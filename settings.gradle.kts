@@ -1,6 +1,6 @@
 pluginManagement {
-	repositories {
-		gradlePluginPortal()
-	}
+    repositories {
+        gradlePluginPortal()
+    }
 }
 rootProject.name = "mail-service"
