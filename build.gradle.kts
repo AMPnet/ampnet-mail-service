@@ -31,6 +31,7 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging:1.6.26")
     implementation("io.micrometer:micrometer-registry-prometheus:1.1.5")
     implementation("net.devh:grpc-server-spring-boot-starter:2.4.0.RELEASE")
+    implementation("com.github.spullara.mustache.java:compiler:0.9.6")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude("junit")

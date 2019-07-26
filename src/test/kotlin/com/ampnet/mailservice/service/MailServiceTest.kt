@@ -17,13 +17,15 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.subethamail.wiser.Wiser
 
 @ExtendWith(SpringExtension::class)
-@SpringBootTest(classes = [ApplicationProperties::class])
+@SpringBootTest
 @EnableConfigurationProperties
 @Import(JavaMailSenderImpl::class)
 class MailServiceTest : TestBase() {
 
     @Autowired
     private lateinit var mailSender: JavaMailSenderImpl
+    @Autowired
+    private lateinit var templateService: TemplateService
     @Autowired
     private lateinit var applicationProperties: ApplicationProperties
 
@@ -38,7 +40,7 @@ class MailServiceTest : TestBase() {
         wiser = Wiser(0)
         wiser.start()
         mailSender.port = wiser.server.port
-        service = MailServiceImpl(mailSender, applicationProperties)
+        service = MailServiceImpl(mailSender, templateService, applicationProperties)
     }
 
     @AfterEach
