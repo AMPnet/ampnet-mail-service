@@ -29,6 +29,7 @@ jobs:
       - checkout
       - gradle-depenencies
 
+      - run: gradle ktlintCheck
       - run:
           name: Run all tests
           command: gradle test
