@@ -29,22 +29,14 @@ class MailServiceImpl(
         val link = getConfirmationLink(token)
         val message = templateService.generateTextForMailConfirmation(MailConfirmationData(link))
         val mail = createMailMessage(to, confirmationMailSubject, message)
-        if (applicationProperties.mail.enabled) {
-            sendEmail(mail)
-        } else {
-            logger.warn { "Sending email is disabled. \nEmail: $mail" }
-        }
+        sendEmail(mail)
     }
 
     override fun sendOrganizationInvitationMail(to: String, organizationName: String) {
         val data = InvitationData(organizationName, applicationProperties.mail.organizationInvitationsLink)
         val message = templateService.generateTextForInvitation(data)
         val mail = createMailMessage(to, invitationMailSubject, message)
-        if (applicationProperties.mail.enabled) {
-            sendEmail(mail)
-        } else {
-            logger.warn { "Sending email is disabled. \nEmail: $mail" }
-        }
+        sendEmail(mail)
     }
 
     private fun createMailMessage(to: String, subject: String, text: String): MimeMessage {
@@ -59,6 +51,11 @@ class MailServiceImpl(
     }
 
     private fun sendEmail(mail: MimeMessage) {
+        if (applicationProperties.mail.enabled.not()) {
+            logger.warn { "Sending email is disabled. \nEmail: ${mail.content}" }
+            return
+        }
+
         logger.info { "Sending email: ${mail.content} " }
         val recipients = mail.allRecipients.map { it.toString() }
         try {
