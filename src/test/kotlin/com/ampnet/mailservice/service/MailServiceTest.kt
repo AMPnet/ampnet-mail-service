@@ -88,6 +88,82 @@ class MailServiceTest : TestBase() {
         }
     }
 
+    @Test
+    fun mustSetCorrectPositiveDepositInfoMail() {
+        suppose("Service send Deposit info mail") {
+            service.sendDepositInfoMail(testData.receiverMail, true)
+        }
+
+        verify("The mail is sent to right receiver and has correct data") {
+            val mailList = wiser.messages
+            assertThat(mailList).hasSize(1)
+            val mail = mailList.first()
+            assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(mail.mimeMessage.subject).isEqualTo(service.depositSubject)
+
+            val mailText = mail.mimeMessage.content.toString()
+            assertThat(mailText).contains("approved")
+        }
+    }
+
+    @Test
+    fun mustSetCorrectNegativeDepositInfoMail() {
+        suppose("Service send Deposit info mail") {
+            service.sendDepositInfoMail(testData.receiverMail, false)
+        }
+
+        verify("The mail is sent to right receiver and has correct data") {
+            val mailList = wiser.messages
+            assertThat(mailList).hasSize(1)
+            val mail = mailList.first()
+            assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(mail.mimeMessage.subject).isEqualTo(service.depositSubject)
+
+            val mailText = mail.mimeMessage.content.toString()
+            assertThat(mailText).contains("rejected")
+        }
+    }
+
+    @Test
+    fun mustSetCorrectPositiveWithdrawInfoMail() {
+        suppose("Service send Deposit info mail") {
+            service.sendWithdrawInfoMail(testData.receiverMail, true)
+        }
+
+        verify("The mail is sent to right receiver and has correct data") {
+            val mailList = wiser.messages
+            assertThat(mailList).hasSize(1)
+            val mail = mailList.first()
+            assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(mail.mimeMessage.subject).isEqualTo(service.withdrawSubject)
+
+            val mailText = mail.mimeMessage.content.toString()
+            assertThat(mailText).contains("approved")
+        }
+    }
+
+    @Test
+    fun mustSetCorrectNegativeWithdrawInfoMail() {
+        suppose("Service send Deposit info mail") {
+            service.sendWithdrawInfoMail(testData.receiverMail, false)
+        }
+
+        verify("The mail is sent to right receiver and has correct data") {
+            val mailList = wiser.messages
+            assertThat(mailList).hasSize(1)
+            val mail = mailList.first()
+            assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(mail.mimeMessage.subject).isEqualTo(service.withdrawSubject)
+
+            val mailText = mail.mimeMessage.content.toString()
+            assertThat(mailText).contains("rejected")
+        }
+    }
+
     private class TestData {
         val receiverMail = "test@test.com"
         val token = "test-token"

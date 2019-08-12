@@ -3,8 +3,10 @@ package com.ampnet.mailservice.service.impl
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.MailService
 import com.ampnet.mailservice.service.TemplateService
+import com.ampnet.mailservice.service.pojo.DepositInfo
 import com.ampnet.mailservice.service.pojo.InvitationData
 import com.ampnet.mailservice.service.pojo.MailConfirmationData
+import com.ampnet.mailservice.service.pojo.WithdrawInfo
 import mu.KLogging
 import org.springframework.mail.MailException
 import org.springframework.mail.javamail.JavaMailSender
@@ -24,6 +26,8 @@ class MailServiceImpl(
 
     internal val confirmationMailSubject = "Confirm your email"
     internal val invitationMailSubject = "Invitation"
+    internal val depositSubject = "Deposit"
+    internal val withdrawSubject = "Withdraw"
 
     override fun sendConfirmationMail(to: String, token: String) {
         val link = getConfirmationLink(token)
@@ -36,6 +40,20 @@ class MailServiceImpl(
         val data = InvitationData(organizationName, applicationProperties.mail.organizationInvitationsLink)
         val message = templateService.generateTextForInvitation(data)
         val mail = createMailMessage(to, invitationMailSubject, message)
+        sendEmail(mail)
+    }
+
+    override fun sendDepositInfoMail(to: String, minted: Boolean) {
+        val data = DepositInfo(minted)
+        val message = templateService.generateTextForDepositInfo(data)
+        val mail = createMailMessage(to, depositSubject, message)
+        sendEmail(mail)
+    }
+
+    override fun sendWithdrawInfoMail(to: String, burned: Boolean) {
+        val data = WithdrawInfo(burned)
+        val message = templateService.generateTextForWithdrawInfo(data)
+        val mail = createMailMessage(to, withdrawSubject, message)
         sendEmail(mail)
     }
 
