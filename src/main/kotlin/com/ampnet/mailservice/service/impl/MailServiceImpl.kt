@@ -31,17 +31,17 @@ class MailServiceImpl(
     internal val depositSubject = "Deposit"
     internal val withdrawSubject = "Withdraw"
 
-    override fun sendConfirmationMail(user: UserResponse, token: String) {
+    override fun sendConfirmationMail(email: String, token: String) {
         val link = getConfirmationLink(token)
         val message = templateService.generateTextForMailConfirmation(MailConfirmationData(link))
-        val mail = createMailMessage(user.email, confirmationMailSubject, message)
+        val mail = createMailMessage(email, confirmationMailSubject, message)
         sendEmail(mail)
     }
 
-    override fun sendOrganizationInvitationMail(user: UserResponse, organizationName: String) {
+    override fun sendOrganizationInvitationMail(email: String, organizationName: String) {
         val data = InvitationData(organizationName, applicationProperties.mail.organizationInvitationsLink)
         val message = templateService.generateTextForInvitation(data)
-        val mail = createMailMessage(user.email, invitationMailSubject, message)
+        val mail = createMailMessage(email, invitationMailSubject, message)
         sendEmail(mail)
     }
 

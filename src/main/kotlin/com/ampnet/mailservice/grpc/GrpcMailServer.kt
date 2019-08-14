@@ -26,20 +26,18 @@ class GrpcMailServer(
     companion object : KLogging()
 
     override fun sendMailConfirmation(request: MailConfirmationRequest, responseObserver: StreamObserver<Empty>) {
-        logger.debug { "Received gRPC request SendMailConfirmationRequest to: ${request.user}" }
-        sendMailToUser(request.user, responseObserver) {
-            mailService.sendConfirmationMail(it, request.token)
-        }
+        logger.debug { "Received gRPC request SendMailConfirmationRequest to: ${request.email}" }
+        mailService.sendConfirmationMail(request.email, request.token)
+        returnEmptyResponse(responseObserver)
     }
 
     override fun sendOrganizationInvitation(
         request: OrganizationInvitationRequest,
         responseObserver: StreamObserver<Empty>
     ) {
-        logger.debug { "Received gRPC request SendOrganizationInvitationRequest to: ${request.user}" }
-        sendMailToUser(request.user, responseObserver) {
-            mailService.sendOrganizationInvitationMail(it, request.organization)
-        }
+        logger.debug { "Received gRPC request SendOrganizationInvitationRequest to: ${request.email}" }
+        mailService.sendOrganizationInvitationMail(request.email, request.organization)
+        returnEmptyResponse(responseObserver)
     }
 
     override fun sendDepositRequest(request: DepositRequest, responseObserver: StreamObserver<Empty>) {

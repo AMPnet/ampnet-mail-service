@@ -5,12 +5,12 @@ package com.ampnet.mailservice.proto;
 // User = User UUID
 
 message MailConfirmationRequest {
-    string user = 1;
+    string email = 1;
     string token = 2;
 }
 
 message OrganizationInvitationRequest {
-    string user = 1;
+    string email = 1;
     string organization = 2;
 }
 

@@ -54,8 +54,7 @@ class MailServiceTest : TestBase() {
     @Test
     fun mustSetCorrectSenderMailFromProperties() {
         suppose("Service sent the mail") {
-            val user = generateUserResponse(testData.receiverMail)
-            service.sendConfirmationMail(user, testData.token)
+            service.sendConfirmationMail(testData.receiverMail, testData.token)
         }
 
         verify("The mail is sent to right receiver and has confirmation link") {
@@ -74,8 +73,7 @@ class MailServiceTest : TestBase() {
     @Test
     fun mustSetCorrectOrganizationInvitationMail() {
         suppose("Service send organizationInvitation mail") {
-            val user = generateUserResponse(testData.receiverMail)
-            service.sendOrganizationInvitationMail(user, testData.organizationName)
+            service.sendOrganizationInvitationMail(testData.receiverMail, testData.organizationName)
         }
 
         verify("The mail is sent to right receiver and has correct data") {
