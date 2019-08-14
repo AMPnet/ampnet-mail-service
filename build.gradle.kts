@@ -15,7 +15,7 @@ plugins {
 }
 
 group = "com.ampnet"
-version = "0.0.3"
+version = "0.1.0"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
@@ -30,7 +30,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.github.microutils:kotlin-logging:1.6.26")
     implementation("io.micrometer:micrometer-registry-prometheus:1.2.0")
-    implementation("net.devh:grpc-server-spring-boot-starter:2.4.0.RELEASE")
+    implementation("net.devh:grpc-spring-boot-starter:2.5.0.RELEASE")
     implementation("com.github.spullara.mustache.java:compiler:0.9.6")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
