@@ -3,6 +3,7 @@ package com.ampnet.mailservice.service
 import com.ampnet.mailservice.TestBase
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.impl.MailServiceImpl
+import com.ampnet.userservice.proto.UserResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.subethamail.wiser.Wiser
+import java.util.UUID
 
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
@@ -52,7 +54,8 @@ class MailServiceTest : TestBase() {
     @Test
     fun mustSetCorrectSenderMailFromProperties() {
         suppose("Service sent the mail") {
-            service.sendConfirmationMail(testData.receiverMail, testData.token)
+            val user = generateUserResponse(testData.receiverMail)
+            service.sendConfirmationMail(user, testData.token)
         }
 
         verify("The mail is sent to right receiver and has confirmation link") {
@@ -71,7 +74,8 @@ class MailServiceTest : TestBase() {
     @Test
     fun mustSetCorrectOrganizationInvitationMail() {
         suppose("Service send organizationInvitation mail") {
-            service.sendOrganizationInvitationMail(testData.receiverMail, testData.organizationName)
+            val user = generateUserResponse(testData.receiverMail)
+            service.sendOrganizationInvitationMail(user, testData.organizationName)
         }
 
         verify("The mail is sent to right receiver and has correct data") {
@@ -91,7 +95,8 @@ class MailServiceTest : TestBase() {
     @Test
     fun mustSetCorrectDepositRequestMail() {
         suppose("Service send deposit request mail") {
-            service.sendDepositRequestMail(testData.receiverMail, testData.amount)
+            val user = generateUserResponse(testData.receiverMail)
+            service.sendDepositRequestMail(user, testData.amount)
         }
 
         verify("The mail is sent to right receiver and has correct data") {
@@ -110,7 +115,8 @@ class MailServiceTest : TestBase() {
     @Test
     fun mustSetCorrectPositiveDepositInfoMail() {
         suppose("Service send Deposit info mail") {
-            service.sendDepositInfoMail(testData.receiverMail, true)
+            val user = generateUserResponse(testData.receiverMail)
+            service.sendDepositInfoMail(user, true)
         }
 
         verify("The mail is sent to right receiver and has correct data") {
@@ -129,7 +135,8 @@ class MailServiceTest : TestBase() {
     @Test
     fun mustSetCorrectNegativeDepositInfoMail() {
         suppose("Service send Deposit info mail") {
-            service.sendDepositInfoMail(testData.receiverMail, false)
+            val user = generateUserResponse(testData.receiverMail)
+            service.sendDepositInfoMail(user, false)
         }
 
         verify("The mail is sent to right receiver and has correct data") {
@@ -148,7 +155,8 @@ class MailServiceTest : TestBase() {
     @Test
     fun mustSetCorrectWithdrawRequestMail() {
         suppose("Service send withdraw request mail") {
-            service.sendWithdrawRequestMail(testData.receiverMail, testData.amount)
+            val user = generateUserResponse(testData.receiverMail)
+            service.sendWithdrawRequestMail(user, testData.amount)
         }
 
         verify("The mail is sent to right receiver and has correct data") {
@@ -167,7 +175,8 @@ class MailServiceTest : TestBase() {
     @Test
     fun mustSetCorrectPositiveWithdrawInfoMail() {
         suppose("Service send Deposit info mail") {
-            service.sendWithdrawInfoMail(testData.receiverMail, true)
+            val user = generateUserResponse(testData.receiverMail)
+            service.sendWithdrawInfoMail(user, true)
         }
 
         verify("The mail is sent to right receiver and has correct data") {
@@ -186,7 +195,8 @@ class MailServiceTest : TestBase() {
     @Test
     fun mustSetCorrectNegativeWithdrawInfoMail() {
         suppose("Service send Deposit info mail") {
-            service.sendWithdrawInfoMail(testData.receiverMail, false)
+            val user = generateUserResponse(testData.receiverMail)
+            service.sendWithdrawInfoMail(user, false)
         }
 
         verify("The mail is sent to right receiver and has correct data") {
@@ -201,6 +211,15 @@ class MailServiceTest : TestBase() {
             assertThat(mailText).contains("rejected")
         }
     }
+
+    private fun generateUserResponse(email: String): UserResponse =
+        UserResponse.newBuilder()
+            .setUuid(UUID.randomUUID().toString())
+            .setEmail(email)
+            .setEnabled(true)
+            .setFirstName("First")
+            .setLastName("Last")
+            .build()
 
     private class TestData {
         val receiverMail = "test@test.com"

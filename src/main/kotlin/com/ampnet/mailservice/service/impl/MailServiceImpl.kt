@@ -8,6 +8,7 @@ import com.ampnet.mailservice.service.pojo.DepositInfo
 import com.ampnet.mailservice.service.pojo.InvitationData
 import com.ampnet.mailservice.service.pojo.MailConfirmationData
 import com.ampnet.mailservice.service.pojo.WithdrawInfo
+import com.ampnet.userservice.proto.UserResponse
 import mu.KLogging
 import org.springframework.mail.MailException
 import org.springframework.mail.javamail.JavaMailSender
@@ -30,45 +31,45 @@ class MailServiceImpl(
     internal val depositSubject = "Deposit"
     internal val withdrawSubject = "Withdraw"
 
-    override fun sendConfirmationMail(to: String, token: String) {
+    override fun sendConfirmationMail(user: UserResponse, token: String) {
         val link = getConfirmationLink(token)
         val message = templateService.generateTextForMailConfirmation(MailConfirmationData(link))
-        val mail = createMailMessage(to, confirmationMailSubject, message)
+        val mail = createMailMessage(user.email, confirmationMailSubject, message)
         sendEmail(mail)
     }
 
-    override fun sendOrganizationInvitationMail(to: String, organizationName: String) {
+    override fun sendOrganizationInvitationMail(user: UserResponse, organizationName: String) {
         val data = InvitationData(organizationName, applicationProperties.mail.organizationInvitationsLink)
         val message = templateService.generateTextForInvitation(data)
-        val mail = createMailMessage(to, invitationMailSubject, message)
+        val mail = createMailMessage(user.email, invitationMailSubject, message)
         sendEmail(mail)
     }
 
-    override fun sendDepositRequestMail(to: String, amount: Long) {
+    override fun sendDepositRequestMail(user: UserResponse, amount: Long) {
         val data = AmountData(amount)
         val message = templateService.generateTextForDepositRequest(data)
-        val mail = createMailMessage(to, depositSubject, message)
+        val mail = createMailMessage(user.email, depositSubject, message)
         sendEmail(mail)
     }
 
-    override fun sendDepositInfoMail(to: String, minted: Boolean) {
+    override fun sendDepositInfoMail(user: UserResponse, minted: Boolean) {
         val data = DepositInfo(minted)
         val message = templateService.generateTextForDepositInfo(data)
-        val mail = createMailMessage(to, depositSubject, message)
+        val mail = createMailMessage(user.email, depositSubject, message)
         sendEmail(mail)
     }
 
-    override fun sendWithdrawRequestMail(to: String, amount: Long) {
+    override fun sendWithdrawRequestMail(user: UserResponse, amount: Long) {
         val data = AmountData(amount)
         val message = templateService.generateTextForWithdrawRequest(data)
-        val mail = createMailMessage(to, withdrawSubject, message)
+        val mail = createMailMessage(user.email, withdrawSubject, message)
         sendEmail(mail)
     }
 
-    override fun sendWithdrawInfoMail(to: String, burned: Boolean) {
+    override fun sendWithdrawInfoMail(user: UserResponse, burned: Boolean) {
         val data = WithdrawInfo(burned)
         val message = templateService.generateTextForWithdrawInfo(data)
-        val mail = createMailMessage(to, withdrawSubject, message)
+        val mail = createMailMessage(user.email, withdrawSubject, message)
         sendEmail(mail)
     }
 

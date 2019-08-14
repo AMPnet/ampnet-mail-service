@@ -1,10 +1,12 @@
 package com.ampnet.mailservice.service
 
+import com.ampnet.userservice.proto.UserResponse
+
 interface MailService {
-    fun sendConfirmationMail(to: String, token: String)
-    fun sendOrganizationInvitationMail(to: String, organizationName: String)
-    fun sendDepositRequestMail(to: String, amount: Long)
-    fun sendDepositInfoMail(to: String, minted: Boolean)
-    fun sendWithdrawRequestMail(to: String, amount: Long)
-    fun sendWithdrawInfoMail(to: String, burned: Boolean)
+    fun sendConfirmationMail(user: UserResponse, token: String)
+    fun sendOrganizationInvitationMail(user: UserResponse, organizationName: String)
+    fun sendDepositRequestMail(user: UserResponse, amount: Long)
+    fun sendDepositInfoMail(user: UserResponse, minted: Boolean)
+    fun sendWithdrawRequestMail(user: UserResponse, amount: Long)
+    fun sendWithdrawInfoMail(user: UserResponse, burned: Boolean)
 }
