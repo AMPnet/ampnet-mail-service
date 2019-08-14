@@ -3,6 +3,7 @@ package com.ampnet.mailservice.service.impl
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.MailService
 import com.ampnet.mailservice.service.TemplateService
+import com.ampnet.mailservice.service.pojo.AmountData
 import com.ampnet.mailservice.service.pojo.DepositInfo
 import com.ampnet.mailservice.service.pojo.InvitationData
 import com.ampnet.mailservice.service.pojo.MailConfirmationData
@@ -43,10 +44,24 @@ class MailServiceImpl(
         sendEmail(mail)
     }
 
+    override fun sendDepositRequestMail(to: String, amount: Long) {
+        val data = AmountData(amount)
+        val message = templateService.generateTextForDepositRequest(data)
+        val mail = createMailMessage(to, depositSubject, message)
+        sendEmail(mail)
+    }
+
     override fun sendDepositInfoMail(to: String, minted: Boolean) {
         val data = DepositInfo(minted)
         val message = templateService.generateTextForDepositInfo(data)
         val mail = createMailMessage(to, depositSubject, message)
+        sendEmail(mail)
+    }
+
+    override fun sendWithdrawRequestMail(to: String, amount: Long) {
+        val data = AmountData(amount)
+        val message = templateService.generateTextForWithdrawRequest(data)
+        val mail = createMailMessage(to, withdrawSubject, message)
         sendEmail(mail)
     }
 

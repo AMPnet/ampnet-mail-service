@@ -89,6 +89,25 @@ class MailServiceTest : TestBase() {
     }
 
     @Test
+    fun mustSetCorrectDepositRequestMail() {
+        suppose("Service send deposit request mail") {
+            service.sendDepositRequestMail(testData.receiverMail, testData.amount)
+        }
+
+        verify("The mail is sent to right receiver and has correct data") {
+            val mailList = wiser.messages
+            assertThat(mailList).hasSize(1)
+            val mail = mailList.first()
+            assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(mail.mimeMessage.subject).isEqualTo(service.depositSubject)
+
+            val mailText = mail.mimeMessage.content.toString()
+            assertThat(mailText).contains(testData.amount.toString())
+        }
+    }
+
+    @Test
     fun mustSetCorrectPositiveDepositInfoMail() {
         suppose("Service send Deposit info mail") {
             service.sendDepositInfoMail(testData.receiverMail, true)
@@ -123,6 +142,25 @@ class MailServiceTest : TestBase() {
 
             val mailText = mail.mimeMessage.content.toString()
             assertThat(mailText).contains("rejected")
+        }
+    }
+
+    @Test
+    fun mustSetCorrectWithdrawRequestMail() {
+        suppose("Service send withdraw request mail") {
+            service.sendWithdrawRequestMail(testData.receiverMail, testData.amount)
+        }
+
+        verify("The mail is sent to right receiver and has correct data") {
+            val mailList = wiser.messages
+            assertThat(mailList).hasSize(1)
+            val mail = mailList.first()
+            assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(mail.mimeMessage.subject).isEqualTo(service.withdrawSubject)
+
+            val mailText = mail.mimeMessage.content.toString()
+            assertThat(mailText).contains(testData.amount.toString())
         }
     }
 
@@ -168,5 +206,6 @@ class MailServiceTest : TestBase() {
         val receiverMail = "test@test.com"
         val token = "test-token"
         val organizationName = "Organization test"
+        val amount = 100L
     }
 }
