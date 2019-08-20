@@ -3,6 +3,7 @@ package com.ampnet.mailservice.service.impl
 import com.ampnet.mailservice.service.TemplateService
 import com.ampnet.mailservice.service.pojo.AmountData
 import com.ampnet.mailservice.service.pojo.DepositInfo
+import com.ampnet.mailservice.service.pojo.ResetPasswordData
 import com.ampnet.mailservice.service.pojo.InvitationData
 import com.ampnet.mailservice.service.pojo.MailConfirmationData
 import com.ampnet.mailservice.service.pojo.WithdrawInfo
@@ -33,9 +34,16 @@ class TemplateServiceImpl : TemplateService {
     private val withdrawTemplate: Mustache by lazy {
         mustacheFactory.compile("mustache/withdraw-template.mustache")
     }
+    private val forgotPasswordTemplate: Mustache by lazy {
+        mustacheFactory.compile("mustache/forgot-password-template.mustache")
+    }
 
     override fun generateTextForMailConfirmation(data: MailConfirmationData): String {
         return fillTemplate(mailConfirmationTemplate, data)
+    }
+
+    override fun generateTextForResetPassword(data: ResetPasswordData): String {
+        return fillTemplate(forgotPasswordTemplate, data)
     }
 
     override fun generateTextForInvitation(data: InvitationData): String {

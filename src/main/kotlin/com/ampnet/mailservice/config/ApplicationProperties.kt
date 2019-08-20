@@ -12,6 +12,7 @@ class ApplicationProperties {
 class MailProperties {
     lateinit var sender: String
     lateinit var confirmationBaseLink: String
+    lateinit var resetPasswordBaseLink: String
     lateinit var organizationInvitationsLink: String
     var enabled: Boolean = false
 }

@@ -6,6 +6,7 @@ import com.ampnet.mailservice.proto.Empty
 import com.ampnet.mailservice.proto.MailServiceGrpc
 import com.ampnet.mailservice.proto.MailConfirmationRequest
 import com.ampnet.mailservice.proto.OrganizationInvitationRequest
+import com.ampnet.mailservice.proto.ResetPasswordRequest
 import com.ampnet.mailservice.proto.WithdrawInfoRequest
 import com.ampnet.mailservice.proto.WithdrawRequest
 import com.ampnet.mailservice.service.MailService
@@ -49,7 +50,6 @@ class GrpcMailServer(
 
     override fun sendDepositInfo(request: DepositInfoRequest, responseObserver: StreamObserver<Empty>) {
         logger.debug { "Received gRPC request SendDepositInfo to: ${request.user}" }
-
         sendMailToUser(request.user, responseObserver) {
             mailService.sendDepositInfoMail(it, request.minted)
         }
@@ -68,6 +68,11 @@ class GrpcMailServer(
         sendMailToUser(request.user, responseObserver) {
             mailService.sendWithdrawInfoMail(it, request.burned)
         }
+    }
+
+    override fun sendResetPassword(request: ResetPasswordRequest, responseObserver: StreamObserver<Empty>) {
+        logger.debug { "Received gRPC request SendForgotPassword to: ${request.email}" }
+        mailService.sendResetPasswordMail(request.email, request.token)
     }
 
     private fun sendMailToUser(
