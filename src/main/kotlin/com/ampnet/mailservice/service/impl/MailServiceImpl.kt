@@ -5,6 +5,7 @@ import com.ampnet.mailservice.service.MailService
 import com.ampnet.mailservice.service.TemplateService
 import com.ampnet.mailservice.service.pojo.AmountData
 import com.ampnet.mailservice.service.pojo.DepositInfo
+import com.ampnet.mailservice.service.pojo.ResetPasswordData
 import com.ampnet.mailservice.service.pojo.InvitationData
 import com.ampnet.mailservice.service.pojo.MailConfirmationData
 import com.ampnet.mailservice.service.pojo.WithdrawInfo
@@ -27,14 +28,22 @@ class MailServiceImpl(
     companion object : KLogging()
 
     internal val confirmationMailSubject = "Confirm your email"
+    internal val resetPasswordSubject = "Reset password"
     internal val invitationMailSubject = "Invitation"
     internal val depositSubject = "Deposit"
     internal val withdrawSubject = "Withdraw"
 
     override fun sendConfirmationMail(email: String, token: String) {
-        val link = getConfirmationLink(token)
+        val link = "${applicationProperties.mail.confirmationBaseLink}?token=$token"
         val message = templateService.generateTextForMailConfirmation(MailConfirmationData(link))
         val mail = createMailMessage(email, confirmationMailSubject, message)
+        sendEmail(mail)
+    }
+
+    override fun sendResetPasswordMail(email: String, token: String) {
+        val link = "${applicationProperties.mail.resetPasswordBaseLink}?token=$token"
+        val message = templateService.generateTextForResetPassword(ResetPasswordData(link))
+        val mail = createMailMessage(email, resetPasswordSubject, message)
         sendEmail(mail)
     }
 
@@ -99,7 +108,4 @@ class MailServiceImpl(
             logger.error(ex) { "Cannot send email to: $recipients" }
         }
     }
-
-    private fun getConfirmationLink(token: String): String =
-        "${applicationProperties.mail.confirmationBaseLink}?token=$token"
 }

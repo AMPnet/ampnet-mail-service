@@ -6,16 +6,16 @@ plugins {
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
 
-    id("org.springframework.boot") version "2.1.6.RELEASE"
-    id("io.spring.dependency-management") version "1.0.7.RELEASE"
-    id("com.google.cloud.tools.jib") version "1.4.0"
+    id("org.springframework.boot") version "2.1.7.RELEASE"
+    id("io.spring.dependency-management") version "1.0.8.RELEASE"
+    id("com.google.cloud.tools.jib") version "1.5.0"
     id("org.jlleitschuh.gradle.ktlint") version "8.1.0"
     id("com.google.protobuf") version "0.8.10"
     idea
 }
 
 group = "com.ampnet"
-version = "0.1.0"
+version = "0.1.1"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
@@ -82,6 +82,6 @@ jib {
         tags = setOf("latest")
     }
     container {
-        useCurrentTimestamp = true
+        creationTime = "USE_CURRENT_TIMESTAMP"
     }
 }

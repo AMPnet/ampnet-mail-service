@@ -4,6 +4,7 @@ import com.ampnet.userservice.proto.UserResponse
 
 interface MailService {
     fun sendConfirmationMail(email: String, token: String)
+    fun sendResetPasswordMail(email: String, token: String)
     fun sendOrganizationInvitationMail(email: String, organizationName: String)
     fun sendDepositRequestMail(user: UserResponse, amount: Long)
     fun sendDepositInfoMail(user: UserResponse, minted: Boolean)
