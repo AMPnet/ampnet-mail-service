@@ -57,7 +57,6 @@ class GrpcMailServer(
 
     override fun sendWithdrawRequest(request: WithdrawRequest, responseObserver: StreamObserver<Empty>) {
         logger.debug { "Received gRPC request SendWithdrawRequest to: ${request.user}" }
-
         sendMailToUser(request.user, responseObserver) {
             mailService.sendWithdrawRequestMail(it, request.amount)
         }
@@ -95,6 +94,7 @@ class GrpcMailServer(
     }
 
     private fun returnErrorForMissingUser(responseObserver: StreamObserver<Empty>, user: String) {
+        logger.warn { "Missing user: $user" }
         responseObserver.onError(
             Status.INVALID_ARGUMENT.withDescription("Missing user with uuid: $user")
                 .asRuntimeException())

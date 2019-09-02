@@ -26,6 +26,8 @@ class UserServiceImpl(
         val request = GetUsersRequest.newBuilder()
                 .addAllUuids(set.map { it.toString() })
                 .build()
-        return serviceBlockingStub.getUsers(request).usersList
+        val users = serviceBlockingStub.getUsers(request).usersList
+        logger.debug { "Users response: $users" }
+        return users
     }
 }
