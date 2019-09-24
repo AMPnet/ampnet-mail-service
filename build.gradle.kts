@@ -30,6 +30,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.github.microutils:kotlin-logging:1.6.26")
+    implementation("net.logstash.logback:logstash-logback-encoder:6.2")
     implementation("io.micrometer:micrometer-registry-prometheus:1.2.0")
     implementation("net.devh:grpc-spring-boot-starter:2.5.0.RELEASE")
     implementation("com.github.spullara.mustache.java:compiler:0.9.6")
