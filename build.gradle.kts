@@ -16,6 +16,7 @@ plugins {
     id("com.google.cloud.tools.jib") version "1.6.1"
     id("org.jlleitschuh.gradle.ktlint") version "9.0.0"
     id("com.google.protobuf") version "0.8.10"
+    id("io.gitlab.arturbosch.detekt").version("1.1.1")
     idea
 }
 
@@ -91,4 +92,12 @@ jib {
     container {
         creationTime = "USE_CURRENT_TIMESTAMP"
     }
+}
+
+detekt {
+    input = files("src/main/kotlin")
+}
+
+task("qualityCheck") {
+    dependsOn(tasks.ktlintCheck, tasks.detekt)
 }
