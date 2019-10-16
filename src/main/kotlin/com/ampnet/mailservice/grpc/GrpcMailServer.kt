@@ -1,5 +1,6 @@
 package com.ampnet.mailservice.grpc
 
+import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.proto.DepositInfoRequest
 import com.ampnet.mailservice.proto.DepositRequest
 import com.ampnet.mailservice.proto.Empty
@@ -10,7 +11,6 @@ import com.ampnet.mailservice.proto.ResetPasswordRequest
 import com.ampnet.mailservice.proto.WithdrawInfoRequest
 import com.ampnet.mailservice.proto.WithdrawRequest
 import com.ampnet.mailservice.service.MailService
-import com.ampnet.mailservice.userservice.UserService
 import com.ampnet.userservice.proto.UserResponse
 import io.grpc.Status
 import io.grpc.stub.StreamObserver

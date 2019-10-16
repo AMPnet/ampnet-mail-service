@@ -1,4 +1,4 @@
-package com.ampnet.mailservice.userservice
+package com.ampnet.mailservice.grpc.userservice
 
 import com.ampnet.userservice.proto.GetUsersRequest
 import com.ampnet.userservice.proto.UserResponse

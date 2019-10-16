@@ -1,4 +1,4 @@
-package com.ampnet.mailservice.config.grpc
+package com.ampnet.mailservice.grpc
 
 import io.grpc.CallOptions
 import io.grpc.Channel
