@@ -2,20 +2,20 @@ import com.google.protobuf.gradle.*
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    val kotlinVersion = "1.3.41"
+    val kotlinVersion = "1.3.50"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
 
-    id("org.springframework.boot") version "2.1.7.RELEASE"
+    id("org.springframework.boot") version "2.1.9.RELEASE"
     id("io.spring.dependency-management") version "1.0.8.RELEASE"
-    id("com.google.cloud.tools.jib") version "1.5.0"
-    id("org.jlleitschuh.gradle.ktlint") version "8.1.0"
+    id("com.google.cloud.tools.jib") version "1.6.1"
+    id("org.jlleitschuh.gradle.ktlint") version "9.0.0"
     id("com.google.protobuf") version "0.8.10"
     idea
 }
 
 group = "com.ampnet"
-version = "0.1.2"
+version = "0.1.3"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
@@ -29,10 +29,10 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-kubernetes-config:1.0.3.RELEASE")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("io.github.microutils:kotlin-logging:1.6.26")
+    implementation("io.github.microutils:kotlin-logging:1.7.6")
     implementation("net.logstash.logback:logstash-logback-encoder:6.2")
-    implementation("io.micrometer:micrometer-registry-prometheus:1.2.0")
-    implementation("net.devh:grpc-spring-boot-starter:2.5.0.RELEASE")
+    implementation("io.micrometer:micrometer-registry-prometheus:1.3.0")
+    implementation("net.devh:grpc-spring-boot-starter:2.5.1.RELEASE")
     implementation("com.github.spullara.mustache.java:compiler:0.9.6")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
@@ -59,7 +59,7 @@ protobuf {
     }
     plugins {
         id("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:1.20.0"
+            artifact = "io.grpc:protoc-gen-grpc-java:1.24.0"
         }
     }
     generateProtoTasks {
