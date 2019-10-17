@@ -11,7 +11,7 @@ plugins {
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
 
-    id("org.springframework.boot") version "2.1.9.RELEASE"
+    id("org.springframework.boot") version "2.2.0.RELEASE"
     id("io.spring.dependency-management") version "1.0.8.RELEASE"
     id("com.google.cloud.tools.jib") version "1.6.1"
     id("org.jlleitschuh.gradle.ktlint") version "9.0.0"
@@ -35,16 +35,13 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-kubernetes-config:1.0.3.RELEASE")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("io.github.microutils:kotlin-logging:1.7.6")
     implementation("net.logstash.logback:logstash-logback-encoder:6.2")
-    implementation("io.micrometer:micrometer-registry-prometheus:1.3.0")
     implementation("net.devh:grpc-spring-boot-starter:2.5.1.RELEASE")
     implementation("com.github.spullara.mustache.java:compiler:0.9.6")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test") {
-        exclude("junit")
-    }
-    testImplementation("org.junit.jupiter:junit-jupiter:5.5.0")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.subethamail:subethasmtp:3.1.7")
 }
 
