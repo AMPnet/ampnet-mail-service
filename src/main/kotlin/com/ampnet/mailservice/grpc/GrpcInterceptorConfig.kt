@@ -1,4 +1,4 @@
-package com.ampnet.mailservice.config.grpc
+package com.ampnet.mailservice.grpc
 
 import net.devh.boot.grpc.client.interceptor.GlobalClientInterceptorConfigurer
 import org.springframework.context.annotation.Bean

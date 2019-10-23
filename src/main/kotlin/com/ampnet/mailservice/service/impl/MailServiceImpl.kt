@@ -5,18 +5,18 @@ import com.ampnet.mailservice.service.MailService
 import com.ampnet.mailservice.service.TemplateService
 import com.ampnet.mailservice.service.pojo.AmountData
 import com.ampnet.mailservice.service.pojo.DepositInfo
-import com.ampnet.mailservice.service.pojo.ResetPasswordData
 import com.ampnet.mailservice.service.pojo.InvitationData
 import com.ampnet.mailservice.service.pojo.MailConfirmationData
+import com.ampnet.mailservice.service.pojo.ResetPasswordData
 import com.ampnet.mailservice.service.pojo.WithdrawInfo
 import com.ampnet.userservice.proto.UserResponse
+import java.util.Date
+import javax.mail.internet.MimeMessage
 import mu.KLogging
 import org.springframework.mail.MailException
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMailMessage
 import org.springframework.stereotype.Service
-import java.util.Date
-import javax.mail.internet.MimeMessage
 
 @Service
 class MailServiceImpl(

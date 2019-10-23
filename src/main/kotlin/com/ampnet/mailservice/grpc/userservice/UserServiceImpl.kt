@@ -1,12 +1,12 @@
-package com.ampnet.mailservice.userservice
+package com.ampnet.mailservice.grpc.userservice
 
 import com.ampnet.userservice.proto.GetUsersRequest
 import com.ampnet.userservice.proto.UserResponse
 import com.ampnet.userservice.proto.UserServiceGrpc
+import java.util.UUID
 import mu.KLogging
 import net.devh.boot.grpc.client.channelfactory.GrpcChannelFactory
 import org.springframework.stereotype.Service
-import java.util.UUID
 
 @Service
 class UserServiceImpl(

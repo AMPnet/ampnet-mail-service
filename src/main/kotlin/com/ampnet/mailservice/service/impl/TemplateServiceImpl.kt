@@ -3,14 +3,14 @@ package com.ampnet.mailservice.service.impl
 import com.ampnet.mailservice.service.TemplateService
 import com.ampnet.mailservice.service.pojo.AmountData
 import com.ampnet.mailservice.service.pojo.DepositInfo
-import com.ampnet.mailservice.service.pojo.ResetPasswordData
 import com.ampnet.mailservice.service.pojo.InvitationData
 import com.ampnet.mailservice.service.pojo.MailConfirmationData
+import com.ampnet.mailservice.service.pojo.ResetPasswordData
 import com.ampnet.mailservice.service.pojo.WithdrawInfo
 import com.github.mustachejava.DefaultMustacheFactory
 import com.github.mustachejava.Mustache
-import org.springframework.stereotype.Service
 import java.io.StringWriter
+import org.springframework.stereotype.Service
 
 @Service
 class TemplateServiceImpl : TemplateService {
