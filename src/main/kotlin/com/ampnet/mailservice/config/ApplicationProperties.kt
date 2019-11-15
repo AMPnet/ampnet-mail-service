@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration
 @ConfigurationProperties(prefix = "com.ampnet.mailservice")
 class ApplicationProperties {
     val mail: MailProperties = MailProperties()
+    val grpc: GrpcProperties = GrpcProperties()
 }
 
 class MailProperties {
@@ -15,4 +16,9 @@ class MailProperties {
     lateinit var resetPasswordBaseLink: String
     lateinit var organizationInvitationsLink: String
     var enabled: Boolean = false
+}
+
+@Suppress("MagicNumber")
+class GrpcProperties {
+    var userServiceTimeout: Long = 1000
 }
