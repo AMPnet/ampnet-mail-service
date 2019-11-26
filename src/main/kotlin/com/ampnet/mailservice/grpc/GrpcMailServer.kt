@@ -1,5 +1,6 @@
 package com.ampnet.mailservice.grpc
 
+import com.ampnet.mailservice.exception.GrpcException
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.proto.DepositInfoRequest
 import com.ampnet.mailservice.proto.DepositRequest
@@ -14,7 +15,6 @@ import com.ampnet.mailservice.service.MailService
 import com.ampnet.userservice.proto.UserResponse
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
-import java.util.UUID
 import mu.KLogging
 import net.devh.boot.grpc.server.service.GrpcService
 
@@ -29,7 +29,7 @@ class GrpcMailServer(
     override fun sendMailConfirmation(request: MailConfirmationRequest, responseObserver: StreamObserver<Empty>) {
         logger.debug { "Received gRPC request SendMailConfirmationRequest to: ${request.email}" }
         mailService.sendConfirmationMail(request.email, request.token)
-        returnEmptyResponse(responseObserver)
+        returnSuccessfulResponse(responseObserver)
     }
 
     override fun sendOrganizationInvitation(
@@ -38,7 +38,7 @@ class GrpcMailServer(
     ) {
         logger.debug { "Received gRPC request SendOrganizationInvitationRequest to: ${request.email}" }
         mailService.sendOrganizationInvitationMail(request.email, request.organization)
-        returnEmptyResponse(responseObserver)
+        returnSuccessfulResponse(responseObserver)
     }
 
     override fun sendDepositRequest(request: DepositRequest, responseObserver: StreamObserver<Empty>) {
@@ -79,16 +79,25 @@ class GrpcMailServer(
         observer: StreamObserver<Empty>,
         sendMail: (user: UserResponse) -> (Unit)
     ) {
-        val userResponse = getUserResponse(uuid)
-        if (userResponse != null) {
-            sendMail(userResponse)
-            returnEmptyResponse(observer)
-        } else {
-            returnErrorForMissingUser(observer, uuid)
+        try {
+            val users = userService.getUsers(listOf(uuid))
+            if (users.isEmpty()) {
+                returnErrorForMissingUser(observer, uuid)
+            } else {
+                sendMail(users.first())
+                returnSuccessfulResponse(observer)
+            }
+        } catch (ex: GrpcException) {
+            logger.error(ex) { "Cannot get user: $uuid from user service" }
+            observer.onError(
+                Status.UNAVAILABLE
+                    .withDescription("User service is unavailable")
+                    .asRuntimeException()
+            )
         }
     }
 
-    private fun returnEmptyResponse(responseObserver: StreamObserver<Empty>) {
+    private fun returnSuccessfulResponse(responseObserver: StreamObserver<Empty>) {
         responseObserver.onNext(Empty.newBuilder().build())
         responseObserver.onCompleted()
     }
@@ -96,18 +105,9 @@ class GrpcMailServer(
     private fun returnErrorForMissingUser(responseObserver: StreamObserver<Empty>, user: String) {
         logger.warn { "Missing user: $user" }
         responseObserver.onError(
-            Status.INVALID_ARGUMENT.withDescription("Missing user with uuid: $user")
-                .asRuntimeException())
-    }
-
-    private fun getUserResponse(user: String): UserResponse? {
-        return try {
-            val uuid = UUID.fromString(user)
-            val users = userService.getUsers(listOf(uuid))
-            users.firstOrNull()
-        } catch (ex: IllegalArgumentException) {
-            logger.warn(ex) { "User uuid in invalid form" }
-            null
-        }
+            Status.INVALID_ARGUMENT
+                .withDescription("Missing user with uuid: $user")
+                .asRuntimeException()
+        )
     }
 }
