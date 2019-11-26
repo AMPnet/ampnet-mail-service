@@ -1,10 +1,11 @@
 package com.ampnet.mailservice.grpc.userservice
 
 import com.ampnet.mailservice.config.ApplicationProperties
+import com.ampnet.mailservice.exception.GrpcException
 import com.ampnet.userservice.proto.GetUsersRequest
 import com.ampnet.userservice.proto.UserResponse
 import com.ampnet.userservice.proto.UserServiceGrpc
-import java.util.UUID
+import io.grpc.StatusRuntimeException
 import java.util.concurrent.TimeUnit
 import mu.KLogging
 import net.devh.boot.grpc.client.channelfactory.GrpcChannelFactory
@@ -23,16 +24,21 @@ class UserServiceImpl(
         UserServiceGrpc.newBlockingStub(channel)
     }
 
-    override fun getUsers(uuids: List<UUID>): List<UserResponse> {
-        val set = uuids.toSet()
-        logger.debug { "Fetching users: $set" }
-        val request = GetUsersRequest.newBuilder()
-                .addAllUuids(set.map { it.toString() })
+    @Throws(GrpcException::class)
+    override fun getUsers(uuids: List<String>): List<UserResponse> {
+        val userSet = uuids.toSet()
+        logger.debug { "Fetching users: $userSet" }
+        try {
+            val request = GetUsersRequest.newBuilder()
+                .addAllUuids(userSet)
                 .build()
-        val users = serviceBlockingStub
-            .withDeadlineAfter(applicationProperties.grpc.userServiceTimeout, TimeUnit.MILLISECONDS)
-            .getUsers(request).usersList
-        logger.debug { "Users response: $users" }
-        return users
+            val usersResponse = serviceBlockingStub
+                .withDeadlineAfter(applicationProperties.grpc.userServiceTimeout, TimeUnit.MILLISECONDS)
+                .getUsers(request).usersList
+            logger.debug { "Users response: $usersResponse" }
+            return usersResponse
+        } catch (ex: StatusRuntimeException) {
+            throw GrpcException("Could not get users from user service", ex)
+        }
     }
 }
