@@ -15,7 +15,7 @@ import javax.mail.internet.MimeMessage
 import mu.KLogging
 import org.springframework.mail.MailException
 import org.springframework.mail.javamail.JavaMailSender
-import org.springframework.mail.javamail.MimeMailMessage
+import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
 
 @Service
@@ -84,11 +84,11 @@ class MailServiceImpl(
 
     private fun createMailMessage(to: String, subject: String, text: String): MimeMessage {
         val mail = mailSender.createMimeMessage()
-        val helper = MimeMailMessage(mail)
+        val helper = MimeMessageHelper(mail)
         helper.setFrom(applicationProperties.mail.sender)
         helper.setTo(to)
         helper.setSubject(subject)
-        helper.setText(text)
+        helper.setText(text, true)
         helper.setSentDate(Date())
         return mail
     }
@@ -99,7 +99,7 @@ class MailServiceImpl(
             return
         }
 
-        logger.info { "Sending email: ${mail.content} " }
+        logger.info { "Sending email: ${mail.subject} " }
         val recipients = mail.allRecipients.map { it.toString() }
         try {
             mailSender.send(mail)
