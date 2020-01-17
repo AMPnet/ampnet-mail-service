@@ -41,7 +41,7 @@ jobs:
           fingerprints:
             - "96:2c:54:e3:52:7c:c8:89:e3:0f:58:44:d8:be:71:fb"
       - checkout
-      - gradle-depenencies
+      - gradle-dependencies
 
       - run: ./gradlew build
       - run:
