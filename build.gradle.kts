@@ -7,21 +7,21 @@ import com.google.protobuf.gradle.protoc
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    val kotlinVersion = "1.3.60"
+    val kotlinVersion = "1.3.61"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
 
-    id("org.springframework.boot") version "2.2.1.RELEASE"
+    id("org.springframework.boot") version "2.2.2.RELEASE"
     id("io.spring.dependency-management") version "1.0.8.RELEASE"
     id("com.google.cloud.tools.jib") version "1.8.0"
     id("org.jlleitschuh.gradle.ktlint") version "9.1.1"
-    id("com.google.protobuf") version "0.8.10"
-    id("io.gitlab.arturbosch.detekt").version("1.2.0")
+    id("com.google.protobuf") version "0.8.11"
+    id("io.gitlab.arturbosch.detekt").version("1.4.0")
     idea
 }
 
 group = "com.ampnet"
-version = "0.1.6"
+version = "0.1.7"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
@@ -38,7 +38,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("io.github.microutils:kotlin-logging:1.7.8")
-    implementation("net.devh:grpc-spring-boot-starter:2.5.1.RELEASE")
+    implementation("net.devh:grpc-spring-boot-starter:2.6.2.RELEASE")
     implementation("com.github.spullara.mustache.java:compiler:0.9.6")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -58,11 +58,11 @@ tasks.test {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.7.1"
+        artifact = "com.google.protobuf:protoc:3.10.0"
     }
     plugins {
         id("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:1.24.2"
+            artifact = "io.grpc:protoc-gen-grpc-java:1.25.0"
         }
     }
     generateProtoTasks {
