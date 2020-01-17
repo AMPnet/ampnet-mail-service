@@ -10,13 +10,13 @@ executors:
       TERM: dumb
 
 commands:
-  gradle-depenencies:
+  gradle-dependencies:
     steps:
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "build.gradle.kts" }}
             - v1-dependencies-
-      - run: gradle dependencies
+      - run: ./gradlew dependencies
       - save_cache:
           paths:
             - ~/.gradle
@@ -27,12 +27,12 @@ jobs:
     executor: java-executor
     steps:
       - checkout
-      - gradle-depenencies
+      - gradle-dependencies
 
-      - run: gradle ktlintCheck
+      - run: ./gradlew ktlintCheck
       - run:
           name: Run all tests
-          command: gradle test
+          command: ./gradlew test
 
   deploy:
     executor: java-executor
@@ -43,10 +43,10 @@ jobs:
       - checkout
       - gradle-depenencies
 
-      - run: gradle build
+      - run: ./gradlew build
       - run:
           name: Push new docker image
-          command: gradle jib
+          command: ./gradlew jib
 
 workflows:
   version: 2.1
