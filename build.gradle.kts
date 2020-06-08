@@ -13,15 +13,15 @@ plugins {
 
     id("org.springframework.boot") version "2.2.7.RELEASE"
     id("io.spring.dependency-management") version "1.0.9.RELEASE"
-    id("com.google.cloud.tools.jib") version "2.1.0"
+    id("com.google.cloud.tools.jib") version "2.3.0"
     id("org.jlleitschuh.gradle.ktlint") version "9.2.1"
-    id("com.google.protobuf") version "0.8.11"
-    id("io.gitlab.arturbosch.detekt").version("1.8.0")
+    id("com.google.protobuf") version "0.8.12"
+    id("io.gitlab.arturbosch.detekt").version("1.9.1")
     idea
 }
 
 group = "com.ampnet"
-version = "0.1.10"
+version = "0.1.11"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
@@ -38,7 +38,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("io.github.microutils:kotlin-logging:1.7.8")
-    implementation("net.devh:grpc-spring-boot-starter:2.7.0.RELEASE")
+    implementation("net.devh:grpc-spring-boot-starter:2.8.0.RELEASE")
     implementation("com.github.spullara.mustache.java:compiler:0.9.6")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -58,11 +58,11 @@ tasks.test {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.11.4"
+        artifact = "com.google.protobuf:protoc:3.12.2"
     }
     plugins {
         id("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:1.27.1"
+            artifact = "io.grpc:protoc-gen-grpc-java:1.29.0"
         }
     }
     generateProtoTasks {
