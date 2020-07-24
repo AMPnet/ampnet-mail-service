@@ -6,10 +6,10 @@ import com.ampnet.userservice.proto.GetUsersRequest
 import com.ampnet.userservice.proto.UserResponse
 import com.ampnet.userservice.proto.UserServiceGrpc
 import io.grpc.StatusRuntimeException
-import java.util.concurrent.TimeUnit
 import mu.KLogging
 import net.devh.boot.grpc.client.channelfactory.GrpcChannelFactory
 import org.springframework.stereotype.Service
+import java.util.concurrent.TimeUnit
 
 @Service
 class UserServiceImpl(

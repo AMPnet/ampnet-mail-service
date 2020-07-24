@@ -9,8 +9,8 @@ class GrpcInterceptorConfig {
 
     @Bean
     fun globalInterceptorConfigurerAdapter(): GlobalClientInterceptorConfigurer {
-        return GlobalClientInterceptorConfigurer {
-            registry -> registry.addClientInterceptors(GrpcLogInterceptor())
+        return GlobalClientInterceptorConfigurer { registry ->
+            registry.addClientInterceptors(GrpcLogInterceptor())
         }
     }
 }

@@ -4,7 +4,6 @@ import com.ampnet.mailservice.TestBase
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.impl.MailServiceImpl
 import com.ampnet.userservice.proto.UserResponse
-import java.util.UUID
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -17,6 +16,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.subethamail.wiser.Wiser
+import java.util.UUID
 
 @ExtendWith(SpringExtension::class)
 @SpringBootTest

@@ -9,8 +9,8 @@ import com.ampnet.mailservice.service.pojo.ResetPasswordData
 import com.ampnet.mailservice.service.pojo.WithdrawInfo
 import com.github.mustachejava.DefaultMustacheFactory
 import com.github.mustachejava.Mustache
-import java.io.StringWriter
 import org.springframework.stereotype.Service
+import java.io.StringWriter
 
 @Service
 class TemplateServiceImpl : TemplateService {
