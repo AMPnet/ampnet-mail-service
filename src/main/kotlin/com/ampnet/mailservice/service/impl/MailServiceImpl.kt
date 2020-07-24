@@ -10,13 +10,13 @@ import com.ampnet.mailservice.service.pojo.MailConfirmationData
 import com.ampnet.mailservice.service.pojo.ResetPasswordData
 import com.ampnet.mailservice.service.pojo.WithdrawInfo
 import com.ampnet.userservice.proto.UserResponse
-import java.util.Date
-import javax.mail.internet.MimeMessage
 import mu.KLogging
 import org.springframework.mail.MailException
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
+import java.util.Date
+import javax.mail.internet.MimeMessage
 
 @Service
 class MailServiceImpl(
