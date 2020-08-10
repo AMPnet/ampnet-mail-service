@@ -5,6 +5,7 @@ import com.ampnet.mailservice.service.pojo.AmountData
 import com.ampnet.mailservice.service.pojo.DepositInfo
 import com.ampnet.mailservice.service.pojo.InvitationData
 import com.ampnet.mailservice.service.pojo.MailConfirmationData
+import com.ampnet.mailservice.service.pojo.NewWalletData
 import com.ampnet.mailservice.service.pojo.ResetPasswordData
 import com.ampnet.mailservice.service.pojo.WithdrawInfo
 import com.github.mustachejava.DefaultMustacheFactory
@@ -37,6 +38,9 @@ class TemplateServiceImpl : TemplateService {
     private val forgotPasswordTemplate: Mustache by lazy {
         mustacheFactory.compile("mustache/forgot-password-template.mustache")
     }
+    private val newWalletTemplate: Mustache by lazy {
+        mustacheFactory.compile("mustache/new-wallet-template.mustache")
+    }
 
     override fun generateTextForMailConfirmation(data: MailConfirmationData): String {
         return fillTemplate(mailConfirmationTemplate, data)
@@ -64,6 +68,10 @@ class TemplateServiceImpl : TemplateService {
 
     override fun generateTextForWithdrawInfo(data: WithdrawInfo): String {
         return fillTemplate(withdrawTemplate, data)
+    }
+
+    override fun generateTextForNewWallet(data: NewWalletData): String {
+        return fillTemplate(newWalletTemplate, data)
     }
 
     private fun fillTemplate(template: Mustache, data: Any): String {

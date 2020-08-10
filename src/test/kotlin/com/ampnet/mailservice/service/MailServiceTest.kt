@@ -229,6 +229,26 @@ class MailServiceTest : TestBase() {
         }
     }
 
+    @Test
+    fun mustSetCorrectSendNewWalletMail() {
+        suppose("Service sent New wallet created mail") {
+            service.sendNewWalletNotificationMail()
+            // TODO add privileged user and test it
+        }
+
+        verify("The mail is sent to right receiver and has confirmation link") {
+            val mailList = wiser.messages
+            assertThat(mailList).hasSize(1)
+            val mail = mailList.first()
+            assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(mail.mimeMessage.subject).isEqualTo(service.newWalletSubject)
+
+            val confirmationLink = applicationProperties.mail.newWalletLink
+            assertThat(mail.mimeMessage.content.toString()).contains(confirmationLink)
+        }
+    }
+
     private fun generateUserResponse(email: String): UserResponse =
         UserResponse.newBuilder()
             .setUuid(UUID.randomUUID().toString())

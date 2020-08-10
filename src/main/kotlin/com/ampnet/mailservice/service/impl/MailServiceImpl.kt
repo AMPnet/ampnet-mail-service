@@ -7,6 +7,7 @@ import com.ampnet.mailservice.service.pojo.AmountData
 import com.ampnet.mailservice.service.pojo.DepositInfo
 import com.ampnet.mailservice.service.pojo.InvitationData
 import com.ampnet.mailservice.service.pojo.MailConfirmationData
+import com.ampnet.mailservice.service.pojo.NewWalletData
 import com.ampnet.mailservice.service.pojo.ResetPasswordData
 import com.ampnet.mailservice.service.pojo.WithdrawInfo
 import com.ampnet.userservice.proto.UserResponse
@@ -32,6 +33,7 @@ class MailServiceImpl(
     internal val invitationMailSubject = "Invitation"
     internal val depositSubject = "Deposit"
     internal val withdrawSubject = "Withdraw"
+    internal val newWalletSubject = "New wallet created"
 
     override fun sendConfirmationMail(email: String, token: String) {
         val link = "${applicationProperties.mail.confirmationBaseLink}?token=$token"
@@ -79,6 +81,13 @@ class MailServiceImpl(
         val data = WithdrawInfo(burned)
         val message = templateService.generateTextForWithdrawInfo(data)
         val mail = createMailMessage(user.email, withdrawSubject, message)
+        sendEmail(mail)
+    }
+
+    override fun sendNewWalletNotificationMail() {
+        val link = applicationProperties.mail.newWalletLink
+        val message = templateService.generateTextForNewWallet(NewWalletData(link))
+        val mail = createMailMessage("test@test.com", newWalletSubject, message)
         sendEmail(mail)
     }
 
