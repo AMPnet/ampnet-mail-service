@@ -18,6 +18,11 @@ message UsersResponse {
     repeated UserResponse users = 1;
 }
 
+message Empty {
+}
+
 service UserService {
     rpc GetUsers(GetUsersRequest) returns (UsersResponse);
+    rpc GetPlatformManagers(Empty) returns (UsersResponse);
+
 }

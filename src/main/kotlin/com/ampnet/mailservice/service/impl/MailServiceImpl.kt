@@ -1,6 +1,7 @@
 package com.ampnet.mailservice.service.impl
 
 import com.ampnet.mailservice.config.ApplicationProperties
+import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.service.MailService
 import com.ampnet.mailservice.service.TemplateService
 import com.ampnet.mailservice.service.pojo.AmountData
@@ -23,7 +24,8 @@ import javax.mail.internet.MimeMessage
 class MailServiceImpl(
     private val mailSender: JavaMailSender,
     private val templateService: TemplateService,
-    private val applicationProperties: ApplicationProperties
+    private val applicationProperties: ApplicationProperties,
+    private val userService: UserService
 ) : MailService {
 
     companion object : KLogging()
@@ -87,8 +89,11 @@ class MailServiceImpl(
     override fun sendNewWalletNotificationMail() {
         val link = applicationProperties.mail.newWalletLink
         val message = templateService.generateTextForNewWallet(NewWalletData(link))
-        val mail = createMailMessage("test@test.com", newWalletSubject, message)
-        sendEmail(mail)
+        val platformManagers = userService.getPlatformManagers()
+        platformManagers.stream().forEach {
+            val mail = createMailMessage(it.email, newWalletSubject, message)
+            sendEmail(mail)
+        }
     }
 
     private fun createMailMessage(to: String, subject: String, text: String): MimeMessage {

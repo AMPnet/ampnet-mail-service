@@ -17,8 +17,8 @@ import io.grpc.Status
 import io.grpc.stub.StreamObserver
 import mu.KLogging
 import net.devh.boot.grpc.server.service.GrpcService
-
 @GrpcService
+@Suppress("TooManyFunctions")
 class GrpcMailServer(
     private val mailService: MailService,
     private val userService: UserService
@@ -72,6 +72,11 @@ class GrpcMailServer(
     override fun sendResetPassword(request: ResetPasswordRequest, responseObserver: StreamObserver<Empty>) {
         logger.debug { "Received gRPC request SendForgotPassword to: ${request.email}" }
         mailService.sendResetPasswordMail(request.email, request.token)
+    }
+
+    override fun sendNewWalletMail(request: Empty, responseObserver: StreamObserver<Empty>) {
+        logger.debug { "Received gRPC request SendNewWalletMail" }
+        mailService.sendNewWalletNotificationMail()
     }
 
     private fun sendMailToUser(
