@@ -2,6 +2,7 @@ package com.ampnet.mailservice.service
 
 import com.ampnet.mailservice.TestBase
 import com.ampnet.mailservice.config.ApplicationProperties
+import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.service.impl.MailServiceImpl
 import com.ampnet.userservice.proto.UserResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest
@@ -31,6 +33,8 @@ class MailServiceTest : TestBase() {
     @Autowired
     private lateinit var applicationProperties: ApplicationProperties
 
+    private val userService = Mockito.mock(UserService::class.java)
+
     private lateinit var service: MailServiceImpl
     private lateinit var wiser: Wiser
     private var defaultMailPort: Int = 0
@@ -42,7 +46,7 @@ class MailServiceTest : TestBase() {
         wiser = Wiser(0)
         wiser.start()
         mailSender.port = wiser.server.port
-        service = MailServiceImpl(mailSender, templateService, applicationProperties)
+        service = MailServiceImpl(mailSender, templateService, applicationProperties, userService)
     }
 
     @AfterEach
@@ -226,6 +230,30 @@ class MailServiceTest : TestBase() {
 
             val mailText = mail.mimeMessage.content.toString()
             assertThat(mailText).contains("rejected")
+        }
+    }
+
+    @Test
+    fun mustSetCorrectSendNewWalletMail() {
+        suppose("Service sent New wallet created mail") {
+            val platformManager = UserResponse.newBuilder()
+                .setUuid(UUID.randomUUID().toString())
+                .setEmail(testData.receiverMail)
+                .build()
+            Mockito.`when`(userService.getPlatformManagers())
+                .thenReturn(listOf(platformManager))
+            service.sendNewWalletNotificationMail()
+        }
+
+        verify("The mail is sent to right receivers and has confirmation link") {
+            val mailList = wiser.messages
+            val mail = mailList.first()
+            assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(mail.mimeMessage.subject).isEqualTo(service.newWalletSubject)
+
+            val confirmationLink = applicationProperties.mail.newWalletLink
+            assertThat(mail.mimeMessage.content.toString()).contains(confirmationLink)
         }
     }
 

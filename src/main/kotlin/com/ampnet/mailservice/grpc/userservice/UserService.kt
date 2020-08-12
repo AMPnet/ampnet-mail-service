@@ -4,4 +4,5 @@ import com.ampnet.userservice.proto.UserResponse
 
 interface UserService {
     fun getUsers(uuids: List<String>): List<UserResponse>
+    fun getPlatformManagers(): List<UserResponse>
 }

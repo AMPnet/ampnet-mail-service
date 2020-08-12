@@ -2,6 +2,7 @@ package com.ampnet.mailservice.grpc.userservice
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.exception.GrpcException
+import com.ampnet.userservice.proto.Empty
 import com.ampnet.userservice.proto.GetUsersRequest
 import com.ampnet.userservice.proto.UserResponse
 import com.ampnet.userservice.proto.UserServiceGrpc
@@ -39,6 +40,21 @@ class UserServiceImpl(
             return usersResponse
         } catch (ex: StatusRuntimeException) {
             throw GrpcException("Could not get users from user service", ex)
+        }
+    }
+
+    @Throws(GrpcException::class)
+    override fun getPlatformManagers(): List<UserResponse> {
+        logger.debug { "Fetching Platform Managers!" }
+        try {
+            val usersResponse = serviceBlockingStub
+                .withDeadlineAfter(applicationProperties.grpc.userServiceTimeout, TimeUnit.MILLISECONDS)
+                .getPlatformManagers(Empty.getDefaultInstance())
+                .usersList
+            logger.debug { "Users response: $usersResponse" }
+            return usersResponse
+        } catch (ex: StatusRuntimeException) {
+            throw GrpcException("Could not get Platform Managers from user service", ex)
         }
     }
 }
