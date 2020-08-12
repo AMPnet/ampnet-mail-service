@@ -2,6 +2,7 @@ package com.ampnet.mailservice.service
 
 import com.ampnet.mailservice.TestBase
 import com.ampnet.mailservice.config.ApplicationProperties
+import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.service.impl.MailServiceImpl
 import com.ampnet.userservice.proto.UserResponse
@@ -242,7 +243,7 @@ class MailServiceTest : TestBase() {
                 .build()
             Mockito.`when`(userService.getPlatformManagers())
                 .thenReturn(listOf(platformManager))
-            service.sendNewWalletNotificationMail()
+            service.sendNewWalletNotificationMail(WalletType.PROJECT)
         }
 
         verify("The mail is sent to right receivers and has confirmation link") {

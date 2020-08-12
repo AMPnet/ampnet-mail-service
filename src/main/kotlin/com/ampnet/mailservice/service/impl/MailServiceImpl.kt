@@ -1,6 +1,7 @@
 package com.ampnet.mailservice.service.impl
 
 import com.ampnet.mailservice.config.ApplicationProperties
+import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.service.MailService
 import com.ampnet.mailservice.service.TemplateService
@@ -86,9 +87,9 @@ class MailServiceImpl(
         sendEmail(mail)
     }
 
-    override fun sendNewWalletNotificationMail() {
+    override fun sendNewWalletNotificationMail(walletType: WalletType) {
         val link = applicationProperties.mail.newWalletLink
-        val message = templateService.generateTextForNewWallet(NewWalletData(link))
+        val message = templateService.generateTextForNewWallet(NewWalletData(link), walletType)
         val platformManagers = userService.getPlatformManagers()
         val mail = createMailMessage(platformManagers.map { it.email }, newWalletSubject, message)
         sendEmail(mail)

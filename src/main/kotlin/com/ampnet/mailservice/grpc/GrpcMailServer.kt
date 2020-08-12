@@ -1,5 +1,6 @@
 package com.ampnet.mailservice.grpc
 
+import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.exception.GrpcException
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.proto.DepositInfoRequest
@@ -9,6 +10,7 @@ import com.ampnet.mailservice.proto.MailConfirmationRequest
 import com.ampnet.mailservice.proto.MailServiceGrpc
 import com.ampnet.mailservice.proto.OrganizationInvitationRequest
 import com.ampnet.mailservice.proto.ResetPasswordRequest
+import com.ampnet.mailservice.proto.WalletTypeRequest
 import com.ampnet.mailservice.proto.WithdrawInfoRequest
 import com.ampnet.mailservice.proto.WithdrawRequest
 import com.ampnet.mailservice.service.MailService
@@ -74,9 +76,9 @@ class GrpcMailServer(
         mailService.sendResetPasswordMail(request.email, request.token)
     }
 
-    override fun sendNewWalletMail(request: Empty, responseObserver: StreamObserver<Empty>) {
+    override fun sendNewWalletMail(request: WalletTypeRequest, responseObserver: StreamObserver<Empty>?) {
         logger.debug { "Received gRPC request SendNewWalletMail" }
-        mailService.sendNewWalletNotificationMail()
+        mailService.sendNewWalletNotificationMail(getWalletType(request.type))
     }
 
     private fun sendMailToUser(
@@ -115,4 +117,10 @@ class GrpcMailServer(
                 .asRuntimeException()
         )
     }
+    private fun getWalletType(type: WalletTypeRequest.Type): WalletType =
+        when (type) {
+            WalletTypeRequest.Type.USER -> WalletType.USER
+            WalletTypeRequest.Type.PROJECT -> WalletType.USER
+            else -> throw IllegalArgumentException("Invalid wallet type")
+        }
 }

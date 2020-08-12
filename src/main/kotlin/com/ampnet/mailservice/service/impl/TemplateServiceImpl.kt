@@ -1,5 +1,6 @@
 package com.ampnet.mailservice.service.impl
 
+import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.service.TemplateService
 import com.ampnet.mailservice.service.pojo.AmountData
 import com.ampnet.mailservice.service.pojo.DepositInfo
@@ -38,10 +39,12 @@ class TemplateServiceImpl : TemplateService {
     private val forgotPasswordTemplate: Mustache by lazy {
         mustacheFactory.compile("mustache/forgot-password-template.mustache")
     }
-    private val newWalletTemplate: Mustache by lazy {
+    private val userWalletTemplate: Mustache by lazy {
         mustacheFactory.compile("mustache/user-wallet-template.mustache")
     }
-
+    private val projectWalletTemplate: Mustache by lazy {
+        mustacheFactory.compile("mustache/project-wallet-template.mustache")
+    }
     override fun generateTextForMailConfirmation(data: MailConfirmationData): String {
         return fillTemplate(mailConfirmationTemplate, data)
     }
@@ -70,8 +73,11 @@ class TemplateServiceImpl : TemplateService {
         return fillTemplate(withdrawTemplate, data)
     }
 
-    override fun generateTextForNewWallet(data: NewWalletData): String {
-        return fillTemplate(newWalletTemplate, data)
+    override fun generateTextForNewWallet(data: NewWalletData, walletType: WalletType): String {
+        return when (walletType) {
+            WalletType.USER -> fillTemplate(userWalletTemplate, data)
+            WalletType.PROJECT -> fillTemplate(projectWalletTemplate, data)
+        }
     }
 
     private fun fillTemplate(template: Mustache, data: Any): String {
