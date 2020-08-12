@@ -39,7 +39,7 @@ class TemplateServiceImpl : TemplateService {
         mustacheFactory.compile("mustache/forgot-password-template.mustache")
     }
     private val newWalletTemplate: Mustache by lazy {
-        mustacheFactory.compile("mustache/new-wallet-template.mustache")
+        mustacheFactory.compile("mustache/user-wallet-template.mustache")
     }
 
     override fun generateTextForMailConfirmation(data: MailConfirmationData): String {
