@@ -1,5 +1,6 @@
 package com.ampnet.mailservice.service
 
+import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.service.pojo.AmountData
 import com.ampnet.mailservice.service.pojo.DepositInfo
 import com.ampnet.mailservice.service.pojo.InvitationData
@@ -16,5 +17,5 @@ interface TemplateService {
     fun generateTextForDepositInfo(data: DepositInfo): String
     fun generateTextForWithdrawRequest(data: AmountData): String
     fun generateTextForWithdrawInfo(data: WithdrawInfo): String
-    fun generateTextForNewWallet(data: NewWalletData): String
+    fun generateTextForNewWallet(data: NewWalletData, walletType: WalletType): String
 }

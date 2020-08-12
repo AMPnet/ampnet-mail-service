@@ -2,6 +2,7 @@ package com.ampnet.mailservice.service
 
 import com.ampnet.mailservice.TestBase
 import com.ampnet.mailservice.config.ApplicationProperties
+import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.service.impl.MailServiceImpl
 import com.ampnet.userservice.proto.UserResponse
@@ -234,26 +235,33 @@ class MailServiceTest : TestBase() {
     }
 
     @Test
-    fun mustSetCorrectSendNewWalletMail() {
-        suppose("Service sent New wallet created mail") {
+    fun mustSetCorrectSendNewWalletMails() {
+        suppose("Service sent mails for new user and project wallet created") {
             val platformManager = UserResponse.newBuilder()
                 .setUuid(UUID.randomUUID().toString())
                 .setEmail(testData.receiverMail)
                 .build()
             Mockito.`when`(userService.getPlatformManagers())
                 .thenReturn(listOf(platformManager))
-            service.sendNewWalletNotificationMail()
+            service.sendNewWalletNotificationMail(WalletType.USER)
+            service.sendNewWalletNotificationMail(WalletType.PROJECT)
         }
 
-        verify("The mail is sent to right receivers and has confirmation link") {
+        verify("Both mails are sent to right receivers and have confirmation link") {
             val mailList = wiser.messages
-            val mail = mailList.first()
-            assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
-            assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
-            assertThat(mail.mimeMessage.subject).isEqualTo(service.newWalletSubject)
+            val userMail = mailList.first()
+            assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(userMail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(userMail.mimeMessage.subject).isEqualTo(service.newWalletSubject)
 
             val confirmationLink = applicationProperties.mail.newWalletLink
-            assertThat(mail.mimeMessage.content.toString()).contains(confirmationLink)
+            assertThat(userMail.mimeMessage.content.toString()).contains(confirmationLink)
+
+            val projectMail = mailList[1]
+            assertThat(projectMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(projectMail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(projectMail.mimeMessage.subject).isEqualTo(service.newWalletSubject)
+            assertThat(projectMail.mimeMessage.content.toString()).contains(confirmationLink)
         }
     }
 

@@ -1,5 +1,6 @@
 package com.ampnet.mailservice.service
 
+import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.userservice.proto.UserResponse
 
 interface MailService {
@@ -10,5 +11,5 @@ interface MailService {
     fun sendDepositInfoMail(user: UserResponse, minted: Boolean)
     fun sendWithdrawRequestMail(user: UserResponse, amount: Long)
     fun sendWithdrawInfoMail(user: UserResponse, burned: Boolean)
-    fun sendNewWalletNotificationMail()
+    fun sendNewWalletNotificationMail(walletType: WalletType)
 }
