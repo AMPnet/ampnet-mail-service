@@ -8,6 +8,7 @@ import com.ampnet.mailservice.service.pojo.InvitationData
 import com.ampnet.mailservice.service.pojo.MailConfirmationData
 import com.ampnet.mailservice.service.pojo.NewWalletData
 import com.ampnet.mailservice.service.pojo.ResetPasswordData
+import com.ampnet.mailservice.service.pojo.UserData
 import com.ampnet.mailservice.service.pojo.WithdrawInfo
 import com.github.mustachejava.DefaultMustacheFactory
 import com.github.mustachejava.Mustache
@@ -45,6 +46,10 @@ class TemplateServiceImpl : TemplateService {
     private val projectWalletTemplate: Mustache by lazy {
         mustacheFactory.compile("mustache/project-wallet-template.mustache")
     }
+    private val tokenIssuerWithdrawRequestTemplate: Mustache by lazy {
+        mustacheFactory.compile("mustache/token-issuer-withdrawal-template.mustache")
+    }
+
     override fun generateTextForMailConfirmation(data: MailConfirmationData): String {
         return fillTemplate(mailConfirmationTemplate, data)
     }
@@ -78,6 +83,10 @@ class TemplateServiceImpl : TemplateService {
             WalletType.USER -> fillTemplate(userWalletTemplate, data)
             WalletType.PROJECT -> fillTemplate(projectWalletTemplate, data)
         }
+    }
+
+    override fun generateTextForTokenIssuerWithdrawRequest(data: UserData): String {
+        return fillTemplate(tokenIssuerWithdrawRequestTemplate, data)
     }
 
     private fun fillTemplate(template: Mustache, data: Any): String {
