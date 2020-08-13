@@ -11,6 +11,7 @@ import com.ampnet.mailservice.service.pojo.InvitationData
 import com.ampnet.mailservice.service.pojo.MailConfirmationData
 import com.ampnet.mailservice.service.pojo.NewWalletData
 import com.ampnet.mailservice.service.pojo.ResetPasswordData
+import com.ampnet.mailservice.service.pojo.UserData
 import com.ampnet.mailservice.service.pojo.WithdrawInfo
 import com.ampnet.userservice.proto.UserResponse
 import mu.KLogging
@@ -37,6 +38,7 @@ class MailServiceImpl(
     internal val depositSubject = "Deposit"
     internal val withdrawSubject = "Withdraw"
     internal val newWalletSubject = "New wallet created"
+    internal val manageWithdrawalsSubject = "New withdrawal request"
 
     override fun sendConfirmationMail(email: String, token: String) {
         val link = "${applicationProperties.mail.confirmationBaseLink}?token=$token"
@@ -74,10 +76,18 @@ class MailServiceImpl(
     }
 
     override fun sendWithdrawRequestMail(user: UserResponse, amount: Long) {
-        val data = AmountData(amount)
-        val message = templateService.generateTextForWithdrawRequest(data)
-        val mail = createMailMessage(listOf(user.email), withdrawSubject, message)
-        sendEmail(mail)
+        val tokenIssuers = userService.getTokenIssuers()
+        val link = applicationProperties.mail.manageWithdrawalsLink
+        val userData = UserData(user.firstName, user.lastName, amount, link)
+        val tokenIssuersMessage = templateService.generateTextForTokenIssuerWithdrawRequest(userData)
+        val tokenIssuersMail =
+            createMailMessage(tokenIssuers.map { it.email }, manageWithdrawalsSubject, tokenIssuersMessage)
+
+        val userMessage = templateService.generateTextForWithdrawRequest(AmountData(amount))
+        val userMail = createMailMessage(listOf(user.email), withdrawSubject, userMessage)
+
+        sendEmail(tokenIssuersMail)
+        sendEmail(userMail)
     }
 
     override fun sendWithdrawInfoMail(user: UserResponse, burned: Boolean) {

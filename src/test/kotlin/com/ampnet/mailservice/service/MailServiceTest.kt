@@ -176,21 +176,38 @@ class MailServiceTest : TestBase() {
 
     @Test
     fun mustSetCorrectWithdrawRequestMail() {
-        suppose("Service send withdraw request mail") {
+        suppose("User service returns a list of token issuers") {
+            val tokenIssuer = UserResponse.newBuilder()
+                .setUuid(UUID.randomUUID().toString())
+                .setEmail(testData.tokenIssuerMail)
+                .build()
+            Mockito.`when`(userService.getTokenIssuers())
+                .thenReturn(listOf(tokenIssuer))
+        }
+        suppose("Service send withdraw request mail to user and token issuers") {
             val user = generateUserResponse(testData.receiverMail)
             service.sendWithdrawRequestMail(user, testData.amount)
         }
 
-        verify("The mail is sent to right receiver and has correct data") {
+        verify("The mail is sent to token issuer and has correct data") {
             val mailList = wiser.messages
-            assertThat(mailList).hasSize(1)
-            val mail = mailList.first()
-            assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
-            assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
-            assertThat(mail.mimeMessage.subject).isEqualTo(service.withdrawSubject)
+            assertThat(mailList).hasSize(2)
+            val tokenIssuerMail = mailList.first()
 
-            val mailText = mail.mimeMessage.content.toString()
+            assertThat(tokenIssuerMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(tokenIssuerMail.envelopeReceiver).isEqualTo(testData.tokenIssuerMail)
+            assertThat(tokenIssuerMail.mimeMessage.subject).isEqualTo(service.manageWithdrawalsSubject)
+
+            val mailText = tokenIssuerMail.mimeMessage.content.toString()
             assertThat(mailText).contains(testData.amount.toString())
+        }
+        verify("The mail is sent to user and has correct data") {
+            val mailList = wiser.messages
+            val userMail = mailList[1]
+
+            assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(userMail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(userMail.mimeMessage.subject).isEqualTo(service.withdrawSubject)
         }
     }
 
@@ -276,6 +293,7 @@ class MailServiceTest : TestBase() {
 
     private class TestData {
         val receiverMail = "test@test.com"
+        val tokenIssuerMail = "demoadmin@ampnet.io"
         val token = "test-token"
         val organizationName = "Organization test"
         val amount = 100L
