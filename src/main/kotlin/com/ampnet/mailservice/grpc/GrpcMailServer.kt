@@ -120,7 +120,7 @@ class GrpcMailServer(
     private fun getWalletType(type: WalletTypeRequest.Type): WalletType =
         when (type) {
             WalletTypeRequest.Type.USER -> WalletType.USER
-            WalletTypeRequest.Type.PROJECT -> WalletType.USER
+            WalletTypeRequest.Type.PROJECT -> WalletType.PROJECT
             else -> throw IllegalArgumentException("Invalid wallet type")
         }
 }
