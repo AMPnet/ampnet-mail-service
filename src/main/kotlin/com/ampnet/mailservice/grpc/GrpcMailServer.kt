@@ -77,7 +77,7 @@ class GrpcMailServer(
     }
 
     override fun sendNewWalletMail(request: WalletTypeRequest, responseObserver: StreamObserver<Empty>?) {
-        logger.debug { "Received gRPC request SendNewWalletMail" }
+        logger.debug { "Received gRPC request SendNewWalletMail for wallet type: ${request.type}" }
         mailService.sendNewWalletNotificationMail(getWalletType(request.type))
     }
 
@@ -120,7 +120,7 @@ class GrpcMailServer(
     private fun getWalletType(type: WalletTypeRequest.Type): WalletType =
         when (type) {
             WalletTypeRequest.Type.USER -> WalletType.USER
-            WalletTypeRequest.Type.PROJECT -> WalletType.USER
+            WalletTypeRequest.Type.PROJECT -> WalletType.PROJECT
             else -> throw IllegalArgumentException("Invalid wallet type")
         }
 }
