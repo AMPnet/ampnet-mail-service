@@ -17,6 +17,7 @@ class MailProperties {
     lateinit var organizationInvitationsLink: String
     lateinit var newWalletLink: String
     lateinit var manageWithdrawalsLink: String
+    lateinit var newOrganizationLink: String
     var enabled: Boolean = false
 }
 

@@ -286,6 +286,29 @@ class MailServiceTest : TestBase() {
         }
     }
 
+    @Test
+    fun mustSetCorrectSendNewOrganizationMails() {
+        suppose("Service send mail for new organization created") {
+            val platformManager = UserResponse.newBuilder()
+                .setUuid(UUID.randomUUID().toString())
+                .setEmail(testData.receiverMail)
+                .build()
+            Mockito.`when`(userService.getPlatformManagers())
+                .thenReturn(listOf(platformManager))
+            service.sendNewOrganizationNotificationMail()
+        }
+
+        verify("The mail is sent to right receiver and has correct data") {
+            val mailList = wiser.messages
+            val mail = mailList.first()
+            assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(mail.mimeMessage.subject).isEqualTo(service.newOrganizationSubject)
+            val confirmationUserLink = applicationProperties.mail.newOrganizationLink
+            assertThat(mail.mimeMessage.content.toString()).contains(confirmationUserLink)
+        }
+    }
+
     private fun generateUserResponse(email: String): UserResponse =
         UserResponse.newBuilder()
             .setUuid(UUID.randomUUID().toString())

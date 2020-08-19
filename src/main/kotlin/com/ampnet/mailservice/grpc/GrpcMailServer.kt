@@ -80,6 +80,10 @@ class GrpcMailServer(
         logger.debug { "Received gRPC request SendNewWalletMail for wallet type: ${request.type}" }
         mailService.sendNewWalletNotificationMail(getWalletType(request.type))
     }
+    override fun sendNewOrganizationMail(request: Empty, responseObserver: StreamObserver<Empty>?) {
+        logger.debug { "Received gRPC request SendNewOrganizationMail" }
+        mailService.sendNewOrganizationNotificationMail()
+    }
 
     private fun sendMailToUser(
         uuid: String,

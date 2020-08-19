@@ -6,6 +6,7 @@ import com.ampnet.mailservice.service.pojo.AmountData
 import com.ampnet.mailservice.service.pojo.DepositInfo
 import com.ampnet.mailservice.service.pojo.InvitationData
 import com.ampnet.mailservice.service.pojo.MailConfirmationData
+import com.ampnet.mailservice.service.pojo.NewOrganizationData
 import com.ampnet.mailservice.service.pojo.NewWalletData
 import com.ampnet.mailservice.service.pojo.ResetPasswordData
 import com.ampnet.mailservice.service.pojo.UserData
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service
 import java.io.StringWriter
 
 @Service
+@Suppress("TooManyFunctions")
 class TemplateServiceImpl : TemplateService {
 
     private val mustacheFactory = DefaultMustacheFactory()
@@ -48,6 +50,9 @@ class TemplateServiceImpl : TemplateService {
     }
     private val tokenIssuerWithdrawRequestTemplate: Mustache by lazy {
         mustacheFactory.compile("mustache/token-issuer-withdrawal-template.mustache")
+    }
+    private val organizationWalletTemplate: Mustache by lazy {
+        mustacheFactory.compile("mustache/organization-wallet-template.mustache")
     }
 
     override fun generateTextForMailConfirmation(data: MailConfirmationData): String {
@@ -87,6 +92,10 @@ class TemplateServiceImpl : TemplateService {
 
     override fun generateTextForTokenIssuerWithdrawRequest(data: UserData): String {
         return fillTemplate(tokenIssuerWithdrawRequestTemplate, data)
+    }
+
+    override fun generateTextForNewOrganization(data: NewOrganizationData): String {
+        return fillTemplate(organizationWalletTemplate, data)
     }
 
     private fun fillTemplate(template: Mustache, data: Any): String {

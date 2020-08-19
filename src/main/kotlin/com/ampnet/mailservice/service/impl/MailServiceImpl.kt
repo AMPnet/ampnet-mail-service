@@ -9,6 +9,7 @@ import com.ampnet.mailservice.service.pojo.AmountData
 import com.ampnet.mailservice.service.pojo.DepositInfo
 import com.ampnet.mailservice.service.pojo.InvitationData
 import com.ampnet.mailservice.service.pojo.MailConfirmationData
+import com.ampnet.mailservice.service.pojo.NewOrganizationData
 import com.ampnet.mailservice.service.pojo.NewWalletData
 import com.ampnet.mailservice.service.pojo.ResetPasswordData
 import com.ampnet.mailservice.service.pojo.UserData
@@ -26,6 +27,7 @@ const val FROM_CENTS_TO_EUROS = 100.0
 const val TWO_DECIMAL_FORMAT = "%.2f"
 
 @Service
+@Suppress("TooManyFunctions")
 class MailServiceImpl(
     private val mailSender: JavaMailSender,
     private val templateService: TemplateService,
@@ -42,6 +44,7 @@ class MailServiceImpl(
     internal val withdrawSubject = "Withdraw"
     internal val newWalletSubject = "New wallet created"
     internal val manageWithdrawalsSubject = "New withdrawal request"
+    internal val newOrganizationSubject = "New organization created"
 
     override fun sendConfirmationMail(email: String, token: String) {
         val link = "${applicationProperties.mail.confirmationBaseLink}?token=$token"
@@ -110,6 +113,14 @@ class MailServiceImpl(
         val message = templateService.generateTextForNewWallet(NewWalletData(link), walletType)
         val platformManagers = userService.getPlatformManagers()
         val mail = createMailMessage(platformManagers.map { it.email }, newWalletSubject, message)
+        sendEmail(mail)
+    }
+
+    override fun sendNewOrganizationNotificationMail() {
+        val link = applicationProperties.mail.newOrganizationLink
+        val message = templateService.generateTextForNewOrganization(NewOrganizationData(link))
+        val platformManagers = userService.getPlatformManagers()
+        val mail = createMailMessage(platformManagers.map { it.email }, newOrganizationSubject, message)
         sendEmail(mail)
     }
 
