@@ -22,6 +22,9 @@ import org.springframework.stereotype.Service
 import java.util.Date
 import javax.mail.internet.MimeMessage
 
+const val FROM_CENTS_TO_EUROS = 100.0
+const val TWO_DECIMAL_FORMAT = "%.2f"
+
 @Service
 class MailServiceImpl(
     private val mailSender: JavaMailSender,
@@ -62,7 +65,7 @@ class MailServiceImpl(
     }
 
     override fun sendDepositRequestMail(user: UserResponse, amount: Long) {
-        val data = AmountData(amount)
+        val data = AmountData((TWO_DECIMAL_FORMAT.format(amount / FROM_CENTS_TO_EUROS)))
         val message = templateService.generateTextForDepositRequest(data)
         val mail = createMailMessage(listOf(user.email), depositSubject, message)
         sendEmail(mail)
@@ -78,12 +81,17 @@ class MailServiceImpl(
     override fun sendWithdrawRequestMail(user: UserResponse, amount: Long) {
         val tokenIssuers = userService.getTokenIssuers()
         val link = applicationProperties.mail.manageWithdrawalsLink
-        val userData = UserData(user.firstName, user.lastName, amount, link)
+        val userData = UserData(
+            user.firstName, user.lastName,
+            TWO_DECIMAL_FORMAT.format(amount / FROM_CENTS_TO_EUROS), link
+        )
         val tokenIssuersMessage = templateService.generateTextForTokenIssuerWithdrawRequest(userData)
         val tokenIssuersMail =
             createMailMessage(tokenIssuers.map { it.email }, manageWithdrawalsSubject, tokenIssuersMessage)
 
-        val userMessage = templateService.generateTextForWithdrawRequest(AmountData(amount))
+        val userMessage = templateService.generateTextForWithdrawRequest(
+            AmountData(TWO_DECIMAL_FORMAT.format(amount / FROM_CENTS_TO_EUROS))
+        )
         val userMail = createMailMessage(listOf(user.email), withdrawSubject, userMessage)
 
         sendEmail(tokenIssuersMail)
