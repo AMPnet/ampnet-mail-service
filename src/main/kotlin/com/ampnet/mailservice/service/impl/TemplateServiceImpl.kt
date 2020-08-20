@@ -6,7 +6,6 @@ import com.ampnet.mailservice.service.pojo.AmountData
 import com.ampnet.mailservice.service.pojo.DepositInfo
 import com.ampnet.mailservice.service.pojo.InvitationData
 import com.ampnet.mailservice.service.pojo.MailConfirmationData
-import com.ampnet.mailservice.service.pojo.NewOrganizationData
 import com.ampnet.mailservice.service.pojo.NewWalletData
 import com.ampnet.mailservice.service.pojo.ResetPasswordData
 import com.ampnet.mailservice.service.pojo.UserData
@@ -87,15 +86,12 @@ class TemplateServiceImpl : TemplateService {
         return when (walletType) {
             WalletType.USER -> fillTemplate(userWalletTemplate, NewWalletData("${data.link}/user"))
             WalletType.PROJECT -> fillTemplate(projectWalletTemplate, NewWalletData("${data.link}/project"))
+            WalletType.ORGANIZATION -> fillTemplate(organizationWalletTemplate, NewWalletData("${data.link}/groups"))
         }
     }
 
     override fun generateTextForTokenIssuerWithdrawRequest(data: UserData): String {
         return fillTemplate(tokenIssuerWithdrawRequestTemplate, data)
-    }
-
-    override fun generateTextForNewOrganization(data: NewOrganizationData): String {
-        return fillTemplate(organizationWalletTemplate, data)
     }
 
     private fun fillTemplate(template: Mustache, data: Any): String {
