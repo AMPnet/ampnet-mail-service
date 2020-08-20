@@ -26,6 +26,7 @@ const val FROM_CENTS_TO_EUROS = 100.0
 const val TWO_DECIMAL_FORMAT = "%.2f"
 
 @Service
+@Suppress("TooManyFunctions")
 class MailServiceImpl(
     private val mailSender: JavaMailSender,
     private val templateService: TemplateService,

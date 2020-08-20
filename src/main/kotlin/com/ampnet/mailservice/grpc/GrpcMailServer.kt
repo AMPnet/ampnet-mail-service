@@ -121,6 +121,7 @@ class GrpcMailServer(
         when (type) {
             WalletTypeRequest.Type.USER -> WalletType.USER
             WalletTypeRequest.Type.PROJECT -> WalletType.PROJECT
+            WalletTypeRequest.Type.ORGANIZATION -> WalletType.ORGANIZATION
             else -> throw IllegalArgumentException("Invalid wallet type")
         }
 }

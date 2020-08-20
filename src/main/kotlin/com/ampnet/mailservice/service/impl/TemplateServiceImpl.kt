@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service
 import java.io.StringWriter
 
 @Service
+@Suppress("TooManyFunctions")
 class TemplateServiceImpl : TemplateService {
 
     private val mustacheFactory = DefaultMustacheFactory()
@@ -48,6 +49,9 @@ class TemplateServiceImpl : TemplateService {
     }
     private val tokenIssuerWithdrawRequestTemplate: Mustache by lazy {
         mustacheFactory.compile("mustache/token-issuer-withdrawal-template.mustache")
+    }
+    private val organizationWalletTemplate: Mustache by lazy {
+        mustacheFactory.compile("mustache/organization-wallet-template.mustache")
     }
 
     override fun generateTextForMailConfirmation(data: MailConfirmationData): String {
@@ -82,6 +86,7 @@ class TemplateServiceImpl : TemplateService {
         return when (walletType) {
             WalletType.USER -> fillTemplate(userWalletTemplate, NewWalletData("${data.link}/user"))
             WalletType.PROJECT -> fillTemplate(projectWalletTemplate, NewWalletData("${data.link}/project"))
+            WalletType.ORGANIZATION -> fillTemplate(organizationWalletTemplate, NewWalletData("${data.link}/groups"))
         }
     }
 

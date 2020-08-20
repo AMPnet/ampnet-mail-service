@@ -285,6 +285,28 @@ class MailServiceTest : TestBase() {
             assertThat(projectMail.mimeMessage.content.toString()).contains(confirmationProjectLink)
         }
     }
+    @Test
+    fun mustSetCorrectSendNewOrganizationWalletMail() {
+        suppose("Service sent mail for new organization wallet created") {
+            val platformManager = UserResponse.newBuilder()
+                .setUuid(UUID.randomUUID().toString())
+                .setEmail(testData.receiverMail)
+                .build()
+            Mockito.`when`(userService.getPlatformManagers())
+                .thenReturn(listOf(platformManager))
+            service.sendNewWalletNotificationMail(WalletType.ORGANIZATION)
+        }
+
+        verify("The mail is sent to right receiver and has correct data") {
+            val mailList = wiser.messages
+            val userMail = mailList.first()
+            assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(userMail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(userMail.mimeMessage.subject).isEqualTo(service.newWalletSubject)
+            val confirmationUserLink = applicationProperties.mail.newWalletLink + "/groups"
+            assertThat(userMail.mimeMessage.content.toString()).contains(confirmationUserLink)
+        }
+    }
 
     private fun generateUserResponse(email: String): UserResponse =
         UserResponse.newBuilder()
