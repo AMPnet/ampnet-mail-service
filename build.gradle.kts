@@ -21,7 +21,7 @@ plugins {
 }
 
 group = "com.ampnet"
-version = "0.1.14"
+version = "0.1.15"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
@@ -77,7 +77,6 @@ protobuf {
 jib {
     val dockerUsername: String = System.getenv("DOCKER_USERNAME") ?: "DOCKER_USERNAME"
     val dockerPassword: String = System.getenv("DOCKER_PASSWORD") ?: "DOCKER_PASSWORD"
-
     to {
         image = "ampnet/mail-service:$version"
         auth {
@@ -88,6 +87,11 @@ jib {
     }
     container {
         creationTime = "USE_CURRENT_TIMESTAMP"
+        jvmFlags = listOf(
+            "-Xmx128m", "-XX:MaxMetaspaceSize=128m", "-XX:+UseSerialGC",
+            "-XX:+UnlockExperimentalVMOptions", "-XX:+UseCGroupMemoryLimitForHeap",
+            "-XX:MinHeapFreeRatio=20", "-XX:MaxHeapFreeRatio=40"
+        )
     }
 }
 
