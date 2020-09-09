@@ -24,4 +24,5 @@ message Empty {
 service UserService {
     rpc GetUsers(GetUsersRequest) returns (UsersResponse);
     rpc GetPlatformManagers(Empty) returns (UsersResponse);
+    rpc GetTokenIssuers(Empty) returns (UsersResponse);
 }

@@ -4,7 +4,9 @@ import com.ampnet.mailservice.TestBase
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.grpc.userservice.UserService
+import com.ampnet.mailservice.service.impl.FROM_CENTS_TO_EUROS
 import com.ampnet.mailservice.service.impl.MailServiceImpl
+import com.ampnet.mailservice.service.impl.TWO_DECIMAL_FORMAT
 import com.ampnet.userservice.proto.UserResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -29,8 +31,10 @@ class MailServiceTest : TestBase() {
 
     @Autowired
     private lateinit var mailSender: JavaMailSenderImpl
+
     @Autowired
     private lateinit var templateService: TemplateService
+
     @Autowired
     private lateinit var applicationProperties: ApplicationProperties
 
@@ -130,7 +134,7 @@ class MailServiceTest : TestBase() {
             assertThat(mail.mimeMessage.subject).isEqualTo(service.depositSubject)
 
             val mailText = mail.mimeMessage.content.toString()
-            assertThat(mailText).contains(testData.amount.toString())
+            assertThat(mailText).contains((TWO_DECIMAL_FORMAT.format(testData.amount / FROM_CENTS_TO_EUROS)))
         }
     }
 
@@ -176,21 +180,38 @@ class MailServiceTest : TestBase() {
 
     @Test
     fun mustSetCorrectWithdrawRequestMail() {
-        suppose("Service send withdraw request mail") {
+        suppose("User service returns a list of token issuers") {
+            val tokenIssuer = UserResponse.newBuilder()
+                .setUuid(UUID.randomUUID().toString())
+                .setEmail(testData.tokenIssuerMail)
+                .build()
+            Mockito.`when`(userService.getTokenIssuers())
+                .thenReturn(listOf(tokenIssuer))
+        }
+        suppose("Service send withdraw request mail to user and token issuers") {
             val user = generateUserResponse(testData.receiverMail)
             service.sendWithdrawRequestMail(user, testData.amount)
         }
 
-        verify("The mail is sent to right receiver and has correct data") {
+        verify("The mail is sent to token issuer and has correct data") {
             val mailList = wiser.messages
-            assertThat(mailList).hasSize(1)
-            val mail = mailList.first()
-            assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
-            assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
-            assertThat(mail.mimeMessage.subject).isEqualTo(service.withdrawSubject)
+            assertThat(mailList).hasSize(2)
+            val tokenIssuerMail = mailList.first()
 
-            val mailText = mail.mimeMessage.content.toString()
-            assertThat(mailText).contains(testData.amount.toString())
+            assertThat(tokenIssuerMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(tokenIssuerMail.envelopeReceiver).isEqualTo(testData.tokenIssuerMail)
+            assertThat(tokenIssuerMail.mimeMessage.subject).isEqualTo(service.manageWithdrawalsSubject)
+
+            val mailText = tokenIssuerMail.mimeMessage.content.toString()
+            assertThat(mailText).contains((TWO_DECIMAL_FORMAT.format(testData.amount / FROM_CENTS_TO_EUROS)))
+        }
+        verify("The mail is sent to user and has correct data") {
+            val mailList = wiser.messages
+            val userMail = mailList[1]
+
+            assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(userMail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(userMail.mimeMessage.subject).isEqualTo(service.withdrawSubject)
         }
     }
 
@@ -264,6 +285,28 @@ class MailServiceTest : TestBase() {
             assertThat(projectMail.mimeMessage.content.toString()).contains(confirmationProjectLink)
         }
     }
+    @Test
+    fun mustSetCorrectSendNewOrganizationWalletMail() {
+        suppose("Service sent mail for new organization wallet created") {
+            val platformManager = UserResponse.newBuilder()
+                .setUuid(UUID.randomUUID().toString())
+                .setEmail(testData.receiverMail)
+                .build()
+            Mockito.`when`(userService.getPlatformManagers())
+                .thenReturn(listOf(platformManager))
+            service.sendNewWalletNotificationMail(WalletType.ORGANIZATION)
+        }
+
+        verify("The mail is sent to right receiver and has correct data") {
+            val mailList = wiser.messages
+            val userMail = mailList.first()
+            assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(userMail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(userMail.mimeMessage.subject).isEqualTo(service.newWalletSubject)
+            val confirmationUserLink = applicationProperties.mail.newWalletLink + "/groups"
+            assertThat(userMail.mimeMessage.content.toString()).contains(confirmationUserLink)
+        }
+    }
 
     private fun generateUserResponse(email: String): UserResponse =
         UserResponse.newBuilder()
@@ -276,6 +319,7 @@ class MailServiceTest : TestBase() {
 
     private class TestData {
         val receiverMail = "test@test.com"
+        val tokenIssuerMail = "demoadmin@ampnet.io"
         val token = "test-token"
         val organizationName = "Organization test"
         val amount = 100L

@@ -8,6 +8,7 @@ import com.ampnet.mailservice.service.pojo.InvitationData
 import com.ampnet.mailservice.service.pojo.MailConfirmationData
 import com.ampnet.mailservice.service.pojo.NewWalletData
 import com.ampnet.mailservice.service.pojo.ResetPasswordData
+import com.ampnet.mailservice.service.pojo.UserData
 import com.ampnet.mailservice.service.pojo.WithdrawInfo
 import com.github.mustachejava.DefaultMustacheFactory
 import com.github.mustachejava.Mustache
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service
 import java.io.StringWriter
 
 @Service
+@Suppress("TooManyFunctions")
 class TemplateServiceImpl : TemplateService {
 
     private val mustacheFactory = DefaultMustacheFactory()
@@ -45,6 +47,13 @@ class TemplateServiceImpl : TemplateService {
     private val projectWalletTemplate: Mustache by lazy {
         mustacheFactory.compile("mustache/project-wallet-template.mustache")
     }
+    private val tokenIssuerWithdrawRequestTemplate: Mustache by lazy {
+        mustacheFactory.compile("mustache/token-issuer-withdrawal-template.mustache")
+    }
+    private val organizationWalletTemplate: Mustache by lazy {
+        mustacheFactory.compile("mustache/organization-wallet-template.mustache")
+    }
+
     override fun generateTextForMailConfirmation(data: MailConfirmationData): String {
         return fillTemplate(mailConfirmationTemplate, data)
     }
@@ -77,7 +86,12 @@ class TemplateServiceImpl : TemplateService {
         return when (walletType) {
             WalletType.USER -> fillTemplate(userWalletTemplate, NewWalletData("${data.link}/user"))
             WalletType.PROJECT -> fillTemplate(projectWalletTemplate, NewWalletData("${data.link}/project"))
+            WalletType.ORGANIZATION -> fillTemplate(organizationWalletTemplate, NewWalletData("${data.link}/groups"))
         }
+    }
+
+    override fun generateTextForTokenIssuerWithdrawRequest(data: UserData): String {
+        return fillTemplate(tokenIssuerWithdrawRequestTemplate, data)
     }
 
     private fun fillTemplate(template: Mustache, data: Any): String {

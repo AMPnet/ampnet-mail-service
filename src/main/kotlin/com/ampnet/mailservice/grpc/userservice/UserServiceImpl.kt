@@ -57,4 +57,18 @@ class UserServiceImpl(
             throw GrpcException("Could not get Platform Managers from user service", ex)
         }
     }
+
+    override fun getTokenIssuers(): List<UserResponse> {
+        logger.debug { "Fetching Token Issuers!" }
+        try {
+            val usersResponse = serviceBlockingStub
+                .withDeadlineAfter(applicationProperties.grpc.userServiceTimeout, TimeUnit.MILLISECONDS)
+                .getTokenIssuers(Empty.getDefaultInstance())
+                .usersList
+            logger.debug { "Users response: $usersResponse" }
+            return usersResponse
+        } catch (ex: StatusRuntimeException) {
+            throw GrpcException("Could not get Platform Managers from user service", ex)
+        }
+    }
 }

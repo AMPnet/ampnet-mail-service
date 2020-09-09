@@ -11,6 +11,7 @@ import com.ampnet.mailservice.service.pojo.InvitationData
 import com.ampnet.mailservice.service.pojo.MailConfirmationData
 import com.ampnet.mailservice.service.pojo.NewWalletData
 import com.ampnet.mailservice.service.pojo.ResetPasswordData
+import com.ampnet.mailservice.service.pojo.UserData
 import com.ampnet.mailservice.service.pojo.WithdrawInfo
 import com.ampnet.userservice.proto.UserResponse
 import mu.KLogging
@@ -21,7 +22,11 @@ import org.springframework.stereotype.Service
 import java.util.Date
 import javax.mail.internet.MimeMessage
 
+const val FROM_CENTS_TO_EUROS = 100.0
+const val TWO_DECIMAL_FORMAT = "%.2f"
+
 @Service
+@Suppress("TooManyFunctions")
 class MailServiceImpl(
     private val mailSender: JavaMailSender,
     private val templateService: TemplateService,
@@ -37,6 +42,7 @@ class MailServiceImpl(
     internal val depositSubject = "Deposit"
     internal val withdrawSubject = "Withdraw"
     internal val newWalletSubject = "New wallet created"
+    internal val manageWithdrawalsSubject = "New withdrawal request"
 
     override fun sendConfirmationMail(email: String, token: String) {
         val link = "${applicationProperties.mail.confirmationBaseLink}?token=$token"
@@ -60,7 +66,7 @@ class MailServiceImpl(
     }
 
     override fun sendDepositRequestMail(user: UserResponse, amount: Long) {
-        val data = AmountData(amount)
+        val data = AmountData((TWO_DECIMAL_FORMAT.format(amount / FROM_CENTS_TO_EUROS)))
         val message = templateService.generateTextForDepositRequest(data)
         val mail = createMailMessage(listOf(user.email), depositSubject, message)
         sendEmail(mail)
@@ -74,10 +80,23 @@ class MailServiceImpl(
     }
 
     override fun sendWithdrawRequestMail(user: UserResponse, amount: Long) {
-        val data = AmountData(amount)
-        val message = templateService.generateTextForWithdrawRequest(data)
-        val mail = createMailMessage(listOf(user.email), withdrawSubject, message)
-        sendEmail(mail)
+        val tokenIssuers = userService.getTokenIssuers()
+        val link = applicationProperties.mail.manageWithdrawalsLink
+        val userData = UserData(
+            user.firstName, user.lastName,
+            TWO_DECIMAL_FORMAT.format(amount / FROM_CENTS_TO_EUROS), link
+        )
+        val tokenIssuersMessage = templateService.generateTextForTokenIssuerWithdrawRequest(userData)
+        val tokenIssuersMail =
+            createMailMessage(tokenIssuers.map { it.email }, manageWithdrawalsSubject, tokenIssuersMessage)
+
+        val userMessage = templateService.generateTextForWithdrawRequest(
+            AmountData(TWO_DECIMAL_FORMAT.format(amount / FROM_CENTS_TO_EUROS))
+        )
+        val userMail = createMailMessage(listOf(user.email), withdrawSubject, userMessage)
+
+        sendEmail(tokenIssuersMail)
+        sendEmail(userMail)
     }
 
     override fun sendWithdrawInfoMail(user: UserResponse, burned: Boolean) {
