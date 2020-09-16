@@ -4,7 +4,6 @@ import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.exception.GrpcException
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.proto.DepositInfoRequest
-import com.ampnet.mailservice.proto.DepositRequest
 import com.ampnet.mailservice.proto.Empty
 import com.ampnet.mailservice.proto.MailConfirmationRequest
 import com.ampnet.mailservice.proto.MailServiceGrpc
@@ -41,13 +40,6 @@ class GrpcMailServer(
         logger.debug { "Received gRPC request SendOrganizationInvitationRequest to: ${request.email}" }
         mailService.sendOrganizationInvitationMail(request.email, request.organization)
         returnSuccessfulResponse(responseObserver)
-    }
-
-    override fun sendDepositRequest(request: DepositRequest, responseObserver: StreamObserver<Empty>) {
-        logger.debug { "Received gRPC request SendDepositRequest to: ${request.user}" }
-        sendMailToUser(request.user, responseObserver) {
-            mailService.sendDepositRequestMail(it, request.amount)
-        }
     }
 
     override fun sendDepositInfo(request: DepositInfoRequest, responseObserver: StreamObserver<Empty>) {
