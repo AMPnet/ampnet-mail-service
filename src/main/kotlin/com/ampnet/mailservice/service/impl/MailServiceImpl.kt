@@ -30,12 +30,13 @@ const val TWO_DECIMAL_FORMAT = "%.2f"
 class MailServiceImpl(
     private val mailSender: JavaMailSender,
     private val templateService: TemplateService,
-    private val applicationProperties: ApplicationProperties,
+    val applicationProperties: ApplicationProperties,
     private val userService: UserService
 ) : MailService {
 
     companion object : KLogging()
 
+    private val linkResolver = LinkResolver(applicationProperties)
     internal val confirmationMailSubject = "Confirm your email"
     internal val resetPasswordSubject = "Reset password"
     internal val invitationMailSubject = "Invitation"
@@ -45,21 +46,21 @@ class MailServiceImpl(
     internal val manageWithdrawalsSubject = "New withdrawal request"
 
     override fun sendConfirmationMail(email: String, token: String) {
-        val link = "${applicationProperties.mail.confirmationBaseLink}?token=$token"
+        val link = linkResolver.getConfirmationLink(token)
         val message = templateService.generateTextForMailConfirmation(MailConfirmationData(link))
         val mail = createMailMessage(listOf(email), confirmationMailSubject, message)
         sendEmail(mail)
     }
 
     override fun sendResetPasswordMail(email: String, token: String) {
-        val link = "${applicationProperties.mail.resetPasswordBaseLink}?token=$token"
+        val link = linkResolver.getResetPasswordLink(token)
         val message = templateService.generateTextForResetPassword(ResetPasswordData(link))
         val mail = createMailMessage(listOf(email), resetPasswordSubject, message)
         sendEmail(mail)
     }
 
     override fun sendOrganizationInvitationMail(email: String, organizationName: String) {
-        val data = InvitationData(organizationName, applicationProperties.mail.organizationInvitationsLink)
+        val data = InvitationData(organizationName, linkResolver.organizationInvitesLink)
         val message = templateService.generateTextForInvitation(data)
         val mail = createMailMessage(listOf(email), invitationMailSubject, message)
         sendEmail(mail)
@@ -81,7 +82,7 @@ class MailServiceImpl(
 
     override fun sendWithdrawRequestMail(user: UserResponse, amount: Long) {
         val tokenIssuers = userService.getTokenIssuers()
-        val link = applicationProperties.mail.manageWithdrawalsLink
+        val link = linkResolver.manageWithdrawalsLink
         val userData = UserData(
             user.firstName, user.lastName,
             TWO_DECIMAL_FORMAT.format(amount / FROM_CENTS_TO_EUROS), link
@@ -107,7 +108,7 @@ class MailServiceImpl(
     }
 
     override fun sendNewWalletNotificationMail(walletType: WalletType) {
-        val link = applicationProperties.mail.newWalletLink
+        val link = linkResolver.getNewWalletLink(walletType)
         val message = templateService.generateTextForNewWallet(NewWalletData(link), walletType)
         val platformManagers = userService.getPlatformManagers()
         val mail = createMailMessage(platformManagers.map { it.email }, newWalletSubject, message)

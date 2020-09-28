@@ -12,11 +12,12 @@ class ApplicationProperties {
 
 class MailProperties {
     lateinit var sender: String
-    lateinit var confirmationBaseLink: String
-    lateinit var resetPasswordBaseLink: String
-    lateinit var organizationInvitationsLink: String
-    lateinit var newWalletLink: String
-    lateinit var manageWithdrawalsLink: String
+    lateinit var baseUrl: String
+    var confirmationLink: String = "mail-confirmation"
+    var resetPasswordLink: String = "reset-password"
+    var organizationInvitationsLink: String = "dash/manage_groups"
+    var newWalletLink: String = "dash/activation"
+    var manageWithdrawalsLink: String = "dash/manage_withdrawals"
     var enabled: Boolean = false
 }
 
