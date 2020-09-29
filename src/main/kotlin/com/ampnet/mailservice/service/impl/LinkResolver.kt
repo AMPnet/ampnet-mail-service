@@ -6,22 +6,25 @@ import java.net.URL
 
 class LinkResolver(applicationProperties: ApplicationProperties) {
 
-    private val baseUrl: URL = URL(applicationProperties.mail.baseUrl)
+    private val baseUrl = URL(applicationProperties.mail.baseUrl).toString()
     private val confirmationPath = applicationProperties.mail.confirmationPath
     private val resetPasswordPath = applicationProperties.mail.resetPasswordPath
     private val newWalletPath = applicationProperties.mail.newWalletPath
-    val organizationInvitesLink = baseUrl.append(applicationProperties.mail.organizationInvitationsPath).toString()
-    val manageWithdrawalsLink = baseUrl.append(applicationProperties.mail.manageWithdrawalsPath).toString()
+    val organizationInvitesLink =
+            "$baseUrl/${applicationProperties.mail.organizationInvitationsPath}".removeDoubleSlashes()
+    val manageWithdrawalsLink = "$baseUrl/${applicationProperties.mail.manageWithdrawalsPath}".removeDoubleSlashes()
 
-    fun getConfirmationLink(token: String): String = baseUrl.append("$confirmationPath?token=$token").toString()
-    fun getResetPasswordLink(token: String): String = baseUrl.append("$resetPasswordPath?token=$token").toString()
+    fun getConfirmationLink(token: String): String = "$baseUrl/$confirmationPath?token=$token".removeDoubleSlashes()
+    fun getResetPasswordLink(token: String): String = "$baseUrl/$resetPasswordPath?token=$token".removeDoubleSlashes()
 
-    fun getNewWalletLink(walletType: WalletType): String =
-        when (walletType) {
-            WalletType.USER -> baseUrl.append("$newWalletPath/users")
-            WalletType.PROJECT -> baseUrl.append("$newWalletPath/projects")
-            WalletType.ORGANIZATION -> baseUrl.append("$newWalletPath/groups")
-        }.toString()
+    fun getNewWalletLink(walletType: WalletType): String {
+        val typePath = when (walletType) {
+            WalletType.USER -> "users"
+            WalletType.PROJECT -> "projects"
+            WalletType.ORGANIZATION -> "groups"
+        }
+        return "$baseUrl/$newWalletPath/$typePath".removeDoubleSlashes()
+    }
 }
 
-fun URL.append(path: String): URL = URL(this, path)
+fun String.removeDoubleSlashes() = this.replace("(?<!http:)//".toRegex(), "/")
