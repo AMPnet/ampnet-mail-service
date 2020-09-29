@@ -11,7 +11,7 @@ class LinkResolver(applicationProperties: ApplicationProperties) {
     private val resetPasswordPath = applicationProperties.mail.resetPasswordPath
     private val newWalletPath = applicationProperties.mail.newWalletPath
     val organizationInvitesLink =
-            "$baseUrl/${applicationProperties.mail.organizationInvitationsPath}".removeDoubleSlashes()
+        "$baseUrl/${applicationProperties.mail.organizationInvitationsPath}".removeDoubleSlashes()
     val manageWithdrawalsLink = "$baseUrl/${applicationProperties.mail.manageWithdrawalsPath}".removeDoubleSlashes()
 
     fun getConfirmationLink(token: String): String = "$baseUrl/$confirmationPath?token=$token".removeDoubleSlashes()
