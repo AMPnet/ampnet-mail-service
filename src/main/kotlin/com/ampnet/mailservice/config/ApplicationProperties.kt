@@ -13,11 +13,11 @@ class ApplicationProperties {
 class MailProperties {
     lateinit var sender: String
     lateinit var baseUrl: String
-    var confirmationLink: String = "mail-confirmation"
-    var resetPasswordLink: String = "reset-password"
-    var organizationInvitationsLink: String = "dash/manage_groups"
-    var newWalletLink: String = "dash/activation"
-    var manageWithdrawalsLink: String = "dash/manage_withdrawals"
+    var confirmationPath: String = "mail-confirmation"
+    var resetPasswordPath: String = "reset-password"
+    var organizationInvitationsPath: String = "dash/manage_groups"
+    var newWalletPath: String = "dash/activation"
+    var manageWithdrawalsPath: String = "dash/manage_withdrawals"
     var enabled: Boolean = false
 }
 
