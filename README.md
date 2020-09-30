@@ -26,7 +26,7 @@ Application is running on port: `8127`. To change default port set configuration
 
 ## Application Properties
 
-### Mail Server
+### Mail Server Properties
 
 Spring mail server properties that must be set:
 
@@ -40,7 +40,5 @@ Spring mail server properties that must be set:
 Internal mail service application properties:
 
   * `com.ampnet.mailservice.mail.enabled`
-  * `com.ampnet.mailservice.mail.confirmation-base-link`
-  * `com.ampnet.mailservice.mail.reset-password-base-link`
-  * `com.ampnet.mailservice.mail.organization-invitations-link`
   * `com.ampnet.mailservice.mail.sender`
+  * `com.ampnet.mailservice.mail.base-url`

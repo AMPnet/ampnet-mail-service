@@ -74,7 +74,8 @@ class MailServiceTest : TestBase() {
             assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
             assertThat(mail.mimeMessage.subject).isEqualTo(service.confirmationMailSubject)
 
-            val confirmationLink = "${applicationProperties.mail.confirmationBaseLink}?token=${testData.token}"
+            val confirmationLink = applicationProperties.mail.baseUrl + "/" +
+                "${applicationProperties.mail.confirmationPath}?token=${testData.token}"
             assertThat(mail.mimeMessage.content.toString()).contains(confirmationLink)
         }
     }
@@ -85,7 +86,7 @@ class MailServiceTest : TestBase() {
             service.sendResetPasswordMail(testData.receiverMail, testData.token)
         }
 
-        verify("The mail is sent to right receiver and has confirmation link") {
+        verify("The mail is sent to right receiver and has reset password link") {
             val mailList = wiser.messages
             assertThat(mailList).hasSize(1)
             val mail = mailList.first()
@@ -93,8 +94,9 @@ class MailServiceTest : TestBase() {
             assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
             assertThat(mail.mimeMessage.subject).isEqualTo(service.resetPasswordSubject)
 
-            val confirmationLink = "${applicationProperties.mail.resetPasswordBaseLink}?token=${testData.token}"
-            assertThat(mail.mimeMessage.content.toString()).contains(confirmationLink)
+            val resetPasswordLink = "${applicationProperties.mail.baseUrl}/" +
+                "${applicationProperties.mail.resetPasswordPath}?token=${testData.token}"
+            assertThat(mail.mimeMessage.content.toString()).contains(resetPasswordLink)
         }
     }
 
@@ -114,7 +116,10 @@ class MailServiceTest : TestBase() {
 
             val mailText = mail.mimeMessage.content.toString()
             assertThat(mailText).contains(testData.organizationName)
-            assertThat(mailText).contains(applicationProperties.mail.organizationInvitationsLink)
+
+            val link = applicationProperties.mail.baseUrl + "/" +
+                applicationProperties.mail.organizationInvitationsPath
+            assertThat(mailText).contains(link)
         }
     }
 
@@ -274,17 +279,20 @@ class MailServiceTest : TestBase() {
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testData.receiverMail)
             assertThat(userMail.mimeMessage.subject).isEqualTo(service.newWalletSubject)
-            val confirmationUserLink = applicationProperties.mail.newWalletLink + "/user"
+            val confirmationUserLink = applicationProperties.mail.baseUrl + "/" +
+                applicationProperties.mail.newWalletPath + "/user"
             assertThat(userMail.mimeMessage.content.toString()).contains(confirmationUserLink)
 
             val projectMail = mailList[1]
             assertThat(projectMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(projectMail.envelopeReceiver).isEqualTo(testData.receiverMail)
             assertThat(projectMail.mimeMessage.subject).isEqualTo(service.newWalletSubject)
-            val confirmationProjectLink = applicationProperties.mail.newWalletLink + "/project"
+            val confirmationProjectLink = applicationProperties.mail.baseUrl + "/" +
+                applicationProperties.mail.newWalletPath + "/project"
             assertThat(projectMail.mimeMessage.content.toString()).contains(confirmationProjectLink)
         }
     }
+
     @Test
     fun mustSetCorrectSendNewOrganizationWalletMail() {
         suppose("Service sent mail for new organization wallet created") {
@@ -303,7 +311,8 @@ class MailServiceTest : TestBase() {
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testData.receiverMail)
             assertThat(userMail.mimeMessage.subject).isEqualTo(service.newWalletSubject)
-            val confirmationUserLink = applicationProperties.mail.newWalletLink + "/groups"
+            val confirmationUserLink = applicationProperties.mail.baseUrl + "/" +
+                applicationProperties.mail.newWalletPath + "/groups"
             assertThat(userMail.mimeMessage.content.toString()).contains(confirmationUserLink)
         }
     }

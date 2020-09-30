@@ -84,9 +84,9 @@ class TemplateServiceImpl : TemplateService {
 
     override fun generateTextForNewWallet(data: NewWalletData, walletType: WalletType): String {
         return when (walletType) {
-            WalletType.USER -> fillTemplate(userWalletTemplate, NewWalletData("${data.link}/user"))
-            WalletType.PROJECT -> fillTemplate(projectWalletTemplate, NewWalletData("${data.link}/project"))
-            WalletType.ORGANIZATION -> fillTemplate(organizationWalletTemplate, NewWalletData("${data.link}/groups"))
+            WalletType.USER -> fillTemplate(userWalletTemplate, data)
+            WalletType.PROJECT -> fillTemplate(projectWalletTemplate, data)
+            WalletType.ORGANIZATION -> fillTemplate(organizationWalletTemplate, data)
         }
     }
 
