@@ -59,10 +59,10 @@ class MailServiceImpl(
         sendEmail(mail)
     }
 
-    override fun sendOrganizationInvitationMail(email: String, organizationName: String) {
+    override fun sendOrganizationInvitationMail(email: List<String>, organizationName: String) {
         val data = InvitationData(organizationName, linkResolver.organizationInvitesLink)
         val message = templateService.generateTextForInvitation(data)
-        val mail = createMailMessage(listOf(email), invitationMailSubject, message)
+        val mail = createMailMessage(email, invitationMailSubject, message)
         sendEmail(mail)
     }
 

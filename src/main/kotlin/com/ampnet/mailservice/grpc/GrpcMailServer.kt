@@ -38,8 +38,9 @@ class GrpcMailServer(
         request: OrganizationInvitationRequest,
         responseObserver: StreamObserver<Empty>
     ) {
-        logger.debug { "Received gRPC request SendOrganizationInvitationRequest to: ${request.email}" }
-        mailService.sendOrganizationInvitationMail(request.email, request.organization)
+        val emails = request.emailsList.toList()
+        logger.debug { "Received gRPC request sendOrganizationInvitation to: ${emails.joinToString()}" }
+        mailService.sendOrganizationInvitationMail(emails, request.organization)
         returnSuccessfulResponse(responseObserver)
     }
 
