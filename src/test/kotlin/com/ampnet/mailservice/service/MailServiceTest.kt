@@ -43,7 +43,7 @@ class MailServiceTest : TestBase() {
     private lateinit var service: MailServiceImpl
     private lateinit var wiser: Wiser
     private var defaultMailPort: Int = 0
-    private val testData = TestData()
+    private val testContext = TestContext()
 
     @BeforeEach
     fun init() {
@@ -63,7 +63,7 @@ class MailServiceTest : TestBase() {
     @Test
     fun mustSetCorrectSendConfirmationMail() {
         suppose("Service sent the mail") {
-            service.sendConfirmationMail(testData.receiverMail, testData.token)
+            service.sendConfirmationMail(testContext.receiverMail, testContext.token)
         }
 
         verify("The mail is sent to right receiver and has confirmation link") {
@@ -71,11 +71,11 @@ class MailServiceTest : TestBase() {
             assertThat(mailList).hasSize(1)
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
-            assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(mail.mimeMessage.subject).isEqualTo(service.confirmationMailSubject)
 
             val confirmationLink = applicationProperties.mail.baseUrl + "/" +
-                "${applicationProperties.mail.confirmationPath}?token=${testData.token}"
+                "${applicationProperties.mail.confirmationPath}?token=${testContext.token}"
             assertThat(mail.mimeMessage.content.toString()).contains(confirmationLink)
         }
     }
@@ -83,7 +83,7 @@ class MailServiceTest : TestBase() {
     @Test
     fun mustSetCorrectSendResetPasswordMail() {
         suppose("Service sent reset password mail") {
-            service.sendResetPasswordMail(testData.receiverMail, testData.token)
+            service.sendResetPasswordMail(testContext.receiverMail, testContext.token)
         }
 
         verify("The mail is sent to right receiver and has reset password link") {
@@ -91,11 +91,11 @@ class MailServiceTest : TestBase() {
             assertThat(mailList).hasSize(1)
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
-            assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(mail.mimeMessage.subject).isEqualTo(service.resetPasswordSubject)
 
             val resetPasswordLink = "${applicationProperties.mail.baseUrl}/" +
-                "${applicationProperties.mail.resetPasswordPath}?token=${testData.token}"
+                "${applicationProperties.mail.resetPasswordPath}?token=${testContext.token}"
             assertThat(mail.mimeMessage.content.toString()).contains(resetPasswordLink)
         }
     }
@@ -103,19 +103,21 @@ class MailServiceTest : TestBase() {
     @Test
     fun mustSetCorrectOrganizationInvitationMail() {
         suppose("Service send organizationInvitation mail") {
-            service.sendOrganizationInvitationMail(testData.receiverMail, testData.organizationName)
+            service.sendOrganizationInvitationMail(testContext.receiverEmails, testContext.organizationName)
         }
 
         verify("The mail is sent to right receiver and has correct data") {
             val mailList = wiser.messages
-            assertThat(mailList).hasSize(1)
-            val mail = mailList.first()
-            assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
-            assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
-            assertThat(mail.mimeMessage.subject).isEqualTo(service.invitationMailSubject)
+            assertThat(mailList).hasSize(2)
+            val firstMail = mailList.first()
+            val secondMail = mailList.last()
+            assertThat(firstMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(firstMail.envelopeReceiver).isEqualTo(testContext.receiverEmails.first())
+            assertThat(firstMail.mimeMessage.subject).isEqualTo(service.invitationMailSubject)
+            assertThat(secondMail.envelopeReceiver).isEqualTo(testContext.receiverEmails.last())
 
-            val mailText = mail.mimeMessage.content.toString()
-            assertThat(mailText).contains(testData.organizationName)
+            val mailText = firstMail.mimeMessage.content.toString()
+            assertThat(mailText).contains(testContext.organizationName)
 
             val link = applicationProperties.mail.baseUrl + "/" +
                 applicationProperties.mail.organizationInvitationsPath
@@ -126,8 +128,8 @@ class MailServiceTest : TestBase() {
     @Test
     fun mustSetCorrectDepositRequestMail() {
         suppose("Service send deposit request mail") {
-            val user = generateUserResponse(testData.receiverMail)
-            service.sendDepositRequestMail(user, testData.amount)
+            val user = generateUserResponse(testContext.receiverMail)
+            service.sendDepositRequestMail(user, testContext.amount)
         }
 
         verify("The mail is sent to right receiver and has correct data") {
@@ -135,18 +137,18 @@ class MailServiceTest : TestBase() {
             assertThat(mailList).hasSize(1)
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
-            assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(mail.mimeMessage.subject).isEqualTo(service.depositSubject)
 
             val mailText = mail.mimeMessage.content.toString()
-            assertThat(mailText).contains((TWO_DECIMAL_FORMAT.format(testData.amount / FROM_CENTS_TO_EUROS)))
+            assertThat(mailText).contains((TWO_DECIMAL_FORMAT.format(testContext.amount / FROM_CENTS_TO_EUROS)))
         }
     }
 
     @Test
     fun mustSetCorrectPositiveDepositInfoMail() {
         suppose("Service send Deposit info mail") {
-            val user = generateUserResponse(testData.receiverMail)
+            val user = generateUserResponse(testContext.receiverMail)
             service.sendDepositInfoMail(user, true)
         }
 
@@ -155,7 +157,7 @@ class MailServiceTest : TestBase() {
             assertThat(mailList).hasSize(1)
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
-            assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(mail.mimeMessage.subject).isEqualTo(service.depositSubject)
 
             val mailText = mail.mimeMessage.content.toString()
@@ -166,7 +168,7 @@ class MailServiceTest : TestBase() {
     @Test
     fun mustSetCorrectNegativeDepositInfoMail() {
         suppose("Service send Deposit info mail") {
-            val user = generateUserResponse(testData.receiverMail)
+            val user = generateUserResponse(testContext.receiverMail)
             service.sendDepositInfoMail(user, false)
         }
 
@@ -175,7 +177,7 @@ class MailServiceTest : TestBase() {
             assertThat(mailList).hasSize(1)
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
-            assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(mail.mimeMessage.subject).isEqualTo(service.depositSubject)
 
             val mailText = mail.mimeMessage.content.toString()
@@ -188,14 +190,14 @@ class MailServiceTest : TestBase() {
         suppose("User service returns a list of token issuers") {
             val tokenIssuer = UserResponse.newBuilder()
                 .setUuid(UUID.randomUUID().toString())
-                .setEmail(testData.tokenIssuerMail)
+                .setEmail(testContext.tokenIssuerMail)
                 .build()
             Mockito.`when`(userService.getTokenIssuers())
                 .thenReturn(listOf(tokenIssuer))
         }
         suppose("Service send withdraw request mail to user and token issuers") {
-            val user = generateUserResponse(testData.receiverMail)
-            service.sendWithdrawRequestMail(user, testData.amount)
+            val user = generateUserResponse(testContext.receiverMail)
+            service.sendWithdrawRequestMail(user, testContext.amount)
         }
 
         verify("The mail is sent to token issuer and has correct data") {
@@ -204,18 +206,18 @@ class MailServiceTest : TestBase() {
             val tokenIssuerMail = mailList.first()
 
             assertThat(tokenIssuerMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
-            assertThat(tokenIssuerMail.envelopeReceiver).isEqualTo(testData.tokenIssuerMail)
+            assertThat(tokenIssuerMail.envelopeReceiver).isEqualTo(testContext.tokenIssuerMail)
             assertThat(tokenIssuerMail.mimeMessage.subject).isEqualTo(service.manageWithdrawalsSubject)
 
             val mailText = tokenIssuerMail.mimeMessage.content.toString()
-            assertThat(mailText).contains((TWO_DECIMAL_FORMAT.format(testData.amount / FROM_CENTS_TO_EUROS)))
+            assertThat(mailText).contains((TWO_DECIMAL_FORMAT.format(testContext.amount / FROM_CENTS_TO_EUROS)))
         }
         verify("The mail is sent to user and has correct data") {
             val mailList = wiser.messages
             val userMail = mailList[1]
 
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
-            assertThat(userMail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(userMail.mimeMessage.subject).isEqualTo(service.withdrawSubject)
         }
     }
@@ -223,7 +225,7 @@ class MailServiceTest : TestBase() {
     @Test
     fun mustSetCorrectPositiveWithdrawInfoMail() {
         suppose("Service send Deposit info mail") {
-            val user = generateUserResponse(testData.receiverMail)
+            val user = generateUserResponse(testContext.receiverMail)
             service.sendWithdrawInfoMail(user, true)
         }
 
@@ -232,7 +234,7 @@ class MailServiceTest : TestBase() {
             assertThat(mailList).hasSize(1)
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
-            assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(mail.mimeMessage.subject).isEqualTo(service.withdrawSubject)
 
             val mailText = mail.mimeMessage.content.toString()
@@ -243,7 +245,7 @@ class MailServiceTest : TestBase() {
     @Test
     fun mustSetCorrectNegativeWithdrawInfoMail() {
         suppose("Service send Deposit info mail") {
-            val user = generateUserResponse(testData.receiverMail)
+            val user = generateUserResponse(testContext.receiverMail)
             service.sendWithdrawInfoMail(user, false)
         }
 
@@ -252,7 +254,7 @@ class MailServiceTest : TestBase() {
             assertThat(mailList).hasSize(1)
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
-            assertThat(mail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(mail.mimeMessage.subject).isEqualTo(service.withdrawSubject)
 
             val mailText = mail.mimeMessage.content.toString()
@@ -265,7 +267,7 @@ class MailServiceTest : TestBase() {
         suppose("Service sent mails for new user and project wallet created") {
             val platformManager = UserResponse.newBuilder()
                 .setUuid(UUID.randomUUID().toString())
-                .setEmail(testData.receiverMail)
+                .setEmail(testContext.receiverMail)
                 .build()
             Mockito.`when`(userService.getPlatformManagers())
                 .thenReturn(listOf(platformManager))
@@ -277,7 +279,7 @@ class MailServiceTest : TestBase() {
             val mailList = wiser.messages
             val userMail = mailList.first()
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
-            assertThat(userMail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(userMail.mimeMessage.subject).isEqualTo(service.newWalletSubject)
             val confirmationUserLink = applicationProperties.mail.baseUrl + "/" +
                 applicationProperties.mail.newWalletPath + "/user"
@@ -285,7 +287,7 @@ class MailServiceTest : TestBase() {
 
             val projectMail = mailList[1]
             assertThat(projectMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
-            assertThat(projectMail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(projectMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(projectMail.mimeMessage.subject).isEqualTo(service.newWalletSubject)
             val confirmationProjectLink = applicationProperties.mail.baseUrl + "/" +
                 applicationProperties.mail.newWalletPath + "/project"
@@ -298,7 +300,7 @@ class MailServiceTest : TestBase() {
         suppose("Service sent mail for new organization wallet created") {
             val platformManager = UserResponse.newBuilder()
                 .setUuid(UUID.randomUUID().toString())
-                .setEmail(testData.receiverMail)
+                .setEmail(testContext.receiverMail)
                 .build()
             Mockito.`when`(userService.getPlatformManagers())
                 .thenReturn(listOf(platformManager))
@@ -309,7 +311,7 @@ class MailServiceTest : TestBase() {
             val mailList = wiser.messages
             val userMail = mailList.first()
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
-            assertThat(userMail.envelopeReceiver).isEqualTo(testData.receiverMail)
+            assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(userMail.mimeMessage.subject).isEqualTo(service.newWalletSubject)
             val confirmationUserLink = applicationProperties.mail.baseUrl + "/" +
                 applicationProperties.mail.newWalletPath + "/groups"
@@ -326,11 +328,12 @@ class MailServiceTest : TestBase() {
             .setLastName("Last")
             .build()
 
-    private class TestData {
+    private class TestContext {
         val receiverMail = "test@test.com"
         val tokenIssuerMail = "demoadmin@ampnet.io"
         val token = "test-token"
         val organizationName = "Organization test"
         val amount = 100L
+        val receiverEmails = listOf("test1@test.com", "test2@test.com")
     }
 }
