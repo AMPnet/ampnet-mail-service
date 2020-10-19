@@ -100,5 +100,5 @@ detekt {
 }
 
 task("qualityCheck") {
-    dependsOn(tasks.ktlintCheck, tasks.detekt)
+    dependsOn(tasks.ktlintCheck, tasks.detekt, tasks.test)
 }
