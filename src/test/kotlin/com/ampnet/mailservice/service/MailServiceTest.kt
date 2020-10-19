@@ -102,7 +102,7 @@ class MailServiceTest : TestBase() {
 
     @Test
     fun mustSetCorrectOrganizationInvitationMail() {
-        suppose("Service send organizationInvitation mail") {
+        suppose("Service sends organizationInvitation e-mails") {
             service.sendOrganizationInvitationMail(testContext.receiverEmails, testContext.organizationName)
         }
 
@@ -334,6 +334,6 @@ class MailServiceTest : TestBase() {
         val token = "test-token"
         val organizationName = "Organization test"
         val amount = 100L
-        val receiverEmails = listOf("test1@test.com", "test2@test.com")
+        val receiverEmails = listOf("test@test.com", "test2@test.com")
     }
 }

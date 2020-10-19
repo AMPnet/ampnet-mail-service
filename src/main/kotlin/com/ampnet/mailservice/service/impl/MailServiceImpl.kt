@@ -115,27 +115,29 @@ class MailServiceImpl(
         sendEmail(mail)
     }
 
-    private fun createMailMessage(to: List<String>, subject: String, text: String): MimeMessage {
-        val mail = mailSender.createMimeMessage()
-        val helper = MimeMessageHelper(mail)
-        helper.setFrom(applicationProperties.mail.sender)
-        helper.setTo(to.toTypedArray())
-        helper.setSubject(subject)
-        helper.setText(text, true)
-        helper.setSentDate(Date())
-        return mail
+    private fun createMailMessage(to: List<String>, subject: String, text: String): List<MimeMessage> {
+        return to.map {
+            val mail = mailSender.createMimeMessage()
+            val helper = MimeMessageHelper(mail)
+            helper.setFrom(applicationProperties.mail.sender)
+            helper.setTo(it)
+            helper.setSubject(subject)
+            helper.setText(text, true)
+            helper.setSentDate(Date())
+            mail
+        }
     }
 
-    private fun sendEmail(mail: MimeMessage) {
+    private fun sendEmail(mails: List<MimeMessage>) {
         if (applicationProperties.mail.enabled.not()) {
-            logger.warn { "Sending email is disabled. \nEmail: ${mail.content}" }
+            logger.warn { "Sending email is disabled. \nEmail: ${mails.first().content}" }
             return
         }
-
-        logger.info { "Sending email: ${mail.subject} " }
-        val recipients = mail.allRecipients.map { it.toString() }
+        logger.info { "Sending email: ${mails.first().subject} " }
+        val recipients = mails.map { it.allRecipients.first().toString() }
         try {
-            mailSender.send(mail)
+            @Suppress("SpreadOperator")
+            mailSender.send(*mails.toTypedArray())
             logger.info { "Successfully sent email to: $recipients" }
         } catch (ex: MailException) {
             logger.error(ex) { "Cannot send email to: $recipients" }

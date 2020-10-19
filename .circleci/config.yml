@@ -28,21 +28,13 @@ jobs:
     steps:
       - checkout
       - gradle-dependencies
-
-      - run: ./gradlew ktlintCheck
-      - run:
-          name: Run all tests
-          command: ./gradlew test
+      - run: ./gradlew qualityCheck
 
   deploy:
     executor: java-executor
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "96:2c:54:e3:52:7c:c8:89:e3:0f:58:44:d8:be:71:fb"
       - checkout
       - gradle-dependencies
-
       - run: ./gradlew build
       - run:
           name: Push new docker image
@@ -54,8 +46,6 @@ workflows:
     jobs:
       - test
       - deploy:
-          requires:
-            - test
           filters:
             branches:
               only: master
