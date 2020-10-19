@@ -26,7 +26,7 @@ const val FROM_CENTS_TO_EUROS = 100.0
 const val TWO_DECIMAL_FORMAT = "%.2f"
 
 @Service
-@Suppress("TooManyFunctions", "SpreadOperator")
+@Suppress("TooManyFunctions")
 class MailServiceImpl(
     private val mailSender: JavaMailSender,
     private val templateService: TemplateService,
@@ -136,6 +136,7 @@ class MailServiceImpl(
         logger.info { "Sending email: ${mails.first().subject} " }
         val recipients = mails.map { it.allRecipients.first().toString() }
         try {
+            @Suppress("SpreadOperator")
             mailSender.send(*mails.toTypedArray())
             logger.info { "Successfully sent email to: $recipients" }
         } catch (ex: MailException) {
