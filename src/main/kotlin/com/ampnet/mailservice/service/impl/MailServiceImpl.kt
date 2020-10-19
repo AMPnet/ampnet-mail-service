@@ -20,14 +20,13 @@ import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
 import java.util.Date
-import javax.mail.MessagingException
 import javax.mail.internet.MimeMessage
 
 const val FROM_CENTS_TO_EUROS = 100.0
 const val TWO_DECIMAL_FORMAT = "%.2f"
 
 @Service
-@Suppress("TooManyFunctions")
+@Suppress("TooManyFunctions", "SpreadOperator")
 class MailServiceImpl(
     private val mailSender: JavaMailSender,
     private val templateService: TemplateService,
@@ -136,11 +135,11 @@ class MailServiceImpl(
         }
         logger.info { "Sending email: ${mails.first().subject} " }
         val recipients = mails.map { it.allRecipients.first().toString() }
-            try {
-                mailSender.send(*mails.toTypedArray())
-                logger.info { "Successfully sent email to: $recipients" }
-            } catch (ex: MailException) {
-                logger.error(ex) { "Cannot send email to: $recipients" }
-            }
+        try {
+            mailSender.send(*mails.toTypedArray())
+            logger.info { "Successfully sent email to: $recipients" }
+        } catch (ex: MailException) {
+            logger.error(ex) { "Cannot send email to: $recipients" }
+        }
     }
 }

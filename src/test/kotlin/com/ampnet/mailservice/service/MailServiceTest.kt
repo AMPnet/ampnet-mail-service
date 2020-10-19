@@ -8,7 +8,6 @@ import com.ampnet.mailservice.service.impl.FROM_CENTS_TO_EUROS
 import com.ampnet.mailservice.service.impl.MailServiceImpl
 import com.ampnet.mailservice.service.impl.TWO_DECIMAL_FORMAT
 import com.ampnet.userservice.proto.UserResponse
-import java.util.Date
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -23,9 +22,6 @@ import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.subethamail.wiser.Wiser
 import java.util.UUID
-import javax.mail.MessagingException
-import javax.mail.internet.MimeMessage
-import org.springframework.mail.javamail.MimeMessageHelper
 
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
