@@ -8,6 +8,7 @@ import com.ampnet.mailservice.service.pojo.MailConfirmationData
 import com.ampnet.mailservice.service.pojo.NewWalletData
 import com.ampnet.mailservice.service.pojo.ResetPasswordData
 import com.ampnet.mailservice.service.pojo.UserData
+import com.ampnet.mailservice.service.pojo.WalletActivatedData
 import com.ampnet.mailservice.service.pojo.WithdrawInfo
 
 interface TemplateService {
@@ -20,4 +21,5 @@ interface TemplateService {
     fun generateTextForWithdrawInfo(data: WithdrawInfo): String
     fun generateTextForNewWallet(data: NewWalletData, walletType: WalletType): String
     fun generateTextForTokenIssuerWithdrawRequest(data: UserData): String
+    fun generateTextForWalletActivated(data: WalletActivatedData, walletType: WalletType): String
 }

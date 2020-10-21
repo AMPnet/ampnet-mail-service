@@ -2,6 +2,7 @@ package com.ampnet.mailservice.service.impl
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.enums.WalletType
+import com.ampnet.mailservice.grpc.projectservice.ProjectService
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.service.MailService
 import com.ampnet.mailservice.service.TemplateService
@@ -12,6 +13,7 @@ import com.ampnet.mailservice.service.pojo.MailConfirmationData
 import com.ampnet.mailservice.service.pojo.NewWalletData
 import com.ampnet.mailservice.service.pojo.ResetPasswordData
 import com.ampnet.mailservice.service.pojo.UserData
+import com.ampnet.mailservice.service.pojo.WalletActivatedData
 import com.ampnet.mailservice.service.pojo.WithdrawInfo
 import com.ampnet.userservice.proto.UserResponse
 import mu.KLogging
@@ -20,6 +22,7 @@ import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
 import java.util.Date
+import java.util.UUID
 import javax.mail.internet.MimeMessage
 
 const val FROM_CENTS_TO_EUROS = 100.0
@@ -31,7 +34,8 @@ class MailServiceImpl(
     private val mailSender: JavaMailSender,
     private val templateService: TemplateService,
     val applicationProperties: ApplicationProperties,
-    private val userService: UserService
+    private val userService: UserService,
+    private val projectservice: ProjectService
 ) : MailService {
 
     companion object : KLogging()
@@ -44,6 +48,7 @@ class MailServiceImpl(
     internal val withdrawSubject = "Withdraw"
     internal val newWalletSubject = "New wallet created"
     internal val manageWithdrawalsSubject = "New withdrawal request"
+    internal val walletActivatedSubject = "Wallet activated"
 
     override fun sendConfirmationMail(email: String, token: String) {
         val link = linkResolver.getConfirmationLink(token)
@@ -115,6 +120,14 @@ class MailServiceImpl(
         sendEmail(mail)
     }
 
+    override fun sendWalletActivatedMail(walletOwner: String, walletType: WalletType) {
+        val dataAndUser = getDataAndUser(walletOwner, walletType)
+        val message = templateService.generateTextForWalletActivated(dataAndUser.first, walletType)
+        val userEmail = userService.getUsers(listOf(dataAndUser.second)).map { it.email }
+        val mail = createMailMessage(userEmail, walletActivatedSubject, message)
+        sendEmail(mail)
+    }
+
     private fun createMailMessage(to: List<String>, subject: String, text: String): List<MimeMessage> {
         return to.map {
             val mail = mailSender.createMimeMessage()
@@ -141,6 +154,25 @@ class MailServiceImpl(
             logger.info { "Successfully sent email to: $recipients" }
         } catch (ex: MailException) {
             logger.error(ex) { "Cannot send email to: $recipients" }
+        }
+    }
+
+    private fun getDataAndUser(walletOwner: String, walletType: WalletType): Pair<WalletActivatedData, String> {
+        return when (walletType) {
+            WalletType.USER -> {
+                val link = linkResolver.getWalletActivatedLink(walletType)
+                Pair(WalletActivatedData(link), walletOwner)
+            }
+            WalletType.PROJECT -> {
+                val project = projectservice.getProject(UUID.fromString(walletOwner))
+                val link = linkResolver.getWalletActivatedLink(walletType, project.organizationUuid, project.uuid)
+                Pair(WalletActivatedData(link, projectName = project.name), project.createdByUser)
+            }
+            WalletType.ORGANIZATION -> {
+                val org = projectservice.getOrganization(UUID.fromString(walletOwner))
+                val link = linkResolver.getWalletActivatedLink(walletType, org.uuid)
+                Pair(WalletActivatedData(link, organizationName = org.name), org.createdByUser)
+            }
         }
     }
 }
