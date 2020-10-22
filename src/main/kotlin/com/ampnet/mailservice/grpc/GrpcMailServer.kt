@@ -3,6 +3,7 @@ package com.ampnet.mailservice.grpc
 import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.exception.GrpcException
 import com.ampnet.mailservice.grpc.userservice.UserService
+import com.ampnet.mailservice.proto.ActivatedWalletRequest
 import com.ampnet.mailservice.proto.DepositInfoRequest
 import com.ampnet.mailservice.proto.DepositRequest
 import com.ampnet.mailservice.proto.Empty
@@ -19,6 +20,7 @@ import io.grpc.Status
 import io.grpc.stub.StreamObserver
 import mu.KLogging
 import net.devh.boot.grpc.server.service.GrpcService
+import com.ampnet.mailservice.proto.WalletType as WalletTypeProto
 @GrpcService
 @Suppress("TooManyFunctions")
 class GrpcMailServer(
@@ -82,6 +84,11 @@ class GrpcMailServer(
         mailService.sendNewWalletNotificationMail(getWalletType(request.type))
     }
 
+    override fun sendWalletActivated(request: ActivatedWalletRequest, responseObserver: StreamObserver<Empty>) {
+        logger.debug { "Received gRPC request SendNewWalletActivated for wallet type: ${request.type}" }
+        mailService.sendWalletActivatedMail(request.walletOwner, getWalletType(request.type))
+    }
+
     private fun sendMailToUser(
         uuid: String,
         observer: StreamObserver<Empty>,
@@ -118,11 +125,12 @@ class GrpcMailServer(
                 .asRuntimeException()
         )
     }
-    private fun getWalletType(type: WalletTypeRequest.Type): WalletType =
+
+    private fun getWalletType(type: WalletTypeProto): WalletType =
         when (type) {
-            WalletTypeRequest.Type.USER -> WalletType.USER
-            WalletTypeRequest.Type.PROJECT -> WalletType.PROJECT
-            WalletTypeRequest.Type.ORGANIZATION -> WalletType.ORGANIZATION
+            WalletTypeProto.USER -> WalletType.USER
+            WalletTypeProto.PROJECT -> WalletType.PROJECT
+            WalletTypeProto.ORGANIZATION -> WalletType.ORGANIZATION
             else -> throw IllegalArgumentException("Invalid wallet type")
         }
 }

@@ -9,6 +9,7 @@ import com.ampnet.mailservice.service.pojo.MailConfirmationData
 import com.ampnet.mailservice.service.pojo.NewWalletData
 import com.ampnet.mailservice.service.pojo.ResetPasswordData
 import com.ampnet.mailservice.service.pojo.UserData
+import com.ampnet.mailservice.service.pojo.WalletActivatedData
 import com.ampnet.mailservice.service.pojo.WithdrawInfo
 import com.github.mustachejava.DefaultMustacheFactory
 import com.github.mustachejava.Mustache
@@ -53,6 +54,15 @@ class TemplateServiceImpl : TemplateService {
     private val organizationWalletTemplate: Mustache by lazy {
         mustacheFactory.compile("mustache/organization-wallet-template.mustache")
     }
+    private val userWalletActivatedTemplate: Mustache by lazy {
+        mustacheFactory.compile("mustache/user-wallet-activated-template.mustache")
+    }
+    private val projectWalletActivatedTemplate: Mustache by lazy {
+        mustacheFactory.compile("mustache/project-wallet-activated-template.mustache")
+    }
+    private val organizationWalletActivatedTemplate: Mustache by lazy {
+        mustacheFactory.compile("mustache/organization-wallet-activated-template.mustache")
+    }
 
     override fun generateTextForMailConfirmation(data: MailConfirmationData): String {
         return fillTemplate(mailConfirmationTemplate, data)
@@ -92,6 +102,14 @@ class TemplateServiceImpl : TemplateService {
 
     override fun generateTextForTokenIssuerWithdrawRequest(data: UserData): String {
         return fillTemplate(tokenIssuerWithdrawRequestTemplate, data)
+    }
+
+    override fun generateTextForWalletActivated(data: WalletActivatedData, walletType: WalletType): String {
+        return when (walletType) {
+            WalletType.USER -> fillTemplate(userWalletActivatedTemplate, data)
+            WalletType.PROJECT -> fillTemplate(projectWalletActivatedTemplate, data)
+            WalletType.ORGANIZATION -> fillTemplate(organizationWalletActivatedTemplate, data)
+        }
     }
 
     private fun fillTemplate(template: Mustache, data: Any): String {

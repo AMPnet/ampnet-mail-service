@@ -18,10 +18,13 @@ class MailProperties {
     var organizationInvitationsPath: String = "dash/manage_groups"
     var newWalletPath: String = "dash/activation"
     var manageWithdrawalsPath: String = "dash/manage_withdrawals"
+    var walletActivatedPath: String = "dash/wallet"
+    var manageProjectPath: String = "manage_project"
     var enabled: Boolean = false
 }
 
 @Suppress("MagicNumber")
 class GrpcProperties {
-    var userServiceTimeout: Long = 1000
+    var userServiceTimeout: Long = 10000
+    var projectServiceTimeout: Long = 10000
 }

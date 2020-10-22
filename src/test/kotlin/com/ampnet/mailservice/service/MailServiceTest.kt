@@ -3,10 +3,13 @@ package com.ampnet.mailservice.service
 import com.ampnet.mailservice.TestBase
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.enums.WalletType
+import com.ampnet.mailservice.grpc.projectservice.ProjectService
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.service.impl.FROM_CENTS_TO_EUROS
 import com.ampnet.mailservice.service.impl.MailServiceImpl
 import com.ampnet.mailservice.service.impl.TWO_DECIMAL_FORMAT
+import com.ampnet.projectservice.proto.OrganizationResponse
+import com.ampnet.projectservice.proto.ProjectResponse
 import com.ampnet.userservice.proto.UserResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -39,6 +42,7 @@ class MailServiceTest : TestBase() {
     private lateinit var applicationProperties: ApplicationProperties
 
     private val userService = Mockito.mock(UserService::class.java)
+    private val projectService = Mockito.mock(ProjectService::class.java)
 
     private lateinit var service: MailServiceImpl
     private lateinit var wiser: Wiser
@@ -51,7 +55,9 @@ class MailServiceTest : TestBase() {
         wiser = Wiser(0)
         wiser.start()
         mailSender.port = wiser.server.port
-        service = MailServiceImpl(mailSender, templateService, applicationProperties, userService)
+        service = MailServiceImpl(
+            mailSender, templateService, applicationProperties, userService, projectService
+        )
     }
 
     @AfterEach
@@ -319,6 +325,85 @@ class MailServiceTest : TestBase() {
         }
     }
 
+    @Test
+    fun mustSetCorrectSendUserWalletActivatedMail() {
+        suppose("Service sent mail for user wallet activated") {
+            val user = generateUserResponse(testContext.receiverMail)
+            Mockito.`when`(userService.getUsers(listOf(user.uuid.toString())))
+                .thenReturn(listOf(user))
+            service.sendWalletActivatedMail(user.uuid, WalletType.USER)
+        }
+
+        verify("The mail is sent to right receiver and has correct data") {
+            val mailList = wiser.messages
+            val userMail = mailList.first()
+            assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
+            assertThat(userMail.mimeMessage.subject).isEqualTo(service.walletActivatedSubject)
+            val confirmationUserLink = applicationProperties.mail.baseUrl + "/" + applicationProperties.mail.walletActivatedPath
+            assertThat(userMail.mimeMessage.content.toString()).contains(confirmationUserLink)
+        }
+    }
+
+    @Test
+    fun mustSetCorrectSendProjectWalletActivatedMail() {
+        suppose("Project service returns project") {
+            testContext.walletOwner = UUID.randomUUID().toString()
+            testContext.project = generateProjectResponse(testContext.walletOwner)
+            Mockito.`when`(projectService.getProject(UUID.fromString(testContext.walletOwner)))
+                .thenReturn(testContext.project)
+        }
+        suppose("User service returns user") {
+            val user = generateUserResponse(testContext.receiverMail)
+            Mockito.`when`(userService.getUsers(listOf(testContext.project.createdByUser)))
+                .thenReturn(listOf(user))
+        }
+        suppose("Service sent mail for project wallet activated") {
+            service.sendWalletActivatedMail(testContext.walletOwner, WalletType.PROJECT)
+        }
+
+        verify("The mail is sent to right receiver and has correct data") {
+            val mailList = wiser.messages
+            val userMail = mailList.first()
+            assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
+            assertThat(userMail.mimeMessage.subject).isEqualTo(service.walletActivatedSubject)
+            val confirmationUserLink = applicationProperties.mail.baseUrl + "/" +
+                applicationProperties.mail.organizationInvitationsPath + "/" + testContext.project.organizationUuid +
+                "/" + applicationProperties.mail.manageProjectPath + "/" + testContext.project.uuid
+            assertThat(userMail.mimeMessage.content.toString()).contains(confirmationUserLink)
+        }
+    }
+
+    @Test
+    fun mustSetCorrectSendOrganizationWalletActivatedMail() {
+        suppose("Project service returns organization") {
+            testContext.walletOwner = UUID.randomUUID().toString()
+            testContext.organization = generateOrganizationResponse(testContext.walletOwner)
+            Mockito.`when`(projectService.getOrganization(UUID.fromString(testContext.walletOwner)))
+                .thenReturn(testContext.organization)
+        }
+        suppose("User service returns user") {
+            val user = generateUserResponse(testContext.receiverMail)
+            Mockito.`when`(userService.getUsers(listOf(testContext.organization.createdByUser)))
+                .thenReturn(listOf(user))
+        }
+        suppose("Service sent mail for organization wallet activated") {
+            service.sendWalletActivatedMail(testContext.walletOwner, WalletType.ORGANIZATION)
+        }
+
+        verify("The mail is sent to right receiver and has correct data") {
+            val mailList = wiser.messages
+            val userMail = mailList.first()
+            assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
+            assertThat(userMail.mimeMessage.subject).isEqualTo(service.walletActivatedSubject)
+            val confirmationUserLink = applicationProperties.mail.baseUrl + "/" +
+                applicationProperties.mail.organizationInvitationsPath + "/" + testContext.organization.uuid
+            assertThat(userMail.mimeMessage.content.toString()).contains(confirmationUserLink)
+        }
+    }
+
     private fun generateUserResponse(email: String): UserResponse =
         UserResponse.newBuilder()
             .setUuid(UUID.randomUUID().toString())
@@ -328,6 +413,21 @@ class MailServiceTest : TestBase() {
             .setLastName("Last")
             .build()
 
+    private fun generateProjectResponse(createdBy: String): ProjectResponse =
+        ProjectResponse.newBuilder()
+            .setUuid(UUID.randomUUID().toString())
+            .setCreatedByUser(createdBy)
+            .setName("Duimane Investement")
+            .setOrganizationUuid(UUID.randomUUID().toString())
+            .build()
+
+    private fun generateOrganizationResponse(createdBy: String): OrganizationResponse =
+        OrganizationResponse.newBuilder()
+            .setUuid(UUID.randomUUID().toString())
+            .setCreatedByUser(createdBy)
+            .setName("Duimane Investement Organization")
+            .build()
+
     private class TestContext {
         val receiverMail = "test@test.com"
         val tokenIssuerMail = "demoadmin@ampnet.io"
@@ -335,5 +435,8 @@ class MailServiceTest : TestBase() {
         val organizationName = "Organization test"
         val amount = 100L
         val receiverEmails = listOf("test@test.com", "test2@test.com")
+        lateinit var walletOwner: String
+        lateinit var project: ProjectResponse
+        lateinit var organization: OrganizationResponse
     }
 }
