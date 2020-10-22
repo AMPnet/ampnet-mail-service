@@ -121,9 +121,9 @@ class MailServiceImpl(
     }
 
     override fun sendWalletActivatedMail(walletOwner: String, walletType: WalletType) {
-        val dataAndUser = getDataAndUser(walletOwner, walletType)
-        val message = templateService.generateTextForWalletActivated(dataAndUser.first, walletType)
-        val userEmail = userService.getUsers(listOf(dataAndUser.second)).map { it.email }
+        val (walletActivatedData, userUUid) = getDataAndUser(walletOwner, walletType)
+        val message = templateService.generateTextForWalletActivated(walletActivatedData, walletType)
+        val userEmail = userService.getUsers(listOf(userUUid)).map { it.email }
         val mail = createMailMessage(userEmail, walletActivatedSubject, message)
         sendEmail(mail)
     }

@@ -25,6 +25,6 @@ class MailProperties {
 
 @Suppress("MagicNumber")
 class GrpcProperties {
-    var userServiceTimeout: Long = 1000
-    var projectServiceTimeout: Long = 1000
+    var userServiceTimeout: Long = 10000
+    var projectServiceTimeout: Long = 10000
 }
