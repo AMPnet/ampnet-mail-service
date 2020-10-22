@@ -49,6 +49,7 @@ class MailServiceImpl(
     internal val newWalletSubject = "New wallet created"
     internal val manageWithdrawalsSubject = "New withdrawal request"
     internal val walletActivatedSubject = "Wallet activated"
+    internal val failedDeliveryMailSubject = "Email delivery failed"
 
     override fun sendConfirmationMail(email: String, token: String) {
         val link = linkResolver.getConfirmationLink(token)
@@ -64,11 +65,17 @@ class MailServiceImpl(
         sendEmail(mail)
     }
 
-    override fun sendOrganizationInvitationMail(email: List<String>, organizationName: String) {
+    override fun sendOrganizationInvitationMail(email: List<String>, organizationName: String, senderEmail: String) {
         val data = InvitationData(organizationName, linkResolver.organizationInvitesLink)
         val message = templateService.generateTextForInvitation(data)
         val mail = createMailMessage(email, invitationMailSubject, message)
-        sendEmail(mail)
+        sendEmail(mail) { messages ->
+            val failedDeliveryMessage =
+                templateService.generateTextForFailedDeliveryMessage(messages.map { it.allRecipients }.joinToString())
+            val failedDeliveryMail =
+                createMailMessage(listOf(senderEmail), failedDeliveryMailSubject, failedDeliveryMessage).first()
+            sendEmailOnFailedDelivery(failedDeliveryMail)
+        }
     }
 
     override fun sendDepositRequestMail(user: UserResponse, amount: Long) {
@@ -141,19 +148,34 @@ class MailServiceImpl(
         }
     }
 
-    private fun sendEmail(mails: List<MimeMessage>) {
+    private fun sendEmail(mails: List<MimeMessage>, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
         if (applicationProperties.mail.enabled.not()) {
             logger.warn { "Sending email is disabled. \nEmail: ${mails.first().content}" }
             return
         }
-        logger.info { "Sending email: ${mails.first().subject} " }
-        val recipients = mails.map { it.allRecipients.first().toString() }
+        logger.info { "Sending email: ${mails.first().subject}" }
+        val failed = mails.mapNotNull {
+            try {
+                mailSender.send(it)
+                logger.info { "Successfully sent email to: ${it.allRecipients}" }
+                null
+            } catch (ex: MailException) {
+                logger.error(ex) { "Cannot send email to: ${it.allRecipients}" }
+                it
+            }
+        }
+        if (failed.isNotEmpty()) {
+            notifySenderOnError.invoke(failed)
+        }
+    }
+
+    private fun sendEmailOnFailedDelivery(mail: MimeMessage) {
+        logger.info { "Sending failed delivery email: ${mail.subject}" }
         try {
-            @Suppress("SpreadOperator")
-            mailSender.send(*mails.toTypedArray())
-            logger.info { "Successfully sent email to: $recipients" }
+            mailSender.send(mail)
+            logger.info { "Successfully sent failed delivery email to sender: ${mail.sender}" }
         } catch (ex: MailException) {
-            logger.error(ex) { "Cannot send email to: $recipients" }
+            logger.error(ex) { "Cannot send failed delivery email to sender: ${mail.sender}" }
         }
     }
 

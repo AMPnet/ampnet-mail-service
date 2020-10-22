@@ -11,6 +11,7 @@ import com.ampnet.mailservice.service.pojo.UserData
 import com.ampnet.mailservice.service.pojo.WalletActivatedData
 import com.ampnet.mailservice.service.pojo.WithdrawInfo
 
+@Suppress("TooManyFunctions")
 interface TemplateService {
     fun generateTextForMailConfirmation(data: MailConfirmationData): String
     fun generateTextForResetPassword(data: ResetPasswordData): String
@@ -22,4 +23,5 @@ interface TemplateService {
     fun generateTextForNewWallet(data: NewWalletData, walletType: WalletType): String
     fun generateTextForTokenIssuerWithdrawRequest(data: UserData): String
     fun generateTextForWalletActivated(data: WalletActivatedData, walletType: WalletType): String
+    fun generateTextForFailedDeliveryMessage(failedRecipients: String): String
 }

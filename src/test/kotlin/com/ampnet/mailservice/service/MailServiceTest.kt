@@ -109,7 +109,9 @@ class MailServiceTest : TestBase() {
     @Test
     fun mustSetCorrectOrganizationInvitationMail() {
         suppose("Service sends organizationInvitation e-mails") {
-            service.sendOrganizationInvitationMail(testContext.receiverEmails, testContext.organizationName)
+            service.sendOrganizationInvitationMail(
+                testContext.receiverEmails, testContext.organizationName, "sender@email.com"
+            )
         }
 
         verify("The mail is sent to right receiver and has correct data") {
