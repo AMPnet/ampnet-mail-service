@@ -23,6 +23,7 @@ import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
 import java.util.Date
 import java.util.UUID
+import javax.mail.MessagingException
 import javax.mail.internet.MimeMessage
 
 const val FROM_CENTS_TO_EUROS = 100.0
@@ -54,26 +55,27 @@ class MailServiceImpl(
     override fun sendConfirmationMail(email: String, token: String) {
         val link = linkResolver.getConfirmationLink(token)
         val message = templateService.generateTextForMailConfirmation(MailConfirmationData(link))
-        val mail = createMailMessage(listOf(email), confirmationMailSubject, message)
-        sendEmail(mail)
+        val mail = createMailMessages(listOf(email), confirmationMailSubject, message)
+        sendEmails(mail)
     }
 
     override fun sendResetPasswordMail(email: String, token: String) {
         val link = linkResolver.getResetPasswordLink(token)
         val message = templateService.generateTextForResetPassword(ResetPasswordData(link))
-        val mail = createMailMessage(listOf(email), resetPasswordSubject, message)
-        sendEmail(mail)
+        val mail = createMailMessages(listOf(email), resetPasswordSubject, message)
+        sendEmails(mail)
     }
 
     override fun sendOrganizationInvitationMail(email: List<String>, organizationName: String, senderEmail: String) {
         val data = InvitationData(organizationName, linkResolver.organizationInvitesLink)
         val message = templateService.generateTextForInvitation(data)
-        val mail = createMailMessage(email, invitationMailSubject, message)
-        sendEmail(mail) { messages ->
-            val failedDeliveryMessage =
-                templateService.generateTextForFailedDeliveryMessage(messages.map { it.allRecipients }.joinToString())
+        val mails = createMailMessages(email, invitationMailSubject, message)
+        sendEmails(mails) { failedMails ->
+            val failedDeliveryMessage = templateService.generateTextForFailedDeliveryMessage(
+                failedMails.map { it.allRecipients }.joinToString()
+            )
             val failedDeliveryMail =
-                createMailMessage(listOf(senderEmail), failedDeliveryMailSubject, failedDeliveryMessage).first()
+                createMailMessages(listOf(senderEmail), failedDeliveryMailSubject, failedDeliveryMessage).first()
             sendEmailOnFailedDelivery(failedDeliveryMail)
         }
     }
@@ -81,15 +83,15 @@ class MailServiceImpl(
     override fun sendDepositRequestMail(user: UserResponse, amount: Long) {
         val data = AmountData((TWO_DECIMAL_FORMAT.format(amount / FROM_CENTS_TO_EUROS)))
         val message = templateService.generateTextForDepositRequest(data)
-        val mail = createMailMessage(listOf(user.email), depositSubject, message)
-        sendEmail(mail)
+        val mail = createMailMessages(listOf(user.email), depositSubject, message)
+        sendEmails(mail)
     }
 
     override fun sendDepositInfoMail(user: UserResponse, minted: Boolean) {
         val data = DepositInfo(minted)
         val message = templateService.generateTextForDepositInfo(data)
-        val mail = createMailMessage(listOf(user.email), depositSubject, message)
-        sendEmail(mail)
+        val mail = createMailMessages(listOf(user.email), depositSubject, message)
+        sendEmails(mail)
     }
 
     override fun sendWithdrawRequestMail(user: UserResponse, amount: Long) {
@@ -101,71 +103,80 @@ class MailServiceImpl(
         )
         val tokenIssuersMessage = templateService.generateTextForTokenIssuerWithdrawRequest(userData)
         val tokenIssuersMail =
-            createMailMessage(tokenIssuers.map { it.email }, manageWithdrawalsSubject, tokenIssuersMessage)
+            createMailMessages(tokenIssuers.map { it.email }, manageWithdrawalsSubject, tokenIssuersMessage)
 
         val userMessage = templateService.generateTextForWithdrawRequest(
             AmountData(TWO_DECIMAL_FORMAT.format(amount / FROM_CENTS_TO_EUROS))
         )
-        val userMail = createMailMessage(listOf(user.email), withdrawSubject, userMessage)
+        val userMail = createMailMessages(listOf(user.email), withdrawSubject, userMessage)
 
-        sendEmail(tokenIssuersMail)
-        sendEmail(userMail)
+        sendEmails(tokenIssuersMail)
+        sendEmails(userMail)
     }
 
     override fun sendWithdrawInfoMail(user: UserResponse, burned: Boolean) {
         val data = WithdrawInfo(burned)
         val message = templateService.generateTextForWithdrawInfo(data)
-        val mail = createMailMessage(listOf(user.email), withdrawSubject, message)
-        sendEmail(mail)
+        val mail = createMailMessages(listOf(user.email), withdrawSubject, message)
+        sendEmails(mail)
     }
 
     override fun sendNewWalletNotificationMail(walletType: WalletType) {
         val link = linkResolver.getNewWalletLink(walletType)
         val message = templateService.generateTextForNewWallet(NewWalletData(link), walletType)
         val platformManagers = userService.getPlatformManagers()
-        val mail = createMailMessage(platformManagers.map { it.email }, newWalletSubject, message)
-        sendEmail(mail)
+        val mail = createMailMessages(platformManagers.map { it.email }, newWalletSubject, message)
+        sendEmails(mail)
     }
 
     override fun sendWalletActivatedMail(walletOwner: String, walletType: WalletType) {
         val (walletActivatedData, userUUid) = getDataAndUser(walletOwner, walletType)
         val message = templateService.generateTextForWalletActivated(walletActivatedData, walletType)
         val userEmail = userService.getUsers(listOf(userUUid)).map { it.email }
-        val mail = createMailMessage(userEmail, walletActivatedSubject, message)
-        sendEmail(mail)
+        val mail = createMailMessages(userEmail, walletActivatedSubject, message)
+        sendEmails(mail)
     }
 
-    private fun createMailMessage(to: List<String>, subject: String, text: String): List<MimeMessage> {
-        return to.map {
-            val mail = mailSender.createMimeMessage()
-            val helper = MimeMessageHelper(mail)
-            helper.setFrom(applicationProperties.mail.sender)
-            helper.setTo(it)
-            helper.setSubject(subject)
-            helper.setText(text, true)
-            helper.setSentDate(Date())
-            mail
-        }
+    private fun createMailMessages(to: List<String>, subject: String, text: String): List<MimeMessage> {
+        return to.mapNotNull { createMimeMessage(it, subject, text) }
     }
 
-    private fun sendEmail(mails: List<MimeMessage>, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
+    private fun sendEmails(mails: List<MimeMessage>, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
         if (applicationProperties.mail.enabled.not()) {
             logger.warn { "Sending email is disabled. \nEmail: ${mails.first().content}" }
             return
         }
         logger.info { "Sending email: ${mails.first().subject}" }
-        val failed = mails.mapNotNull {
-            try {
-                mailSender.send(it)
-                logger.info { "Successfully sent email to: ${it.allRecipients}" }
-                null
-            } catch (ex: MailException) {
-                logger.error(ex) { "Cannot send email to: ${it.allRecipients}" }
-                it
-            }
-        }
+        val failed = mails.filter { sendEmail(it).not() }
         if (failed.isNotEmpty()) {
             notifySenderOnError.invoke(failed)
+        }
+    }
+
+    private fun sendEmail(mail: MimeMessage): Boolean {
+        return try {
+            mailSender.send(mail)
+            logger.info { "Successfully sent email to: ${mail.allRecipients}" }
+            true
+        } catch (ex: MailException) {
+            logger.warn { "Cannot send email to: ${mail.allRecipients}" }
+            false
+        }
+    }
+
+    private fun createMimeMessage(to: String, subject: String, text: String): MimeMessage? {
+        val mail = mailSender.createMimeMessage()
+        val helper = MimeMessageHelper(mail)
+        return try {
+            helper.setFrom(applicationProperties.mail.sender)
+            helper.setTo(to)
+            helper.setSubject(subject)
+            helper.setText(text, true)
+            helper.setSentDate(Date())
+            mail
+        } catch (ex: MessagingException) {
+            logger.warn { "Cannot create mail from: $to" }
+            null
         }
     }
 
