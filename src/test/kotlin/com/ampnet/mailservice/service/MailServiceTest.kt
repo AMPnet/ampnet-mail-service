@@ -406,6 +406,22 @@ class MailServiceTest : TestBase() {
         }
     }
 
+    @Test()
+    fun mustNotSendOrganizationInvitationMailIfRecipientEmailIsIncorrect() {
+        suppose("Service sends organizationInvitation to incorrect and correct email") {
+            val correctEmail = "test@email.com"
+            val incorrectEmail = "fff5555"
+            service.sendOrganizationInvitationMail(
+                listOf(correctEmail, incorrectEmail), testContext.organizationName, "sender@email.com"
+            )
+        }
+
+        verify("The mail is only sent to right receiver") {
+            val mailList = wiser.messages
+            assertThat(mailList).hasSize(1)
+        }
+    }
+
     private fun generateUserResponse(email: String): UserResponse =
         UserResponse.newBuilder()
             .setUuid(UUID.randomUUID().toString())

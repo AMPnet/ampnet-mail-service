@@ -55,27 +55,27 @@ class MailServiceImpl(
     override fun sendConfirmationMail(email: String, token: String) {
         val link = linkResolver.getConfirmationLink(token)
         val message = templateService.generateTextForMailConfirmation(MailConfirmationData(link))
-        val mail = createMailMessages(listOf(email), confirmationMailSubject, message)
+        val mail = createMailMessage(listOf(email), confirmationMailSubject, message)
         sendEmails(mail)
     }
 
     override fun sendResetPasswordMail(email: String, token: String) {
         val link = linkResolver.getResetPasswordLink(token)
         val message = templateService.generateTextForResetPassword(ResetPasswordData(link))
-        val mail = createMailMessages(listOf(email), resetPasswordSubject, message)
+        val mail = createMailMessage(listOf(email), resetPasswordSubject, message)
         sendEmails(mail)
     }
 
     override fun sendOrganizationInvitationMail(email: List<String>, organizationName: String, senderEmail: String) {
         val data = InvitationData(organizationName, linkResolver.organizationInvitesLink)
         val message = templateService.generateTextForInvitation(data)
-        val mails = createMailMessages(email, invitationMailSubject, message)
+        val mails = createMailMessage(email, invitationMailSubject, message)
         sendEmails(mails) { failedMails ->
             val failedDeliveryMessage = templateService.generateTextForFailedDeliveryMessage(
                 failedMails.map { it.allRecipients }.joinToString()
             )
             val failedDeliveryMail =
-                createMailMessages(listOf(senderEmail), failedDeliveryMailSubject, failedDeliveryMessage).first()
+                createMailMessage(listOf(senderEmail), failedDeliveryMailSubject, failedDeliveryMessage).first()
             sendEmailOnFailedDelivery(failedDeliveryMail)
         }
     }
@@ -83,14 +83,14 @@ class MailServiceImpl(
     override fun sendDepositRequestMail(user: UserResponse, amount: Long) {
         val data = AmountData((TWO_DECIMAL_FORMAT.format(amount / FROM_CENTS_TO_EUROS)))
         val message = templateService.generateTextForDepositRequest(data)
-        val mail = createMailMessages(listOf(user.email), depositSubject, message)
+        val mail = createMailMessage(listOf(user.email), depositSubject, message)
         sendEmails(mail)
     }
 
     override fun sendDepositInfoMail(user: UserResponse, minted: Boolean) {
         val data = DepositInfo(minted)
         val message = templateService.generateTextForDepositInfo(data)
-        val mail = createMailMessages(listOf(user.email), depositSubject, message)
+        val mail = createMailMessage(listOf(user.email), depositSubject, message)
         sendEmails(mail)
     }
 
@@ -103,12 +103,12 @@ class MailServiceImpl(
         )
         val tokenIssuersMessage = templateService.generateTextForTokenIssuerWithdrawRequest(userData)
         val tokenIssuersMail =
-            createMailMessages(tokenIssuers.map { it.email }, manageWithdrawalsSubject, tokenIssuersMessage)
+            createMailMessage(tokenIssuers.map { it.email }, manageWithdrawalsSubject, tokenIssuersMessage)
 
         val userMessage = templateService.generateTextForWithdrawRequest(
             AmountData(TWO_DECIMAL_FORMAT.format(amount / FROM_CENTS_TO_EUROS))
         )
-        val userMail = createMailMessages(listOf(user.email), withdrawSubject, userMessage)
+        val userMail = createMailMessage(listOf(user.email), withdrawSubject, userMessage)
 
         sendEmails(tokenIssuersMail)
         sendEmails(userMail)
@@ -117,7 +117,7 @@ class MailServiceImpl(
     override fun sendWithdrawInfoMail(user: UserResponse, burned: Boolean) {
         val data = WithdrawInfo(burned)
         val message = templateService.generateTextForWithdrawInfo(data)
-        val mail = createMailMessages(listOf(user.email), withdrawSubject, message)
+        val mail = createMailMessage(listOf(user.email), withdrawSubject, message)
         sendEmails(mail)
     }
 
@@ -125,7 +125,7 @@ class MailServiceImpl(
         val link = linkResolver.getNewWalletLink(walletType)
         val message = templateService.generateTextForNewWallet(NewWalletData(link), walletType)
         val platformManagers = userService.getPlatformManagers()
-        val mail = createMailMessages(platformManagers.map { it.email }, newWalletSubject, message)
+        val mail = createMailMessage(platformManagers.map { it.email }, newWalletSubject, message)
         sendEmails(mail)
     }
 
@@ -133,12 +133,27 @@ class MailServiceImpl(
         val (walletActivatedData, userUUid) = getDataAndUser(walletOwner, walletType)
         val message = templateService.generateTextForWalletActivated(walletActivatedData, walletType)
         val userEmail = userService.getUsers(listOf(userUUid)).map { it.email }
-        val mail = createMailMessages(userEmail, walletActivatedSubject, message)
+        val mail = createMailMessage(userEmail, walletActivatedSubject, message)
         sendEmails(mail)
     }
 
-    private fun createMailMessages(to: List<String>, subject: String, text: String): List<MimeMessage> {
-        return to.mapNotNull { createMimeMessage(it, subject, text) }
+    private fun createMailMessage(to: List<String>, subject: String, text: String): List<MimeMessage> {
+        return to.mapNotNull {
+            val mail = mailSender.createMimeMessage()
+            val helper = MimeMessageHelper(mail)
+            try {
+                helper.isValidateAddresses = true
+                helper.setFrom(applicationProperties.mail.sender)
+                helper.setTo(it)
+                helper.setSubject(subject)
+                helper.setText(text, true)
+                helper.setSentDate(Date())
+                mail
+            } catch (ex: MessagingException) {
+                logger.warn { "Cannot create mail from: $to" }
+                null
+            }
+        }
     }
 
     private fun sendEmails(mails: List<MimeMessage>, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
@@ -164,29 +179,13 @@ class MailServiceImpl(
         }
     }
 
-    private fun createMimeMessage(to: String, subject: String, text: String): MimeMessage? {
-        val mail = mailSender.createMimeMessage()
-        val helper = MimeMessageHelper(mail)
-        return try {
-            helper.setFrom(applicationProperties.mail.sender)
-            helper.setTo(to)
-            helper.setSubject(subject)
-            helper.setText(text, true)
-            helper.setSentDate(Date())
-            mail
-        } catch (ex: MessagingException) {
-            logger.warn { "Cannot create mail from: $to" }
-            null
-        }
-    }
-
     private fun sendEmailOnFailedDelivery(mail: MimeMessage) {
         logger.info { "Sending failed delivery email: ${mail.subject}" }
         try {
             mailSender.send(mail)
             logger.info { "Successfully sent failed delivery email to sender: ${mail.sender}" }
         } catch (ex: MailException) {
-            logger.error(ex) { "Cannot send failed delivery email to sender: ${mail.sender}" }
+            logger.warn(ex) { "Cannot send failed delivery email to sender: ${mail.sender}" }
         }
     }
 
