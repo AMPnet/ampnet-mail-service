@@ -36,7 +36,7 @@ class MailServiceImpl(
     private val templateService: TemplateService,
     val applicationProperties: ApplicationProperties,
     private val userService: UserService,
-    private val projectservice: ProjectService
+    private val projectService: ProjectService
 ) : MailService {
 
     companion object : KLogging()
@@ -95,7 +95,7 @@ class MailServiceImpl(
     }
 
     override fun sendWithdrawRequestMail(user: UserResponse, amount: Long) {
-        val tokenIssuers = userService.getTokenIssuers()
+        val tokenIssuers = userService.getTokenIssuers(user.coop)
         val link = linkResolver.manageWithdrawalsLink
         val userData = UserData(
             user.firstName, user.lastName,
@@ -121,10 +121,10 @@ class MailServiceImpl(
         sendEmails(mail)
     }
 
-    override fun sendNewWalletNotificationMail(walletType: WalletType) {
+    override fun sendNewWalletNotificationMail(walletType: WalletType, coop: String) {
         val link = linkResolver.getNewWalletLink(walletType)
         val message = templateService.generateTextForNewWallet(NewWalletData(link), walletType)
-        val platformManagers = userService.getPlatformManagers()
+        val platformManagers = userService.getPlatformManagers(coop)
         val mail = createMailMessage(platformManagers.map { it.email }, newWalletSubject, message)
         sendEmails(mail)
     }
@@ -196,12 +196,12 @@ class MailServiceImpl(
                 Pair(WalletActivatedData(link), walletOwner)
             }
             WalletType.PROJECT -> {
-                val project = projectservice.getProject(UUID.fromString(walletOwner))
+                val project = projectService.getProject(UUID.fromString(walletOwner))
                 val link = linkResolver.getWalletActivatedLink(walletType, project.organizationUuid, project.uuid)
                 Pair(WalletActivatedData(link, projectName = project.name), project.createdByUser)
             }
             WalletType.ORGANIZATION -> {
-                val org = projectservice.getOrganization(UUID.fromString(walletOwner))
+                val org = projectService.getOrganization(UUID.fromString(walletOwner))
                 val link = linkResolver.getWalletActivatedLink(walletType, org.uuid)
                 Pair(WalletActivatedData(link, organizationName = org.name), org.createdByUser)
             }

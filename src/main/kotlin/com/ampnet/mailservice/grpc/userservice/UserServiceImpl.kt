@@ -2,7 +2,7 @@ package com.ampnet.mailservice.grpc.userservice
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.exception.GrpcException
-import com.ampnet.userservice.proto.Empty
+import com.ampnet.userservice.proto.CoopRequest
 import com.ampnet.userservice.proto.GetUsersRequest
 import com.ampnet.userservice.proto.UserResponse
 import com.ampnet.userservice.proto.UserServiceGrpc
@@ -44,12 +44,12 @@ class UserServiceImpl(
     }
 
     @Throws(GrpcException::class)
-    override fun getPlatformManagers(): List<UserResponse> {
-        logger.debug { "Fetching Platform Managers!" }
+    override fun getPlatformManagers(coop: String): List<UserResponse> {
+        logger.debug { "Fetching Platform Managers for coop: $coop" }
         try {
             val usersResponse = serviceBlockingStub
                 .withDeadlineAfter(applicationProperties.grpc.userServiceTimeout, TimeUnit.MILLISECONDS)
-                .getPlatformManagers(Empty.getDefaultInstance())
+                .getPlatformManagers(getCoopRequest(coop))
                 .usersList
             logger.debug { "Users response: $usersResponse" }
             return usersResponse
@@ -58,17 +58,23 @@ class UserServiceImpl(
         }
     }
 
-    override fun getTokenIssuers(): List<UserResponse> {
-        logger.debug { "Fetching Token Issuers!" }
+    override fun getTokenIssuers(coop: String): List<UserResponse> {
+        logger.debug { "Fetching Token Issuers for coop: $coop" }
         try {
             val usersResponse = serviceBlockingStub
                 .withDeadlineAfter(applicationProperties.grpc.userServiceTimeout, TimeUnit.MILLISECONDS)
-                .getTokenIssuers(Empty.getDefaultInstance())
+                .getTokenIssuers(getCoopRequest(coop))
                 .usersList
             logger.debug { "Users response: $usersResponse" }
             return usersResponse
         } catch (ex: StatusRuntimeException) {
             throw GrpcException("Could not get Platform Managers from user service", ex)
         }
+    }
+
+    fun getCoopRequest(coop: String): CoopRequest {
+        return CoopRequest.newBuilder()
+            .setCoop(coop)
+            .build()
     }
 }

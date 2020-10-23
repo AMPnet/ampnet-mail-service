@@ -48,6 +48,7 @@ class MailServiceTest : TestBase() {
     private lateinit var wiser: Wiser
     private var defaultMailPort: Int = 0
     private val testContext = TestContext()
+    private val coop = "ampnet-test"
 
     @BeforeEach
     fun init() {
@@ -199,8 +200,9 @@ class MailServiceTest : TestBase() {
             val tokenIssuer = UserResponse.newBuilder()
                 .setUuid(UUID.randomUUID().toString())
                 .setEmail(testContext.tokenIssuerMail)
+                .setCoop(coop)
                 .build()
-            Mockito.`when`(userService.getTokenIssuers())
+            Mockito.`when`(userService.getTokenIssuers(coop))
                 .thenReturn(listOf(tokenIssuer))
         }
         suppose("Service send withdraw request mail to user and token issuers") {
@@ -277,10 +279,10 @@ class MailServiceTest : TestBase() {
                 .setUuid(UUID.randomUUID().toString())
                 .setEmail(testContext.receiverMail)
                 .build()
-            Mockito.`when`(userService.getPlatformManagers())
+            Mockito.`when`(userService.getPlatformManagers(coop))
                 .thenReturn(listOf(platformManager))
-            service.sendNewWalletNotificationMail(WalletType.USER)
-            service.sendNewWalletNotificationMail(WalletType.PROJECT)
+            service.sendNewWalletNotificationMail(WalletType.USER, coop)
+            service.sendNewWalletNotificationMail(WalletType.PROJECT, coop)
         }
 
         verify("Both mails are sent to right receivers and have confirmation link") {
@@ -310,9 +312,9 @@ class MailServiceTest : TestBase() {
                 .setUuid(UUID.randomUUID().toString())
                 .setEmail(testContext.receiverMail)
                 .build()
-            Mockito.`when`(userService.getPlatformManagers())
+            Mockito.`when`(userService.getPlatformManagers(coop))
                 .thenReturn(listOf(platformManager))
-            service.sendNewWalletNotificationMail(WalletType.ORGANIZATION)
+            service.sendNewWalletNotificationMail(WalletType.ORGANIZATION, coop)
         }
 
         verify("The mail is sent to right receiver and has correct data") {
@@ -429,6 +431,7 @@ class MailServiceTest : TestBase() {
             .setEnabled(true)
             .setFirstName("First")
             .setLastName("Last")
+            .setCoop(coop)
             .build()
 
     private fun generateProjectResponse(createdBy: String): ProjectResponse =
