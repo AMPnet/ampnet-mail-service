@@ -109,7 +109,9 @@ class MailServiceTest : TestBase() {
     @Test
     fun mustSetCorrectOrganizationInvitationMail() {
         suppose("Service sends organizationInvitation e-mails") {
-            service.sendOrganizationInvitationMail(testContext.receiverEmails, testContext.organizationName)
+            service.sendOrganizationInvitationMail(
+                testContext.receiverEmails, testContext.organizationName, "sender@email.com"
+            )
         }
 
         verify("The mail is sent to right receiver and has correct data") {
@@ -401,6 +403,22 @@ class MailServiceTest : TestBase() {
             val confirmationUserLink = applicationProperties.mail.baseUrl + "/" +
                 applicationProperties.mail.organizationInvitationsPath + "/" + testContext.organization.uuid
             assertThat(userMail.mimeMessage.content.toString()).contains(confirmationUserLink)
+        }
+    }
+
+    @Test()
+    fun mustNotSendOrganizationInvitationMailIfRecipientEmailIsIncorrect() {
+        suppose("Service sends organizationInvitation to incorrect and correct email") {
+            val correctEmail = "test@email.com"
+            val incorrectEmail = "fff5555"
+            service.sendOrganizationInvitationMail(
+                listOf(correctEmail, incorrectEmail), testContext.organizationName, "sender@email.com"
+            )
+        }
+
+        verify("The mail is only sent to right receiver") {
+            val mailList = wiser.messages
+            assertThat(mailList).hasSize(1)
         }
     }
 

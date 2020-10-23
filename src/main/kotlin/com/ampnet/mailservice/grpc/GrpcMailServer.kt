@@ -42,7 +42,7 @@ class GrpcMailServer(
     ) {
         val emails = request.emailsList.toList()
         logger.debug { "Received gRPC request sendOrganizationInvitation to: ${emails.joinToString()}" }
-        mailService.sendOrganizationInvitationMail(emails, request.organization)
+        mailService.sendOrganizationInvitationMail(emails, request.organization, request.senderEmail)
         returnSuccessfulResponse(responseObserver)
     }
 

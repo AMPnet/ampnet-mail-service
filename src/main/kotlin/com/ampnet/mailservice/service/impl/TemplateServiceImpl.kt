@@ -63,6 +63,9 @@ class TemplateServiceImpl : TemplateService {
     private val organizationWalletActivatedTemplate: Mustache by lazy {
         mustacheFactory.compile("mustache/organization-wallet-activated-template.mustache")
     }
+    private val failedDeliveryMessageTemplate: Mustache by lazy {
+        mustacheFactory.compile("mustache/failed-delivery-message-template.mustache")
+    }
 
     override fun generateTextForMailConfirmation(data: MailConfirmationData): String {
         return fillTemplate(mailConfirmationTemplate, data)
@@ -110,6 +113,10 @@ class TemplateServiceImpl : TemplateService {
             WalletType.PROJECT -> fillTemplate(projectWalletActivatedTemplate, data)
             WalletType.ORGANIZATION -> fillTemplate(organizationWalletActivatedTemplate, data)
         }
+    }
+
+    override fun generateTextForFailedDeliveryMessage(failedRecipients: String): String {
+        return fillTemplate(failedDeliveryMessageTemplate, failedRecipients)
     }
 
     private fun fillTemplate(template: Mustache, data: Any): String {
