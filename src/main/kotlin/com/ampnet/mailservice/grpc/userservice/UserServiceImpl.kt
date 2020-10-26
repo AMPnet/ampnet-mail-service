@@ -49,7 +49,7 @@ class UserServiceImpl(
         try {
             val usersResponse = serviceBlockingStub
                 .withDeadlineAfter(applicationProperties.grpc.userServiceTimeout, TimeUnit.MILLISECONDS)
-                .getPlatformManagers(getCoopRequest(coop))
+                .getPlatformManagers(generateCoopRequest(coop))
                 .usersList
             logger.debug { "Users response: $usersResponse" }
             return usersResponse
@@ -63,7 +63,7 @@ class UserServiceImpl(
         try {
             val usersResponse = serviceBlockingStub
                 .withDeadlineAfter(applicationProperties.grpc.userServiceTimeout, TimeUnit.MILLISECONDS)
-                .getTokenIssuers(getCoopRequest(coop))
+                .getTokenIssuers(generateCoopRequest(coop))
                 .usersList
             logger.debug { "Users response: $usersResponse" }
             return usersResponse
@@ -72,7 +72,7 @@ class UserServiceImpl(
         }
     }
 
-    fun getCoopRequest(coop: String): CoopRequest {
+    fun generateCoopRequest(coop: String): CoopRequest {
         return CoopRequest.newBuilder()
             .setCoop(coop)
             .build()
