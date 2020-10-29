@@ -16,20 +16,27 @@ import com.ampnet.mailservice.proto.WithdrawInfoRequest
 import com.ampnet.mailservice.proto.WithdrawRequest
 import com.ampnet.mailservice.service.MailService
 import com.ampnet.mailservice.service.MailServiceALT
-import com.ampnet.mailservice.service.pojo.MailTextFactory
+import com.ampnet.mailservice.service.pojo.DepositRequestData
+import com.ampnet.mailservice.service.pojo.OrganizationInvitationData
 import com.ampnet.userservice.proto.UserResponse
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
 import mu.KLogging
 import net.devh.boot.grpc.server.service.GrpcService
+import org.springframework.beans.factory.annotation.Autowired
 import com.ampnet.mailservice.proto.WalletType as WalletTypeProto
+
 @GrpcService
 @Suppress("TooManyFunctions")
 class GrpcMailServer(
     private val mailService: MailService,
-    private val userService: UserService,
-    private val mailServiceALT: MailServiceALT
+    private val userService: UserService
 ) : MailServiceGrpc.MailServiceImplBase() {
+
+    @Autowired
+    private lateinit var depositService: MailServiceALT<DepositRequestData>
+    @Autowired
+    private lateinit var organizationInvitationService: MailServiceALT<OrganizationInvitationData>
 
     companion object : KLogging()
 
@@ -45,16 +52,16 @@ class GrpcMailServer(
     ) {
         val emails = request.emailsList.toList()
         logger.debug { "Received gRPC request sendOrganizationInvitation to: ${emails.joinToString()}" }
-        mailService.sendOrganizationInvitationMail(emails, request.organization, request.senderEmail)
+        //mailService.sendOrganizationInvitationMail(emails, request.organization, request.senderEmail)
+        organizationInvitationService.sendMail(OrganizationInvitationData(emails, request.organization, request.senderEmail))
         returnSuccessfulResponse(responseObserver)
     }
 
     override fun sendDepositRequest(request: DepositRequest, responseObserver: StreamObserver<Empty>) {
         logger.debug { "Received gRPC request SendDepositRequest to: ${request.user}" }
         sendMailToUser(request.user, responseObserver) {
-            //mailService.sendDepositRequestMail(it, request.amount)
-            val mailTextInput = MailTextFactory().createDepositRequestData(it, request.amount)
-            mailServiceALT.sendMail(mailTextInput)
+            depositService.sendMail(DepositRequestData(it, request.amount))
+            // mailServiceALT.sendMail(DepositRequestData(it, request.amount))
         }
     }
 
