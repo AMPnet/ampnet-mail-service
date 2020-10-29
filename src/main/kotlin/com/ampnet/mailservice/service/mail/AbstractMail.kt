@@ -50,3 +50,7 @@ abstract class AbstractMail(
         return writer.toString()
     }
 }
+
+const val FROM_CENTS_TO_EUROS = 100.0
+const val TWO_DECIMAL_FORMAT = "%.2f"
+fun Long.toMailFormat(): String = TWO_DECIMAL_FORMAT.format(this / FROM_CENTS_TO_EUROS)

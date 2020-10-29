@@ -5,7 +5,6 @@ import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.grpc.projectservice.ProjectService
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.service.MailService
-import com.ampnet.mailservice.service.mail.AbstractMail
 import com.ampnet.mailservice.service.mail.ActivatedOrganizationWalletMail
 import com.ampnet.mailservice.service.mail.ActivatedProjectWalletMail
 import com.ampnet.mailservice.service.mail.ActivatedUserWalletMail
@@ -42,45 +41,45 @@ class MailServiceImpl(
 
     override fun sendConfirmationMail(email: String, token: String) {
         val mail = ConfirmationMail(token, mailSender, applicationProperties)
-        sendEmail(mail, email)
+        sendEmails(mail.generateMails(email))
     }
 
     override fun sendResetPasswordMail(email: String, token: String) {
         val mail = ResetPasswordMail(token, mailSender, applicationProperties)
-        sendEmail(mail, email)
+        sendEmails(mail.generateMails(email))
     }
 
     override fun sendOrganizationInvitationMail(email: List<String>, organizationName: String, senderEmail: String) {
         val mail = InvitationMail(organizationName, mailSender, applicationProperties)
-        sendEmail(mail, email) { failedMails ->
-            val failedMail =
-                FailedDeliveryMail(failedMails.map { it.allRecipients.toString() }, mailSender, applicationProperties)
+        sendEmails(mail.generateMails(email)) { failedMails ->
+            val filedMailRecipients = failedMails.map { it.allRecipients.toString() }
+            val failedMail = FailedDeliveryMail(filedMailRecipients, mailSender, applicationProperties)
             sendEmailOnFailedDelivery(failedMail.generateMails(listOf(senderEmail)).first())
         }
     }
 
     override fun sendDepositRequestMail(user: UserResponse, amount: Long) {
         val mail = DepositRequestMail(amount, mailSender, applicationProperties)
-        sendEmail(mail, user.email)
+        sendEmails(mail.generateMails(user.email))
     }
 
     override fun sendDepositInfoMail(user: UserResponse, minted: Boolean) {
         val mail = DepositMail(minted, mailSender, applicationProperties)
-        sendEmail(mail, user.email)
+        sendEmails(mail.generateMails(user.email))
     }
 
     override fun sendWithdrawRequestMail(user: UserResponse, amount: Long) {
         val tokenIssuers = userService.getTokenIssuers(user.coop)
         val tokenInfoMail = WithdrawTokenIssuerMail(user, amount, mailSender, applicationProperties)
-        sendEmail(tokenInfoMail, tokenIssuers.map { it.email })
+        sendEmails(tokenInfoMail.generateMails(tokenIssuers.map { it.email }))
 
         val mail = WithdrawRequestMail(amount, mailSender, applicationProperties)
-        sendEmail(mail, user.email)
+        sendEmails(mail.generateMails(user.email))
     }
 
     override fun sendWithdrawInfoMail(user: UserResponse, burned: Boolean) {
         val mail = WithdrawInfoMail(burned, mailSender, applicationProperties)
-        sendEmail(mail, user.email)
+        sendEmails(mail.generateMails(user.email))
     }
 
     override fun sendNewWalletNotificationMail(walletType: WalletType, coop: String) {
@@ -90,7 +89,7 @@ class MailServiceImpl(
             WalletType.PROJECT -> NewProjectWalletMail(mailSender, applicationProperties)
         }
         val platformManagers = userService.getPlatformManagers(coop).map { it.email }
-        sendEmail(mail, platformManagers)
+        sendEmails(mail.generateMails(platformManagers))
     }
 
     override fun sendWalletActivatedMail(walletOwner: String, walletType: WalletType) {
@@ -106,14 +105,8 @@ class MailServiceImpl(
             }
         }
         val userEmail = userService.getUsers(listOf(userUuid)).map { it.email }
-        sendEmail(mail, userEmail)
+        sendEmails(mail.generateMails(userEmail))
     }
-
-    private fun sendEmail(mail: AbstractMail, to: List<String>, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
-        sendEmails(mail.generateMails(to), notifySenderOnError)
-    }
-
-    private fun sendEmail(mail: AbstractMail, to: String) = sendEmails(mail.generateMails(to))
 
     private fun sendEmails(mails: List<MimeMessage>, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
         if (applicationProperties.mail.enabled.not()) {
@@ -148,7 +141,3 @@ class MailServiceImpl(
         }
     }
 }
-
-const val FROM_CENTS_TO_EUROS = 100.0
-const val TWO_DECIMAL_FORMAT = "%.2f"
-fun Long.toMailFormat(): String = TWO_DECIMAL_FORMAT.format(this / FROM_CENTS_TO_EUROS)
