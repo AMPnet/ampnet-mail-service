@@ -1,5 +1,11 @@
 package com.ampnet.mailservice.service.pojo
 
+import com.ampnet.userservice.proto.UserResponse
+
+interface MailText {
+
+}
+
 data class MailConfirmationData(val link: String)
 data class ResetPasswordData(val link: String)
 data class InvitationData(val organization: String, val link: String)
@@ -13,3 +19,17 @@ data class WalletActivatedData(
     val organizationName: String? = null,
     val projectName: String? = null
 )
+data class DepositRequestData(
+    val user: UserResponse,
+    val amount: Long
+): MailText
+
+class MailTextFactory {
+
+    fun createDepositRequestData(
+        user: UserResponse,
+        amount: Long
+    ): DepositRequestData {
+        return DepositRequestData(user, amount)
+    }
+}
