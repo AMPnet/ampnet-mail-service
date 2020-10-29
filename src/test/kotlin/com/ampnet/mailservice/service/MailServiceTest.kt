@@ -6,7 +6,7 @@ import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.grpc.projectservice.ProjectService
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.service.impl.MailServiceImpl
-import com.ampnet.mailservice.service.mail.toMailFormat
+import com.ampnet.mailservice.service.impl.mail.toMailFormat
 import com.ampnet.projectservice.proto.OrganizationResponse
 import com.ampnet.projectservice.proto.ProjectResponse
 import com.ampnet.userservice.proto.UserResponse

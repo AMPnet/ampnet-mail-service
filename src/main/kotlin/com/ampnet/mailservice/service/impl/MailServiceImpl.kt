@@ -5,21 +5,19 @@ import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.grpc.projectservice.ProjectService
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.service.MailService
-import com.ampnet.mailservice.service.mail.ActivatedOrganizationWalletMail
-import com.ampnet.mailservice.service.mail.ActivatedProjectWalletMail
-import com.ampnet.mailservice.service.mail.ActivatedUserWalletMail
-import com.ampnet.mailservice.service.mail.ConfirmationMail
-import com.ampnet.mailservice.service.mail.DepositMail
-import com.ampnet.mailservice.service.mail.DepositRequestMail
-import com.ampnet.mailservice.service.mail.FailedDeliveryMail
-import com.ampnet.mailservice.service.mail.InvitationMail
-import com.ampnet.mailservice.service.mail.NewOrganizationWalletMail
-import com.ampnet.mailservice.service.mail.NewProjectWalletMail
-import com.ampnet.mailservice.service.mail.NewUserWalletMail
-import com.ampnet.mailservice.service.mail.ResetPasswordMail
-import com.ampnet.mailservice.service.mail.WithdrawInfoMail
-import com.ampnet.mailservice.service.mail.WithdrawRequestMail
-import com.ampnet.mailservice.service.mail.WithdrawTokenIssuerMail
+import com.ampnet.mailservice.service.impl.mail.ActivatedOrganizationWalletMail
+import com.ampnet.mailservice.service.impl.mail.ActivatedProjectWalletMail
+import com.ampnet.mailservice.service.impl.mail.ActivatedUserWalletMail
+import com.ampnet.mailservice.service.impl.mail.ConfirmationMail
+import com.ampnet.mailservice.service.impl.mail.DepositMail
+import com.ampnet.mailservice.service.impl.mail.DepositRequestMail
+import com.ampnet.mailservice.service.impl.mail.FailedDeliveryMail
+import com.ampnet.mailservice.service.impl.mail.InvitationMail
+import com.ampnet.mailservice.service.impl.mail.NewWalletMail
+import com.ampnet.mailservice.service.impl.mail.ResetPasswordMail
+import com.ampnet.mailservice.service.impl.mail.WithdrawInfoMail
+import com.ampnet.mailservice.service.impl.mail.WithdrawRequestMail
+import com.ampnet.mailservice.service.impl.mail.WithdrawTokenIssuerMail
 import com.ampnet.userservice.proto.UserResponse
 import mu.KLogging
 import org.springframework.mail.javamail.JavaMailSender
@@ -72,11 +70,8 @@ class MailServiceImpl(
             .sendTo(user.email)
 
     override fun sendNewWalletNotificationMail(walletType: WalletType, coop: String) =
-        when (walletType) {
-            WalletType.USER -> NewUserWalletMail(mailSender, applicationProperties)
-            WalletType.ORGANIZATION -> NewOrganizationWalletMail(mailSender, applicationProperties)
-            WalletType.PROJECT -> NewProjectWalletMail(mailSender, applicationProperties)
-        }.sendTo(userService.getPlatformManagers(coop).map { it.email })
+        NewWalletMail(walletType, mailSender, applicationProperties)
+            .sendTo(userService.getPlatformManagers(coop).map { it.email })
 
     override fun sendWalletActivatedMail(walletOwner: String, walletType: WalletType) {
         val (mail, userUuid) = when (walletType) {

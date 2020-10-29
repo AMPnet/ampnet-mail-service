@@ -1,4 +1,4 @@
-package com.ampnet.mailservice.service.mail
+package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.userservice.proto.UserResponse
