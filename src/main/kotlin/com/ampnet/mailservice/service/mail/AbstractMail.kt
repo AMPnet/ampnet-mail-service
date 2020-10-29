@@ -1,10 +1,10 @@
 package com.ampnet.mailservice.service.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
-import com.ampnet.mailservice.service.impl.LinkResolver
-import com.ampnet.mailservice.service.impl.MailServiceImpl
 import com.github.mustachejava.DefaultMustacheFactory
 import com.github.mustachejava.Mustache
+import mu.KLogging
+import org.springframework.mail.MailException
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import java.io.StringWriter
@@ -16,15 +16,45 @@ abstract class AbstractMail(
     private val mailSender: JavaMailSender,
     private val applicationProperties: ApplicationProperties
 ) {
+
+    companion object : KLogging()
+
     protected val mustacheFactory = DefaultMustacheFactory()
     protected val linkResolver = LinkResolver(applicationProperties)
     protected abstract val title: String
     protected abstract val template: Mustache
     protected abstract val data: Any
 
-    fun generateMails(to: String): List<MimeMessage> = generateMails(listOf(to))
+    fun sendTo(to: List<String>, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
+        sendEmails(this.createMailMessage(to), notifySenderOnError)
+    }
 
-    fun generateMails(to: List<String>): List<MimeMessage> = createMailMessage(to)
+    fun sendTo(to: String, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
+        sendEmails(this.createMailMessage(listOf(to)), notifySenderOnError)
+    }
+
+    private fun sendEmails(mails: List<MimeMessage>, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
+        if (applicationProperties.mail.enabled.not()) {
+            logger.warn { "Sending email is disabled. \nEmail: ${mails.first().content}" }
+            return
+        }
+        logger.info { "Sending email: ${mails.first().subject}" }
+        val failed = mails.filter { sendEmail(it).not() }
+        if (failed.isNotEmpty()) {
+            notifySenderOnError.invoke(failed)
+        }
+    }
+
+    private fun sendEmail(mail: MimeMessage): Boolean {
+        return try {
+            mailSender.send(mail)
+            logger.info { "Successfully sent email to: ${mail.allRecipients}" }
+            true
+        } catch (ex: MailException) {
+            logger.warn { "Cannot send email to: ${mail.allRecipients}" }
+            false
+        }
+    }
 
     private fun createMailMessage(to: List<String>): List<MimeMessage> =
         to.mapNotNull {
@@ -39,7 +69,7 @@ abstract class AbstractMail(
                 helper.setSentDate(Date())
                 mail
             } catch (ex: MessagingException) {
-                MailServiceImpl.logger.warn { "Cannot create mail from: $to" }
+                logger.warn { "Cannot create mail from: $to" }
                 null
             }
         }

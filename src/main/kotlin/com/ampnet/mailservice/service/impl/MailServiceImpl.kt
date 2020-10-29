@@ -22,14 +22,11 @@ import com.ampnet.mailservice.service.mail.WithdrawRequestMail
 import com.ampnet.mailservice.service.mail.WithdrawTokenIssuerMail
 import com.ampnet.userservice.proto.UserResponse
 import mu.KLogging
-import org.springframework.mail.MailException
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
 import java.util.UUID
-import javax.mail.internet.MimeMessage
 
 @Service
-@Suppress("TooManyFunctions")
 class MailServiceImpl(
     private val mailSender: JavaMailSender,
     private val applicationProperties: ApplicationProperties,
@@ -39,58 +36,47 @@ class MailServiceImpl(
 
     companion object : KLogging()
 
-    override fun sendConfirmationMail(email: String, token: String) {
-        val mail = ConfirmationMail(token, mailSender, applicationProperties)
-        sendEmails(mail.generateMails(email))
-    }
+    override fun sendConfirmationMail(email: String, token: String) =
+        ConfirmationMail(token, mailSender, applicationProperties)
+            .sendTo(email)
 
-    override fun sendResetPasswordMail(email: String, token: String) {
-        val mail = ResetPasswordMail(token, mailSender, applicationProperties)
-        sendEmails(mail.generateMails(email))
-    }
+    override fun sendResetPasswordMail(email: String, token: String) =
+        ResetPasswordMail(token, mailSender, applicationProperties)
+            .sendTo(email)
 
-    override fun sendOrganizationInvitationMail(email: List<String>, organizationName: String, senderEmail: String) {
-        val mail = InvitationMail(organizationName, mailSender, applicationProperties)
-        sendEmails(mail.generateMails(email)) { failedMails ->
-            val filedMailRecipients = failedMails.map { it.allRecipients.toString() }
-            val failedMail = FailedDeliveryMail(filedMailRecipients, mailSender, applicationProperties)
-            sendEmailOnFailedDelivery(failedMail.generateMails(listOf(senderEmail)).first())
-        }
-    }
+    override fun sendOrganizationInvitationMail(emails: List<String>, organizationName: String, senderEmail: String) =
+        InvitationMail(organizationName, mailSender, applicationProperties)
+            .sendTo(emails) { failedMails ->
+                val filedMailRecipients = failedMails.map { it.allRecipients.toString() }
+                val failedMail = FailedDeliveryMail(filedMailRecipients, mailSender, applicationProperties)
+                failedMail.sendTo(senderEmail)
+            }
 
-    override fun sendDepositRequestMail(user: UserResponse, amount: Long) {
-        val mail = DepositRequestMail(amount, mailSender, applicationProperties)
-        sendEmails(mail.generateMails(user.email))
-    }
+    override fun sendDepositRequestMail(user: UserResponse, amount: Long) =
+        DepositRequestMail(amount, mailSender, applicationProperties)
+            .sendTo(user.email)
 
-    override fun sendDepositInfoMail(user: UserResponse, minted: Boolean) {
-        val mail = DepositMail(minted, mailSender, applicationProperties)
-        sendEmails(mail.generateMails(user.email))
-    }
+    override fun sendDepositInfoMail(user: UserResponse, minted: Boolean) =
+        DepositMail(minted, mailSender, applicationProperties)
+            .sendTo(user.email)
 
     override fun sendWithdrawRequestMail(user: UserResponse, amount: Long) {
-        val tokenIssuers = userService.getTokenIssuers(user.coop)
-        val tokenInfoMail = WithdrawTokenIssuerMail(user, amount, mailSender, applicationProperties)
-        sendEmails(tokenInfoMail.generateMails(tokenIssuers.map { it.email }))
-
-        val mail = WithdrawRequestMail(amount, mailSender, applicationProperties)
-        sendEmails(mail.generateMails(user.email))
+        WithdrawTokenIssuerMail(user, amount, mailSender, applicationProperties)
+            .sendTo(userService.getTokenIssuers(user.coop).map { it.email })
+        WithdrawRequestMail(amount, mailSender, applicationProperties)
+            .sendTo(user.email)
     }
 
-    override fun sendWithdrawInfoMail(user: UserResponse, burned: Boolean) {
-        val mail = WithdrawInfoMail(burned, mailSender, applicationProperties)
-        sendEmails(mail.generateMails(user.email))
-    }
+    override fun sendWithdrawInfoMail(user: UserResponse, burned: Boolean) =
+        WithdrawInfoMail(burned, mailSender, applicationProperties)
+            .sendTo(user.email)
 
-    override fun sendNewWalletNotificationMail(walletType: WalletType, coop: String) {
-        val mail = when (walletType) {
+    override fun sendNewWalletNotificationMail(walletType: WalletType, coop: String) =
+        when (walletType) {
             WalletType.USER -> NewUserWalletMail(mailSender, applicationProperties)
             WalletType.ORGANIZATION -> NewOrganizationWalletMail(mailSender, applicationProperties)
             WalletType.PROJECT -> NewProjectWalletMail(mailSender, applicationProperties)
-        }
-        val platformManagers = userService.getPlatformManagers(coop).map { it.email }
-        sendEmails(mail.generateMails(platformManagers))
-    }
+        }.sendTo(userService.getPlatformManagers(coop).map { it.email })
 
     override fun sendWalletActivatedMail(walletOwner: String, walletType: WalletType) {
         val (mail, userUuid) = when (walletType) {
@@ -104,40 +90,7 @@ class MailServiceImpl(
                 Pair(ActivatedProjectWalletMail(project, mailSender, applicationProperties), project.createdByUser)
             }
         }
-        val userEmail = userService.getUsers(listOf(userUuid)).map { it.email }
-        sendEmails(mail.generateMails(userEmail))
-    }
-
-    private fun sendEmails(mails: List<MimeMessage>, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
-        if (applicationProperties.mail.enabled.not()) {
-            logger.warn { "Sending email is disabled. \nEmail: ${mails.first().content}" }
-            return
-        }
-        logger.info { "Sending email: ${mails.first().subject}" }
-        val failed = mails.filter { sendEmail(it).not() }
-        if (failed.isNotEmpty()) {
-            notifySenderOnError.invoke(failed)
-        }
-    }
-
-    private fun sendEmail(mail: MimeMessage): Boolean {
-        return try {
-            mailSender.send(mail)
-            logger.info { "Successfully sent email to: ${mail.allRecipients}" }
-            true
-        } catch (ex: MailException) {
-            logger.warn { "Cannot send email to: ${mail.allRecipients}" }
-            false
-        }
-    }
-
-    private fun sendEmailOnFailedDelivery(mail: MimeMessage) {
-        logger.info { "Sending failed delivery email: ${mail.subject}" }
-        try {
-            mailSender.send(mail)
-            logger.info { "Successfully sent failed delivery email to sender: ${mail.sender}" }
-        } catch (ex: MailException) {
-            logger.warn(ex) { "Cannot send failed delivery email to sender: ${mail.sender}" }
-        }
+        val userEmails = userService.getUsers(listOf(userUuid)).map { it.email }
+        mail.sendTo(userEmails)
     }
 }
