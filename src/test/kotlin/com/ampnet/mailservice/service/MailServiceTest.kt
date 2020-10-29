@@ -5,9 +5,8 @@ import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.grpc.projectservice.ProjectService
 import com.ampnet.mailservice.grpc.userservice.UserService
-import com.ampnet.mailservice.service.impl.FROM_CENTS_TO_EUROS
 import com.ampnet.mailservice.service.impl.MailServiceImpl
-import com.ampnet.mailservice.service.impl.TWO_DECIMAL_FORMAT
+import com.ampnet.mailservice.service.mail.toMailFormat
 import com.ampnet.projectservice.proto.OrganizationResponse
 import com.ampnet.projectservice.proto.ProjectResponse
 import com.ampnet.userservice.proto.UserResponse
@@ -155,7 +154,7 @@ class MailServiceTest : TestBase() {
             assertThat(mail.mimeMessage.subject).isEqualTo(depositSubject)
 
             val mailText = mail.mimeMessage.content.toString()
-            assertThat(mailText).contains((TWO_DECIMAL_FORMAT.format(testContext.amount / FROM_CENTS_TO_EUROS)))
+            assertThat(mailText).contains(testContext.amount.toMailFormat())
         }
     }
 
@@ -225,7 +224,7 @@ class MailServiceTest : TestBase() {
             assertThat(tokenIssuerMail.mimeMessage.subject).isEqualTo(manageWithdrawalsSubject)
 
             val mailText = tokenIssuerMail.mimeMessage.content.toString()
-            assertThat(mailText).contains((TWO_DECIMAL_FORMAT.format(testContext.amount / FROM_CENTS_TO_EUROS)))
+            assertThat(mailText).contains(testContext.amount.toMailFormat())
         }
         verify("The mail is sent to user and has correct data") {
             val mailList = wiser.messages

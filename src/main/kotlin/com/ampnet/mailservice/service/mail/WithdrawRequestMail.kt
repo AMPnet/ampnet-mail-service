@@ -1,7 +1,6 @@
 package com.ampnet.mailservice.service.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
-import com.ampnet.mailservice.service.impl.toMailFormat
 import com.ampnet.userservice.proto.UserResponse
 import com.github.mustachejava.Mustache
 import org.springframework.mail.javamail.JavaMailSender
