@@ -36,9 +36,6 @@ class MailServiceTest : TestBase() {
     private lateinit var mailSender: JavaMailSenderImpl
 
     @Autowired
-    private lateinit var templateService: TemplateService
-
-    @Autowired
     private lateinit var applicationProperties: ApplicationProperties
 
     private val userService = Mockito.mock(UserService::class.java)
@@ -49,6 +46,14 @@ class MailServiceTest : TestBase() {
     private var defaultMailPort: Int = 0
     private val testContext = TestContext()
     private val coop = "ampnet-test"
+    private val confirmationMailSubject = "Confirm your email"
+    private val resetPasswordSubject = "Reset password"
+    private val invitationMailSubject = "Invitation"
+    private val depositSubject = "Deposit"
+    private val withdrawSubject = "Withdraw"
+    private val newWalletSubject = "New wallet created"
+    private val manageWithdrawalsSubject = "New withdrawal request"
+    private val walletActivatedSubject = "Wallet activated"
 
     @BeforeEach
     fun init() {
@@ -57,7 +62,7 @@ class MailServiceTest : TestBase() {
         wiser.start()
         mailSender.port = wiser.server.port
         service = MailServiceImpl(
-            mailSender, templateService, applicationProperties, userService, projectService
+            mailSender, applicationProperties, userService, projectService
         )
     }
 
@@ -79,7 +84,7 @@ class MailServiceTest : TestBase() {
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(mail.mimeMessage.subject).isEqualTo(service.confirmationMailSubject)
+            assertThat(mail.mimeMessage.subject).isEqualTo(confirmationMailSubject)
 
             val confirmationLink = applicationProperties.mail.baseUrl + "/" +
                 "${applicationProperties.mail.confirmationPath}?token=${testContext.token}"
@@ -99,7 +104,7 @@ class MailServiceTest : TestBase() {
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(mail.mimeMessage.subject).isEqualTo(service.resetPasswordSubject)
+            assertThat(mail.mimeMessage.subject).isEqualTo(resetPasswordSubject)
 
             val resetPasswordLink = "${applicationProperties.mail.baseUrl}/" +
                 "${applicationProperties.mail.resetPasswordPath}?token=${testContext.token}"
@@ -122,7 +127,7 @@ class MailServiceTest : TestBase() {
             val secondMail = mailList.last()
             assertThat(firstMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(firstMail.envelopeReceiver).isEqualTo(testContext.receiverEmails.first())
-            assertThat(firstMail.mimeMessage.subject).isEqualTo(service.invitationMailSubject)
+            assertThat(firstMail.mimeMessage.subject).isEqualTo(invitationMailSubject)
             assertThat(secondMail.envelopeReceiver).isEqualTo(testContext.receiverEmails.last())
 
             val mailText = firstMail.mimeMessage.content.toString()
@@ -147,7 +152,7 @@ class MailServiceTest : TestBase() {
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(mail.mimeMessage.subject).isEqualTo(service.depositSubject)
+            assertThat(mail.mimeMessage.subject).isEqualTo(depositSubject)
 
             val mailText = mail.mimeMessage.content.toString()
             assertThat(mailText).contains((TWO_DECIMAL_FORMAT.format(testContext.amount / FROM_CENTS_TO_EUROS)))
@@ -167,7 +172,7 @@ class MailServiceTest : TestBase() {
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(mail.mimeMessage.subject).isEqualTo(service.depositSubject)
+            assertThat(mail.mimeMessage.subject).isEqualTo(depositSubject)
 
             val mailText = mail.mimeMessage.content.toString()
             assertThat(mailText).contains("approved")
@@ -187,7 +192,7 @@ class MailServiceTest : TestBase() {
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(mail.mimeMessage.subject).isEqualTo(service.depositSubject)
+            assertThat(mail.mimeMessage.subject).isEqualTo(depositSubject)
 
             val mailText = mail.mimeMessage.content.toString()
             assertThat(mailText).contains("rejected")
@@ -217,7 +222,7 @@ class MailServiceTest : TestBase() {
 
             assertThat(tokenIssuerMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(tokenIssuerMail.envelopeReceiver).isEqualTo(testContext.tokenIssuerMail)
-            assertThat(tokenIssuerMail.mimeMessage.subject).isEqualTo(service.manageWithdrawalsSubject)
+            assertThat(tokenIssuerMail.mimeMessage.subject).isEqualTo(manageWithdrawalsSubject)
 
             val mailText = tokenIssuerMail.mimeMessage.content.toString()
             assertThat(mailText).contains((TWO_DECIMAL_FORMAT.format(testContext.amount / FROM_CENTS_TO_EUROS)))
@@ -228,7 +233,7 @@ class MailServiceTest : TestBase() {
 
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(userMail.mimeMessage.subject).isEqualTo(service.withdrawSubject)
+            assertThat(userMail.mimeMessage.subject).isEqualTo(withdrawSubject)
         }
     }
 
@@ -245,7 +250,7 @@ class MailServiceTest : TestBase() {
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(mail.mimeMessage.subject).isEqualTo(service.withdrawSubject)
+            assertThat(mail.mimeMessage.subject).isEqualTo(withdrawSubject)
 
             val mailText = mail.mimeMessage.content.toString()
             assertThat(mailText).contains("approved")
@@ -265,7 +270,7 @@ class MailServiceTest : TestBase() {
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(mail.mimeMessage.subject).isEqualTo(service.withdrawSubject)
+            assertThat(mail.mimeMessage.subject).isEqualTo(withdrawSubject)
 
             val mailText = mail.mimeMessage.content.toString()
             assertThat(mailText).contains("rejected")
@@ -290,7 +295,7 @@ class MailServiceTest : TestBase() {
             val userMail = mailList.first()
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(userMail.mimeMessage.subject).isEqualTo(service.newWalletSubject)
+            assertThat(userMail.mimeMessage.subject).isEqualTo(newWalletSubject)
             val confirmationUserLink = applicationProperties.mail.baseUrl + "/" +
                 applicationProperties.mail.newWalletPath + "/user"
             assertThat(userMail.mimeMessage.content.toString()).contains(confirmationUserLink)
@@ -298,7 +303,7 @@ class MailServiceTest : TestBase() {
             val projectMail = mailList[1]
             assertThat(projectMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(projectMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(projectMail.mimeMessage.subject).isEqualTo(service.newWalletSubject)
+            assertThat(projectMail.mimeMessage.subject).isEqualTo(newWalletSubject)
             val confirmationProjectLink = applicationProperties.mail.baseUrl + "/" +
                 applicationProperties.mail.newWalletPath + "/project"
             assertThat(projectMail.mimeMessage.content.toString()).contains(confirmationProjectLink)
@@ -322,7 +327,7 @@ class MailServiceTest : TestBase() {
             val userMail = mailList.first()
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(userMail.mimeMessage.subject).isEqualTo(service.newWalletSubject)
+            assertThat(userMail.mimeMessage.subject).isEqualTo(newWalletSubject)
             val confirmationUserLink = applicationProperties.mail.baseUrl + "/" +
                 applicationProperties.mail.newWalletPath + "/groups"
             assertThat(userMail.mimeMessage.content.toString()).contains(confirmationUserLink)
@@ -343,7 +348,7 @@ class MailServiceTest : TestBase() {
             val userMail = mailList.first()
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(userMail.mimeMessage.subject).isEqualTo(service.walletActivatedSubject)
+            assertThat(userMail.mimeMessage.subject).isEqualTo(walletActivatedSubject)
             val confirmationUserLink = applicationProperties.mail.baseUrl + "/" + applicationProperties.mail.walletActivatedPath
             assertThat(userMail.mimeMessage.content.toString()).contains(confirmationUserLink)
         }
@@ -371,7 +376,7 @@ class MailServiceTest : TestBase() {
             val userMail = mailList.first()
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(userMail.mimeMessage.subject).isEqualTo(service.walletActivatedSubject)
+            assertThat(userMail.mimeMessage.subject).isEqualTo(walletActivatedSubject)
             val confirmationUserLink = applicationProperties.mail.baseUrl + "/" +
                 applicationProperties.mail.organizationInvitationsPath + "/" + testContext.project.organizationUuid +
                 "/" + applicationProperties.mail.manageProjectPath + "/" + testContext.project.uuid
@@ -401,7 +406,7 @@ class MailServiceTest : TestBase() {
             val userMail = mailList.first()
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(userMail.mimeMessage.subject).isEqualTo(service.walletActivatedSubject)
+            assertThat(userMail.mimeMessage.subject).isEqualTo(walletActivatedSubject)
             val confirmationUserLink = applicationProperties.mail.baseUrl + "/" +
                 applicationProperties.mail.organizationInvitationsPath + "/" + testContext.organization.uuid
             assertThat(userMail.mimeMessage.content.toString()).contains(confirmationUserLink)

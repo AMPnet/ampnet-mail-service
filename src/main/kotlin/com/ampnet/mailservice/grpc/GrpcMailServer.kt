@@ -15,20 +15,18 @@ import com.ampnet.mailservice.proto.WalletTypeRequest
 import com.ampnet.mailservice.proto.WithdrawInfoRequest
 import com.ampnet.mailservice.proto.WithdrawRequest
 import com.ampnet.mailservice.service.MailService
-import com.ampnet.mailservice.service.MailServiceALT
-import com.ampnet.mailservice.service.pojo.MailTextFactory
 import com.ampnet.userservice.proto.UserResponse
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
 import mu.KLogging
 import net.devh.boot.grpc.server.service.GrpcService
 import com.ampnet.mailservice.proto.WalletType as WalletTypeProto
+
 @GrpcService
 @Suppress("TooManyFunctions")
 class GrpcMailServer(
     private val mailService: MailService,
-    private val userService: UserService,
-    private val mailServiceALT: MailServiceALT
+    private val userService: UserService
 ) : MailServiceGrpc.MailServiceImplBase() {
 
     companion object : KLogging()
@@ -52,9 +50,7 @@ class GrpcMailServer(
     override fun sendDepositRequest(request: DepositRequest, responseObserver: StreamObserver<Empty>) {
         logger.debug { "Received gRPC request SendDepositRequest to: ${request.user}" }
         sendMailToUser(request.user, responseObserver) {
-            //mailService.sendDepositRequestMail(it, request.amount)
-            val mailTextInput = MailTextFactory().createDepositRequestData(it, request.amount)
-            mailServiceALT.sendMail(mailTextInput)
+            mailService.sendDepositRequestMail(it, request.amount)
         }
     }
 
