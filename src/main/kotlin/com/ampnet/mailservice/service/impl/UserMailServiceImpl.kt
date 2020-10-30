@@ -18,7 +18,6 @@ import com.ampnet.mailservice.service.impl.mail.ResetPasswordMail
 import com.ampnet.mailservice.service.impl.mail.WithdrawInfoMail
 import com.ampnet.mailservice.service.impl.mail.WithdrawRequestMail
 import com.ampnet.userservice.proto.UserResponse
-import mu.KLogging
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -31,8 +30,6 @@ class UserMailServiceImpl(
     private val userService: UserService,
     private val projectService: ProjectService
 ) : UserMailService {
-
-    companion object : KLogging()
 
     private val confirmationMail = ConfirmationMail(mailSender, applicationProperties, linkResolverService)
     private val resetPasswordMail = ResetPasswordMail(mailSender, applicationProperties, linkResolverService)

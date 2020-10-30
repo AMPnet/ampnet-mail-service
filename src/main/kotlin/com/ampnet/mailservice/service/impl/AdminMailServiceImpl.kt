@@ -8,7 +8,6 @@ import com.ampnet.mailservice.service.LinkResolverService
 import com.ampnet.mailservice.service.impl.mail.NewWalletMail
 import com.ampnet.mailservice.service.impl.mail.WithdrawTokenIssuerMail
 import com.ampnet.userservice.proto.UserResponse
-import mu.KLogging
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
 
@@ -19,8 +18,6 @@ class AdminMailServiceImpl(
     linkResolverService: LinkResolverService,
     private val userService: UserService
 ) : AdminMailService {
-
-    companion object : KLogging()
 
     private val withdrawTokenIssuerMail =
         WithdrawTokenIssuerMail(mailSender, applicationProperties, linkResolverService)
