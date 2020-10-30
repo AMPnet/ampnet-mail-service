@@ -1,7 +1,7 @@
 package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
-import com.ampnet.mailservice.service.impl.LinkResolver
+import com.ampnet.mailservice.service.LinkResolverService
 import com.github.mustachejava.Mustache
 import mu.KLogging
 import org.springframework.mail.MailException
@@ -14,12 +14,12 @@ import javax.mail.internet.MimeMessage
 
 abstract class AbstractMail(
     private val mailSender: JavaMailSender,
-    private val applicationProperties: ApplicationProperties
+    private val applicationProperties: ApplicationProperties,
+    protected val linkResolver: LinkResolverService
 ) {
 
     companion object : KLogging()
 
-    protected val linkResolver = LinkResolver(applicationProperties)
     protected abstract val title: String
     protected abstract val template: Mustache
     protected open var data: Any? = null

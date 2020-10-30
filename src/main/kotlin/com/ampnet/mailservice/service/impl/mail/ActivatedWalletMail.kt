@@ -2,6 +2,7 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.enums.WalletType
+import com.ampnet.mailservice.service.LinkResolverService
 import com.ampnet.projectservice.proto.OrganizationResponse
 import com.ampnet.projectservice.proto.ProjectResponse
 import com.github.mustachejava.DefaultMustacheFactory
@@ -10,8 +11,9 @@ import org.springframework.mail.javamail.JavaMailSender
 
 class ActivatedUserWalletMail(
     mailSender: JavaMailSender,
-    applicationProperties: ApplicationProperties
-) : AbstractMail(mailSender, applicationProperties) {
+    applicationProperties: ApplicationProperties,
+    linkResolver: LinkResolverService
+) : AbstractMail(mailSender, applicationProperties, linkResolver) {
     override val title: String = "Wallet activated"
     override val template: Mustache =
         DefaultMustacheFactory().compile("mustache/user-wallet-activated-template.mustache")
@@ -22,8 +24,9 @@ data class ActivatedUserWalletData(val link: String)
 
 class ActivatedOrganizationWalletMail(
     mailSender: JavaMailSender,
-    applicationProperties: ApplicationProperties
-) : AbstractMail(mailSender, applicationProperties) {
+    applicationProperties: ApplicationProperties,
+    linkResolver: LinkResolverService
+) : AbstractMail(mailSender, applicationProperties, linkResolver) {
     override val title: String = "Wallet activated"
     override val template: Mustache =
         DefaultMustacheFactory().compile("mustache/organization-wallet-activated-template.mustache")
@@ -44,8 +47,9 @@ data class ActivatedOrganizationWalletData(val link: String, val organizationNam
 
 class ActivatedProjectWalletMail(
     mailSender: JavaMailSender,
-    applicationProperties: ApplicationProperties
-) : AbstractMail(mailSender, applicationProperties) {
+    applicationProperties: ApplicationProperties,
+    linkResolver: LinkResolverService
+) : AbstractMail(mailSender, applicationProperties, linkResolver) {
     override val title: String = "Wallet activated"
     override val template: Mustache =
         DefaultMustacheFactory().compile("mustache/project-wallet-activated-template.mustache")
