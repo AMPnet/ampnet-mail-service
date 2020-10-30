@@ -52,5 +52,5 @@ class LinkResolverServiceImpl(applicationProperties: ApplicationProperties) : Li
         return "$baseUrl/$typePath".removeDoubleSlashes()
     }
 
-    private fun String.removeDoubleSlashes() = this.replace("(?<!(http:)|(https:))\\/\\/+".toRegex(), "/")
+    private fun String.removeDoubleSlashes() = this.replace("(?<!(http:)|(https:))//+".toRegex(), "/")
 }
