@@ -9,7 +9,7 @@ import com.ampnet.mailservice.service.impl.mail.ActivatedOrganizationWalletMail
 import com.ampnet.mailservice.service.impl.mail.ActivatedProjectWalletMail
 import com.ampnet.mailservice.service.impl.mail.ActivatedUserWalletMail
 import com.ampnet.mailservice.service.impl.mail.ConfirmationMail
-import com.ampnet.mailservice.service.impl.mail.DepositMail
+import com.ampnet.mailservice.service.impl.mail.DepositInfoMail
 import com.ampnet.mailservice.service.impl.mail.DepositRequestMail
 import com.ampnet.mailservice.service.impl.mail.FailedDeliveryMail
 import com.ampnet.mailservice.service.impl.mail.InvitationMail
@@ -34,55 +34,66 @@ class MailServiceImpl(
 
     companion object : KLogging()
 
+    private val confirmationMail = ConfirmationMail(mailSender, applicationProperties)
+    private val resetPasswordMail = ResetPasswordMail(mailSender, applicationProperties)
+    private val invitationMail = InvitationMail(mailSender, applicationProperties)
+    private val depositRequestMail = DepositRequestMail(mailSender, applicationProperties)
+    private val depositMail = DepositInfoMail(mailSender, applicationProperties)
+    private val withdrawRequestMail = WithdrawRequestMail(mailSender, applicationProperties)
+    private val withdrawTokenIssuerMail = WithdrawTokenIssuerMail(mailSender, applicationProperties)
+    private val withdrawInfoMail = WithdrawInfoMail(mailSender, applicationProperties)
+    private val activatedUserWalletMail = ActivatedUserWalletMail(mailSender, applicationProperties)
+    private val activatedOrganizationWalletMail = ActivatedOrganizationWalletMail(mailSender, applicationProperties)
+    private val activatedProjectWalletMail = ActivatedProjectWalletMail(mailSender, applicationProperties)
+    private val newUserWalletMail = NewWalletMail(WalletType.USER, mailSender, applicationProperties)
+    private val newOrganizationWalletMail = NewWalletMail(WalletType.ORGANIZATION, mailSender, applicationProperties)
+    private val newProjectWalletMail = NewWalletMail(WalletType.PROJECT, mailSender, applicationProperties)
+
     override fun sendConfirmationMail(email: String, token: String) =
-        ConfirmationMail(token, mailSender, applicationProperties)
-            .sendTo(email)
+        confirmationMail.setData(token).sendTo(email)
 
     override fun sendResetPasswordMail(email: String, token: String) =
-        ResetPasswordMail(token, mailSender, applicationProperties)
-            .sendTo(email)
+        resetPasswordMail.setData(token).sendTo(email)
 
     override fun sendOrganizationInvitationMail(emails: List<String>, organizationName: String, senderEmail: String) =
-        InvitationMail(organizationName, mailSender, applicationProperties)
+        invitationMail.setData(organizationName)
             .sendTo(emails) { failedMails ->
                 val filedMailRecipients = failedMails.map { it.allRecipients.toString() }
-                val failedMail = FailedDeliveryMail(filedMailRecipients, mailSender, applicationProperties)
-                failedMail.sendTo(senderEmail)
+                FailedDeliveryMail(mailSender, applicationProperties).setData(filedMailRecipients)
+                    .sendTo(senderEmail)
             }
 
     override fun sendDepositRequestMail(user: UserResponse, amount: Long) =
-        DepositRequestMail(amount, mailSender, applicationProperties)
-            .sendTo(user.email)
+        depositRequestMail.setData(amount).sendTo(user.email)
 
     override fun sendDepositInfoMail(user: UserResponse, minted: Boolean) =
-        DepositMail(minted, mailSender, applicationProperties)
-            .sendTo(user.email)
+        depositMail.setData(minted).sendTo(user.email)
 
     override fun sendWithdrawRequestMail(user: UserResponse, amount: Long) {
-        WithdrawTokenIssuerMail(user, amount, mailSender, applicationProperties)
-            .sendTo(userService.getTokenIssuers(user.coop).map { it.email })
-        WithdrawRequestMail(amount, mailSender, applicationProperties)
-            .sendTo(user.email)
+        withdrawTokenIssuerMail.setData(user, amount).sendTo(userService.getTokenIssuers(user.coop).map { it.email })
+        withdrawRequestMail.setData(amount).sendTo(user.email)
     }
 
     override fun sendWithdrawInfoMail(user: UserResponse, burned: Boolean) =
-        WithdrawInfoMail(burned, mailSender, applicationProperties)
-            .sendTo(user.email)
+        withdrawInfoMail.setData(burned).sendTo(user.email)
 
     override fun sendNewWalletNotificationMail(walletType: WalletType, coop: String) =
-        NewWalletMail(walletType, mailSender, applicationProperties)
-            .sendTo(userService.getPlatformManagers(coop).map { it.email })
+        when (walletType) {
+            WalletType.USER -> newUserWalletMail
+            WalletType.PROJECT -> newProjectWalletMail
+            WalletType.ORGANIZATION -> newOrganizationWalletMail
+        }.sendTo(userService.getPlatformManagers(coop).map { it.email })
 
     override fun sendWalletActivatedMail(walletOwner: String, walletType: WalletType) {
         val (mail, userUuid) = when (walletType) {
-            WalletType.USER -> Pair(ActivatedUserWalletMail(mailSender, applicationProperties), walletOwner)
+            WalletType.USER -> Pair(activatedUserWalletMail, walletOwner)
             WalletType.ORGANIZATION -> {
-                val org = projectService.getOrganization(UUID.fromString(walletOwner))
-                Pair(ActivatedOrganizationWalletMail(org, mailSender, applicationProperties), org.createdByUser)
+                val organization = projectService.getOrganization(UUID.fromString(walletOwner))
+                Pair(activatedOrganizationWalletMail.setData(organization), organization.createdByUser)
             }
             WalletType.PROJECT -> {
                 val project = projectService.getProject(UUID.fromString(walletOwner))
-                Pair(ActivatedProjectWalletMail(project, mailSender, applicationProperties), project.createdByUser)
+                Pair(activatedProjectWalletMail.setData(project), project.createdByUser)
             }
         }
         val userEmails = userService.getUsers(listOf(userUuid)).map { it.email }

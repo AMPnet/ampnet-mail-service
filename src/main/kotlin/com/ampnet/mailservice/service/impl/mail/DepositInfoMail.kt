@@ -1,20 +1,21 @@
 package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
+import com.github.mustachejava.DefaultMustacheFactory
 import com.github.mustachejava.Mustache
 import org.springframework.mail.javamail.JavaMailSender
 
-class DepositMail(
-    val minted: Boolean,
+class DepositInfoMail(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties
 ) : AbstractMail(mailSender, applicationProperties) {
-    override val title: String
-        get() = "Deposit"
-    override val template: Mustache
-        get() = mustacheFactory.compile("mustache/deposit-template.mustache")
-    override val data: DepositInfo
-        get() = DepositInfo(minted)
+    override val title: String = "Deposit"
+    override val template: Mustache = DefaultMustacheFactory().compile("mustache/deposit-template.mustache")
+
+    fun setData(minted: Boolean): DepositInfoMail {
+        data = DepositInfo(minted)
+        return this
+    }
 }
 
 data class DepositInfo(val minted: Boolean)

@@ -2,7 +2,6 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.impl.LinkResolver
-import com.github.mustachejava.DefaultMustacheFactory
 import com.github.mustachejava.Mustache
 import mu.KLogging
 import org.springframework.mail.MailException
@@ -20,11 +19,10 @@ abstract class AbstractMail(
 
     companion object : KLogging()
 
-    protected val mustacheFactory = DefaultMustacheFactory()
     protected val linkResolver = LinkResolver(applicationProperties)
     protected abstract val title: String
     protected abstract val template: Mustache
-    protected abstract val data: Any
+    protected open var data: Any? = null
 
     fun sendTo(to: List<String>, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
         sendEmails(this.createMailMessage(to), notifySenderOnError)

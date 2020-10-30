@@ -4,6 +4,7 @@ import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.projectservice.proto.OrganizationResponse
 import com.ampnet.projectservice.proto.ProjectResponse
+import com.github.mustachejava.DefaultMustacheFactory
 import com.github.mustachejava.Mustache
 import org.springframework.mail.javamail.JavaMailSender
 
@@ -11,48 +12,46 @@ class ActivatedUserWalletMail(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties
 ) : AbstractMail(mailSender, applicationProperties) {
-    override val title: String
-        get() = "Wallet activated"
-    override val template: Mustache
-        get() = mustacheFactory.compile("mustache/user-wallet-activated-template.mustache")
-    override val data: ActivatedUserWalletData
-        get() = ActivatedUserWalletData(linkResolver.getWalletActivatedLink(WalletType.USER))
+    override val title: String = "Wallet activated"
+    override val template: Mustache =
+        DefaultMustacheFactory().compile("mustache/user-wallet-activated-template.mustache")
+    override var data: Any? = ActivatedUserWalletData(linkResolver.getWalletActivatedLink(WalletType.USER))
 }
 
 data class ActivatedUserWalletData(val link: String)
 
 class ActivatedOrganizationWalletMail(
-    val organization: OrganizationResponse,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties
 ) : AbstractMail(mailSender, applicationProperties) {
-    override val title: String
-        get() = "Wallet activated"
-    override val template: Mustache
-        get() = mustacheFactory.compile("mustache/organization-wallet-activated-template.mustache")
-    override val data: ActivatedOrganizationWalletData
-        get() = ActivatedOrganizationWalletData(
+    override val title: String = "Wallet activated"
+    override val template: Mustache =
+        DefaultMustacheFactory().compile("mustache/organization-wallet-activated-template.mustache")
+
+    fun setData(organization: OrganizationResponse): ActivatedOrganizationWalletMail {
+        data = ActivatedOrganizationWalletData(
             linkResolver.getWalletActivatedLink(
                 WalletType.ORGANIZATION,
                 organizationUUid = organization.uuid
             ),
             organization.name
         )
+        return this
+    }
 }
 
 data class ActivatedOrganizationWalletData(val link: String, val organizationName: String)
 
 class ActivatedProjectWalletMail(
-    val project: ProjectResponse,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties
 ) : AbstractMail(mailSender, applicationProperties) {
-    override val title: String
-        get() = "Wallet activated"
-    override val template: Mustache
-        get() = mustacheFactory.compile("mustache/project-wallet-activated-template.mustache")
-    override val data: ActivatedProjectWalletData
-        get() = ActivatedProjectWalletData(
+    override val title: String = "Wallet activated"
+    override val template: Mustache =
+        DefaultMustacheFactory().compile("mustache/project-wallet-activated-template.mustache")
+
+    fun setData(project: ProjectResponse): ActivatedProjectWalletMail {
+        data = ActivatedProjectWalletData(
             linkResolver.getWalletActivatedLink(
                 WalletType.PROJECT,
                 organizationUUid = project.organizationUuid,
@@ -60,6 +59,8 @@ class ActivatedProjectWalletMail(
             ),
             project.name
         )
+        return this
+    }
 }
 
 data class ActivatedProjectWalletData(val link: String, val projectName: String)

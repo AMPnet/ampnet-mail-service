@@ -2,34 +2,35 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.userservice.proto.UserResponse
+import com.github.mustachejava.DefaultMustacheFactory
 import com.github.mustachejava.Mustache
 import org.springframework.mail.javamail.JavaMailSender
 
 class WithdrawRequestMail(
-    val amount: Long,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties
 ) : AbstractMail(mailSender, applicationProperties) {
-    override val title: String
-        get() = "Withdraw"
-    override val template: Mustache
-        get() = mustacheFactory.compile("mustache/withdraw-request-template.mustache")
-    override val data: AmountData
-        get() = AmountData(amount.toMailFormat())
+    override val title: String = "Withdraw"
+    override val template: Mustache = DefaultMustacheFactory().compile("mustache/withdraw-request-template.mustache")
+
+    fun setData(amount: Long): WithdrawRequestMail {
+        data = AmountData(amount.toMailFormat())
+        return this
+    }
 }
 
 class WithdrawTokenIssuerMail(
-    val user: UserResponse,
-    val amount: Long,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties
 ) : AbstractMail(mailSender, applicationProperties) {
-    override val title: String
-        get() = "New withdrawal request"
-    override val template: Mustache
-        get() = mustacheFactory.compile("mustache/token-issuer-withdrawal-template.mustache")
-    override val data: UserData
-        get() = UserData(user.firstName, user.lastName, amount.toMailFormat(), linkResolver.manageWithdrawalsLink)
+    override val title: String = "New withdrawal request"
+    override val template: Mustache =
+        DefaultMustacheFactory().compile("mustache/token-issuer-withdrawal-template.mustache")
+
+    fun setData(user: UserResponse, amount: Long): WithdrawTokenIssuerMail {
+        data = UserData(user.firstName, user.lastName, amount.toMailFormat(), linkResolver.manageWithdrawalsLink)
+        return this
+    }
 }
 
 data class UserData(val firstName: String, val lastName: String, val amount: String, val link: String)
