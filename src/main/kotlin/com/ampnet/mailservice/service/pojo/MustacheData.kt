@@ -1,7 +1,5 @@
 package com.ampnet.mailservice.service.pojo
 
-import com.ampnet.userservice.proto.UserResponse
-
 data class MailConfirmationData(val link: String)
 data class ResetPasswordData(val link: String)
 data class InvitationData(val organization: String, val link: String)
@@ -15,6 +13,3 @@ data class WalletActivatedData(
     val organizationName: String? = null,
     val projectName: String? = null
 )
-
-
-

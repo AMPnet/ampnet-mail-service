@@ -1,19 +1,17 @@
 package com.ampnet.mailservice.service
 
 import com.ampnet.mailservice.config.ApplicationProperties
-import com.ampnet.mailservice.service.impl.FROM_CENTS_TO_EUROS
-import com.ampnet.mailservice.service.impl.TWO_DECIMAL_FORMAT
-import com.ampnet.mailservice.service.pojo.AmountData
-import com.ampnet.mailservice.service.pojo.DepositRequestData
 import com.ampnet.mailservice.service.pojo.InvitationData
-import com.ampnet.mailservice.service.pojo.OrganizationInvitationData
+import com.ampnet.mailservice.service.pojo.OrganizationInvitationRequestData
 import com.github.mustachejava.Mustache
 import org.springframework.mail.javamail.JavaMailSender
+import org.springframework.stereotype.Service
 
+@Service
 class OrganizationInvitationService(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties
-) : MailServiceALT<OrganizationInvitationData>(mailSender, applicationProperties) {
+) : MailServiceALT<OrganizationInvitationRequestData>(mailSender, applicationProperties) {
 
     internal val invitationMailSubject = "Invitation"
     internal val failedDeliveryMailSubject = "Email delivery failed"
@@ -24,7 +22,7 @@ class OrganizationInvitationService(
         mustacheFactory.compile("mustache/failed-delivery-message-template.mustache")
     }
 
-    override fun sendMail(data: OrganizationInvitationData) {
+    override fun sendMail(data: OrganizationInvitationRequestData) {
         val invitationData = InvitationData(data.organization, linkResolver.organizationInvitesLink)
         val message = fillTemplate(invitationTemplate, invitationData)
         val mails = createMailMessage(data.emails, invitationMailSubject, message)

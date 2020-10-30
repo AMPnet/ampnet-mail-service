@@ -7,7 +7,9 @@ import com.ampnet.mailservice.service.pojo.AmountData
 import com.ampnet.mailservice.service.pojo.DepositRequestData
 import com.github.mustachejava.Mustache
 import org.springframework.mail.javamail.JavaMailSender
+import org.springframework.stereotype.Service
 
+@Service
 class DepositService(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties

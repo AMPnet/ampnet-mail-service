@@ -17,7 +17,8 @@ import com.ampnet.mailservice.proto.WithdrawRequest
 import com.ampnet.mailservice.service.MailService
 import com.ampnet.mailservice.service.MailServiceALT
 import com.ampnet.mailservice.service.pojo.DepositRequestData
-import com.ampnet.mailservice.service.pojo.OrganizationInvitationData
+import com.ampnet.mailservice.service.pojo.OrganizationInvitationRequestData
+import com.ampnet.mailservice.service.pojo.WalletActivatedRequestData
 import com.ampnet.userservice.proto.UserResponse
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
@@ -36,7 +37,9 @@ class GrpcMailServer(
     @Autowired
     private lateinit var depositService: MailServiceALT<DepositRequestData>
     @Autowired
-    private lateinit var organizationInvitationService: MailServiceALT<OrganizationInvitationData>
+    private lateinit var organizationInvitationService: MailServiceALT<OrganizationInvitationRequestData>
+    @Autowired
+    private lateinit var walletActivatedService: MailServiceALT<WalletActivatedRequestData>
 
     companion object : KLogging()
 
@@ -52,8 +55,9 @@ class GrpcMailServer(
     ) {
         val emails = request.emailsList.toList()
         logger.debug { "Received gRPC request sendOrganizationInvitation to: ${emails.joinToString()}" }
-        //mailService.sendOrganizationInvitationMail(emails, request.organization, request.senderEmail)
-        organizationInvitationService.sendMail(OrganizationInvitationData(emails, request.organization, request.senderEmail))
+        organizationInvitationService.sendMail(
+            OrganizationInvitationRequestData(emails, request.organization, request.senderEmail)
+        )
         returnSuccessfulResponse(responseObserver)
     }
 
@@ -61,7 +65,6 @@ class GrpcMailServer(
         logger.debug { "Received gRPC request SendDepositRequest to: ${request.user}" }
         sendMailToUser(request.user, responseObserver) {
             depositService.sendMail(DepositRequestData(it, request.amount))
-            // mailServiceALT.sendMail(DepositRequestData(it, request.amount))
         }
     }
 
@@ -98,7 +101,7 @@ class GrpcMailServer(
 
     override fun sendWalletActivated(request: ActivatedWalletRequest, responseObserver: StreamObserver<Empty>) {
         logger.debug { "Received gRPC request SendNewWalletActivated for wallet type: ${request.type}" }
-        mailService.sendWalletActivatedMail(request.walletOwner, getWalletType(request.type))
+        walletActivatedService.sendMail(WalletActivatedRequestData(request.walletOwner, getWalletType(request.type)))
     }
 
     private fun sendMailToUser(

@@ -1,20 +1,18 @@
 package com.ampnet.mailservice.service
 
 import com.ampnet.mailservice.config.ApplicationProperties
-import com.ampnet.mailservice.grpc.projectservice.ProjectService
-import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.service.impl.LinkResolver
 import com.ampnet.mailservice.service.impl.MailServiceImpl
 import com.github.mustachejava.DefaultMustacheFactory
 import com.github.mustachejava.Mustache
-import java.io.StringWriter
-import java.util.Date
-import javax.mail.MessagingException
-import javax.mail.internet.MimeMessage
 import org.springframework.mail.MailException
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
+import java.io.StringWriter
+import java.util.Date
+import javax.mail.MessagingException
+import javax.mail.internet.MimeMessage
 
 const val FROM_CENTS_TO_EUROS = 100.0
 const val TWO_DECIMAL_FORMAT = "%.2f"
@@ -22,9 +20,7 @@ const val TWO_DECIMAL_FORMAT = "%.2f"
 @Service
 abstract class MailServiceALT<T> (
     private val mailSender: JavaMailSender,
-    private val applicationProperties: ApplicationProperties,
-    private val userService: UserService? = null,
-    private val projectService: ProjectService? = null
+    private val applicationProperties: ApplicationProperties
 ) {
     protected val mustacheFactory = DefaultMustacheFactory()
     protected val linkResolver = LinkResolver(applicationProperties)
