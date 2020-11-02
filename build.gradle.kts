@@ -18,6 +18,7 @@ plugins {
     id("com.google.protobuf") version "0.8.13"
     id("io.gitlab.arturbosch.detekt").version("1.9.1")
     idea
+    jacoco
 }
 
 group = "com.ampnet"
@@ -95,10 +96,42 @@ jib {
     }
 }
 
+jacoco.toolVersion = "0.8.6"
+tasks.jacocoTestReport {
+    reports {
+        xml.isEnabled = true
+        xml.destination = file("$buildDir/reports/jacoco/report.xml")
+        csv.isEnabled = false
+        html.destination = file("$buildDir/reports/jacoco/html")
+    }
+    sourceDirectories.setFrom(listOf(file("${project.projectDir}/src/main/kotlin")))
+    classDirectories.setFrom(
+        fileTree("$buildDir/classes/kotlin/main").apply {
+            exclude("com/ampnet/mailservice/grpc/**")
+        }
+    )
+    dependsOn(tasks.test)
+}
+tasks.jacocoTestCoverageVerification {
+    classDirectories.setFrom(
+        sourceSets.main.get().output.asFileTree.matching {
+            exclude("com/ampnet/*/proto/**", "com/ampnet/mailservice/grpc/**")
+        }
+    )
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.7".toBigDecimal()
+            }
+        }
+    }
+    mustRunAfter(tasks.jacocoTestReport)
+}
+
 detekt {
     input = files("src/main/kotlin")
 }
 
 task("qualityCheck") {
-    dependsOn(tasks.ktlintCheck, tasks.detekt, tasks.test)
+    dependsOn(tasks.ktlintCheck, tasks.jacocoTestReport, tasks.jacocoTestCoverageVerification, tasks.detekt)
 }
