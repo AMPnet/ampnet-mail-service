@@ -31,20 +31,39 @@ class UserMailServiceImpl(
     private val projectService: ProjectService
 ) : UserMailService {
 
-    private val confirmationMail = ConfirmationMail(mailSender, applicationProperties, linkResolverService)
-    private val resetPasswordMail = ResetPasswordMail(mailSender, applicationProperties, linkResolverService)
-    private val invitationMail = InvitationMail(mailSender, applicationProperties, linkResolverService)
-    private val depositRequestMail = DepositRequestMail(mailSender, applicationProperties, linkResolverService)
-    private val depositMail = DepositInfoMail(mailSender, applicationProperties, linkResolverService)
-    private val withdrawRequestMail = WithdrawRequestMail(mailSender, applicationProperties, linkResolverService)
-    private val withdrawInfoMail = WithdrawInfoMail(mailSender, applicationProperties, linkResolverService)
-    private val activatedUserWalletMail =
+    private val confirmationMail: ConfirmationMail by lazy {
+        ConfirmationMail(mailSender, applicationProperties, linkResolverService)
+    }
+    private val resetPasswordMail: ResetPasswordMail by lazy {
+        ResetPasswordMail(mailSender, applicationProperties, linkResolverService)
+    }
+    private val invitationMail: InvitationMail by lazy {
+        InvitationMail(mailSender, applicationProperties, linkResolverService)
+    }
+    private val depositRequestMail: DepositRequestMail by lazy {
+        DepositRequestMail(mailSender, applicationProperties, linkResolverService)
+    }
+    private val depositMail: DepositInfoMail by lazy {
+        DepositInfoMail(mailSender, applicationProperties, linkResolverService)
+    }
+    private val withdrawRequestMail: WithdrawRequestMail by lazy {
+        WithdrawRequestMail(mailSender, applicationProperties, linkResolverService)
+    }
+    private val withdrawInfoMail: WithdrawInfoMail by lazy {
+        WithdrawInfoMail(mailSender, applicationProperties, linkResolverService)
+    }
+    private val activatedUserWalletMail: ActivatedUserWalletMail by lazy {
         ActivatedUserWalletMail(mailSender, applicationProperties, linkResolverService)
-    private val activatedOrganizationWalletMail =
+    }
+    private val activatedOrganizationWalletMail: ActivatedOrganizationWalletMail by lazy {
         ActivatedOrganizationWalletMail(mailSender, applicationProperties, linkResolverService)
-    private val activatedProjectWalletMail =
+    }
+    private val activatedProjectWalletMail: ActivatedProjectWalletMail by lazy {
         ActivatedProjectWalletMail(mailSender, applicationProperties, linkResolverService)
-    private val failedDeliveryMail = FailedDeliveryMail(mailSender, applicationProperties, linkResolverService)
+    }
+    private val failedDeliveryMail: FailedDeliveryMail by lazy {
+        FailedDeliveryMail(mailSender, applicationProperties, linkResolverService)
+    }
 
     override fun sendConfirmationMail(email: String, token: String) =
         confirmationMail.setData(token).sendTo(email)

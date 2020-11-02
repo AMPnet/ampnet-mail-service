@@ -19,17 +19,22 @@ class AdminMailServiceImpl(
     private val userService: UserService
 ) : AdminMailService {
 
-    private val withdrawTokenIssuerMail =
+    private val withdrawTokenIssuerMail: WithdrawTokenIssuerMail by lazy {
         WithdrawTokenIssuerMail(mailSender, applicationProperties, linkResolverService)
-    private val newUserWalletMail =
+    }
+    private val newUserWalletMail: NewWalletMail by lazy {
         NewWalletMail(WalletType.USER, mailSender, applicationProperties, linkResolverService)
-    private val newOrganizationWalletMail =
+    }
+    private val newOrganizationWalletMail: NewWalletMail by lazy {
         NewWalletMail(WalletType.ORGANIZATION, mailSender, applicationProperties, linkResolverService)
-    private val newProjectWalletMail =
+    }
+    private val newProjectWalletMail: NewWalletMail by lazy {
         NewWalletMail(WalletType.PROJECT, mailSender, applicationProperties, linkResolverService)
+    }
 
     override fun sendWithdrawRequestMail(user: UserResponse, amount: Long) =
-        withdrawTokenIssuerMail.setData(user, amount).sendTo(userService.getTokenIssuers(user.coop).map { it.email })
+        withdrawTokenIssuerMail.setData(user, amount)
+            .sendTo(userService.getTokenIssuers(user.coop).map { it.email })
 
     override fun sendNewWalletNotificationMail(walletType: WalletType, coop: String) =
         when (walletType) {
