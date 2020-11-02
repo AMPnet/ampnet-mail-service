@@ -2,9 +2,12 @@ package com.ampnet.mailservice.service.impl
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.enums.WalletType
+import com.ampnet.mailservice.service.LinkResolverService
+import org.springframework.stereotype.Service
 import java.net.URL
 
-class LinkResolver(applicationProperties: ApplicationProperties) {
+@Service
+class LinkResolverServiceImpl(applicationProperties: ApplicationProperties) : LinkResolverService {
 
     private val baseUrl = URL(applicationProperties.mail.baseUrl).toString()
     private val confirmationPath = applicationProperties.mail.confirmationPath
@@ -13,13 +16,21 @@ class LinkResolver(applicationProperties: ApplicationProperties) {
     private val walletActivatedPath = applicationProperties.mail.walletActivatedPath
     private val organizationInvitesPath = applicationProperties.mail.organizationInvitationsPath
     private val manageProjectPath = applicationProperties.mail.manageProjectPath
-    val organizationInvitesLink = "$baseUrl/$organizationInvitesPath".removeDoubleSlashes()
-    val manageWithdrawalsLink = "$baseUrl/${applicationProperties.mail.manageWithdrawalsPath}".removeDoubleSlashes()
+    private val organizationInvitesLink = "$baseUrl/$organizationInvitesPath".removeDoubleSlashes()
+    private val manageWithdrawalsLink =
+        "$baseUrl/${applicationProperties.mail.manageWithdrawalsPath}".removeDoubleSlashes()
 
-    fun getConfirmationLink(token: String): String = "$baseUrl/$confirmationPath?token=$token".removeDoubleSlashes()
-    fun getResetPasswordLink(token: String): String = "$baseUrl/$resetPasswordPath?token=$token".removeDoubleSlashes()
+    override fun getOrganizationInvitesLink() = organizationInvitesLink
 
-    fun getNewWalletLink(walletType: WalletType): String {
+    override fun getManageWithdrawalsLink() = manageWithdrawalsLink
+
+    override fun getConfirmationLink(token: String): String =
+        "$baseUrl/$confirmationPath?token=$token".removeDoubleSlashes()
+
+    override fun getResetPasswordLink(token: String): String =
+        "$baseUrl/$resetPasswordPath?token=$token".removeDoubleSlashes()
+
+    override fun getNewWalletLink(walletType: WalletType): String {
         val typePath = when (walletType) {
             WalletType.USER -> "users"
             WalletType.PROJECT -> "projects"
@@ -28,10 +39,10 @@ class LinkResolver(applicationProperties: ApplicationProperties) {
         return "$baseUrl/$newWalletPath/$typePath".removeDoubleSlashes()
     }
 
-    fun getWalletActivatedLink(
+    override fun getWalletActivatedLink(
         walletType: WalletType,
-        organizationUUid: String? = null,
-        projectUuid: String? = null
+        organizationUUid: String?,
+        projectUuid: String?
     ): String {
         val typePath = when (walletType) {
             WalletType.USER -> walletActivatedPath
@@ -40,6 +51,6 @@ class LinkResolver(applicationProperties: ApplicationProperties) {
         }
         return "$baseUrl/$typePath".removeDoubleSlashes()
     }
-}
 
-fun String.removeDoubleSlashes() = this.replace("(?<!http:)//".toRegex(), "/")
+    private fun String.removeDoubleSlashes() = this.replace("(?<!(http:)|(https:))//+".toRegex(), "/")
+}
