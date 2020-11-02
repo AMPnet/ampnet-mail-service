@@ -1,5 +1,7 @@
 # Mail service
 
+![Release](https://github.com/AMPnet/mail-service/workflows/Release/badge.svg?branch=master) [![codecov](https://codecov.io/gh/AMPnet/mail-service/branch/master/graph/badge.svg?token=6RJjorPf8Z)](https://codecov.io/gh/AMPnet/mail-service)
+
 ## Start
 
 Application is running on port: `8127`. To change default port set configuration: `server.port`.
