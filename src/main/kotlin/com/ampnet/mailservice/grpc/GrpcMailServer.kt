@@ -9,9 +9,9 @@ import com.ampnet.mailservice.proto.DepositRequest
 import com.ampnet.mailservice.proto.Empty
 import com.ampnet.mailservice.proto.MailConfirmationRequest
 import com.ampnet.mailservice.proto.MailServiceGrpc
+import com.ampnet.mailservice.proto.NewWalletRequest
 import com.ampnet.mailservice.proto.OrganizationInvitationRequest
 import com.ampnet.mailservice.proto.ResetPasswordRequest
-import com.ampnet.mailservice.proto.WalletTypeRequest
 import com.ampnet.mailservice.proto.WithdrawInfoRequest
 import com.ampnet.mailservice.proto.WithdrawRequest
 import com.ampnet.mailservice.service.AdminMailService
@@ -83,9 +83,11 @@ class GrpcMailServer(
         userMailService.sendResetPasswordMail(request.email, request.token)
     }
 
-    override fun sendNewWalletMail(request: WalletTypeRequest, responseObserver: StreamObserver<Empty>?) {
+    override fun sendNewWalletMail(request: NewWalletRequest, responseObserver: StreamObserver<Empty>?) {
         logger.debug { "Received gRPC request SendNewWalletMail for wallet type: ${request.type}" }
-        adminMailService.sendNewWalletNotificationMail(getWalletType(request.type), request.coop)
+        adminMailService.sendNewWalletNotificationMail(
+            getWalletType(request.type), request.coop, request.activationData
+        )
     }
 
     override fun sendWalletActivated(request: ActivatedWalletRequest, responseObserver: StreamObserver<Empty>) {

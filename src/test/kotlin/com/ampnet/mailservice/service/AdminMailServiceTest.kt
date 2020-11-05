@@ -4,7 +4,7 @@ import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.service.impl.AdminMailServiceImpl
 import com.ampnet.mailservice.service.impl.mail.toMailFormat
 import com.ampnet.userservice.proto.UserResponse
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import java.util.UUID
@@ -33,15 +33,15 @@ class AdminMailServiceTest : MailServiceTestBase() {
 
         verify("The mail is sent to token issuer and has correct data") {
             val mailList = wiser.messages
-            Assertions.assertThat(mailList).hasSize(1)
+            assertThat(mailList).hasSize(1)
             val tokenIssuerMail = mailList.first()
 
-            Assertions.assertThat(tokenIssuerMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
-            Assertions.assertThat(tokenIssuerMail.envelopeReceiver).isEqualTo(testContext.tokenIssuerMail)
-            Assertions.assertThat(tokenIssuerMail.mimeMessage.subject).isEqualTo(manageWithdrawalsSubject)
+            assertThat(tokenIssuerMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(tokenIssuerMail.envelopeReceiver).isEqualTo(testContext.tokenIssuerMail)
+            assertThat(tokenIssuerMail.mimeMessage.subject).isEqualTo(manageWithdrawalsSubject)
 
             val mailText = tokenIssuerMail.mimeMessage.content.toString()
-            Assertions.assertThat(mailText).contains(testContext.amount.toMailFormat())
+            assertThat(mailText).contains(testContext.amount.toMailFormat())
         }
     }
 
@@ -54,18 +54,20 @@ class AdminMailServiceTest : MailServiceTestBase() {
                 .build()
             Mockito.`when`(userService.getPlatformManagers(coop))
                 .thenReturn(listOf(platformManager))
-            service.sendNewWalletNotificationMail(WalletType.ORGANIZATION, coop)
+            service.sendNewWalletNotificationMail(WalletType.ORGANIZATION, coop, activationData)
         }
 
         verify("The mail is sent to right receiver and has correct data") {
             val mailList = wiser.messages
             val userMail = mailList.first()
-            Assertions.assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
-            Assertions.assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            Assertions.assertThat(userMail.mimeMessage.subject).isEqualTo(newWalletSubject)
+            assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
+            assertThat(userMail.mimeMessage.subject).isEqualTo(newWalletSubject)
             val confirmationUserLink = applicationProperties.mail.baseUrl + "/" +
                 applicationProperties.mail.newWalletPath + "/groups"
-            Assertions.assertThat(userMail.mimeMessage.content.toString()).contains(confirmationUserLink)
+            val mailText = userMail.mimeMessage.content.toString()
+            assertThat(mailText).contains(confirmationUserLink)
+            assertThat(mailText).doesNotContain(activationData)
         }
     }
 
@@ -78,27 +80,31 @@ class AdminMailServiceTest : MailServiceTestBase() {
                 .build()
             Mockito.`when`(userService.getPlatformManagers(coop))
                 .thenReturn(listOf(platformManager))
-            service.sendNewWalletNotificationMail(WalletType.USER, coop)
-            service.sendNewWalletNotificationMail(WalletType.PROJECT, coop)
+            service.sendNewWalletNotificationMail(WalletType.USER, coop, activationData)
+            service.sendNewWalletNotificationMail(WalletType.PROJECT, coop, activationData)
         }
 
         verify("Both mails are sent to right receivers and have confirmation link") {
             val mailList = wiser.messages
             val userMail = mailList.first()
-            Assertions.assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
-            Assertions.assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            Assertions.assertThat(userMail.mimeMessage.subject).isEqualTo(newWalletSubject)
+            assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
+            assertThat(userMail.mimeMessage.subject).isEqualTo(newWalletSubject)
             val confirmationUserLink = applicationProperties.mail.baseUrl + "/" +
                 applicationProperties.mail.newWalletPath + "/user"
-            Assertions.assertThat(userMail.mimeMessage.content.toString()).contains(confirmationUserLink)
+            val userMailText = userMail.mimeMessage.content.toString()
+            assertThat(userMailText).contains(confirmationUserLink)
+            assertThat(userMailText).contains(activationData)
 
             val projectMail = mailList[1]
-            Assertions.assertThat(projectMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
-            Assertions.assertThat(projectMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            Assertions.assertThat(projectMail.mimeMessage.subject).isEqualTo(newWalletSubject)
+            assertThat(projectMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(projectMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
+            assertThat(projectMail.mimeMessage.subject).isEqualTo(newWalletSubject)
             val confirmationProjectLink = applicationProperties.mail.baseUrl + "/" +
                 applicationProperties.mail.newWalletPath + "/project"
-            Assertions.assertThat(projectMail.mimeMessage.content.toString()).contains(confirmationProjectLink)
+            val projectMailText = projectMail.mimeMessage.content.toString()
+            assertThat(projectMailText).contains(confirmationProjectLink)
+            assertThat(projectMailText).doesNotContain(activationData)
         }
     }
 }
