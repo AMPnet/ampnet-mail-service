@@ -5,5 +5,5 @@ import com.ampnet.userservice.proto.UserResponse
 
 interface AdminMailService {
     fun sendWithdrawRequestMail(user: UserResponse, amount: Long)
-    fun sendNewWalletNotificationMail(walletType: WalletType, coop: String)
+    fun sendNewWalletNotificationMail(walletType: WalletType, coop: String, activationData: String)
 }

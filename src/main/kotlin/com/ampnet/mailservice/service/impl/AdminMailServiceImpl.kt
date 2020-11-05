@@ -36,10 +36,10 @@ class AdminMailServiceImpl(
         withdrawTokenIssuerMail.setData(user, amount)
             .sendTo(userService.getTokenIssuers(user.coop).map { it.email })
 
-    override fun sendNewWalletNotificationMail(walletType: WalletType, coop: String) =
+    override fun sendNewWalletNotificationMail(walletType: WalletType, coop: String, activationData: String) =
         when (walletType) {
             WalletType.USER -> newUserWalletMail
             WalletType.PROJECT -> newProjectWalletMail
             WalletType.ORGANIZATION -> newOrganizationWalletMail
-        }.sendTo(userService.getPlatformManagers(coop).map { it.email })
+        }.setData(activationData).sendTo(userService.getPlatformManagers(coop).map { it.email })
 }

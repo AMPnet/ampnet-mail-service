@@ -16,10 +16,15 @@ class NewWalletMail(
     override val title: String = "New wallet created"
     override val template: Mustache = when (type) {
         WalletType.USER -> DefaultMustacheFactory().compile("mustache/user-wallet-template.mustache")
-        WalletType.PROJECT -> DefaultMustacheFactory().compile("mustache/user-wallet-template.mustache")
+        WalletType.PROJECT -> DefaultMustacheFactory().compile("mustache/project-wallet-template.mustache")
         WalletType.ORGANIZATION -> DefaultMustacheFactory().compile("mustache/organization-wallet-template.mustache")
     }
-    override var data: Any? = NewWalletData(linkResolver.getNewWalletLink(type))
+
+    fun setData(activationData: String): NewWalletMail {
+        data = if (type == WalletType.USER) NewWalletData(linkResolver.getNewWalletLink(type), activationData)
+        else NewWalletData(linkResolver.getNewWalletLink(type))
+        return this
+    }
 }
 
-data class NewWalletData(val link: String)
+data class NewWalletData(val link: String, val activationData: String? = null)
