@@ -90,9 +90,9 @@ class UserMailServiceImpl(
     override fun sendWithdrawInfoMail(user: UserResponse, burned: Boolean) =
         withdrawInfoMail.setData(burned).sendTo(user.email)
 
-    override fun sendWalletActivatedMail(walletOwner: String, walletType: WalletType) {
+    override fun sendWalletActivatedMail(walletOwner: String, walletType: WalletType, activationData: String) {
         val (mail, userUuid) = when (walletType) {
-            WalletType.USER -> Pair(activatedUserWalletMail, walletOwner)
+            WalletType.USER -> Pair(activatedUserWalletMail.setData(activationData), walletOwner)
             WalletType.ORGANIZATION -> {
                 val organization = projectService.getOrganization(UUID.fromString(walletOwner))
                 Pair(activatedOrganizationWalletMail.setData(organization), organization.createdByUser)

@@ -11,5 +11,5 @@ interface UserMailService {
     fun sendDepositInfoMail(user: UserResponse, minted: Boolean)
     fun sendWithdrawRequestMail(user: UserResponse, amount: Long)
     fun sendWithdrawInfoMail(user: UserResponse, burned: Boolean)
-    fun sendWalletActivatedMail(walletOwner: String, walletType: WalletType)
+    fun sendWalletActivatedMail(walletOwner: String, walletType: WalletType, activationData: String)
 }

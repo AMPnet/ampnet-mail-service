@@ -17,10 +17,14 @@ class ActivatedUserWalletMail(
     override val title: String = "Wallet activated"
     override val template: Mustache =
         DefaultMustacheFactory().compile("mustache/user-wallet-activated-template.mustache")
-    override var data: Any? = ActivatedUserWalletData(linkResolver.getWalletActivatedLink(WalletType.USER))
+
+    fun setData(activationData: String): ActivatedUserWalletMail {
+        data = ActivatedUserWalletData(linkResolver.getWalletActivatedLink(WalletType.USER), activationData)
+        return this
+    }
 }
 
-data class ActivatedUserWalletData(val link: String)
+data class ActivatedUserWalletData(val link: String, val activationData: String)
 
 class ActivatedOrganizationWalletMail(
     mailSender: JavaMailSender,
