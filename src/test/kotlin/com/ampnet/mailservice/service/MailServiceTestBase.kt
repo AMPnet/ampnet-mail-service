@@ -45,6 +45,7 @@ abstract class MailServiceTestBase : TestBase() {
     protected var defaultMailPort: Int = 0
     protected val testContext = TestContext()
     protected val coop = "ampnet-test"
+    protected val activationData = "activation data"
     protected val confirmationMailSubject = "Confirm your email"
     protected val resetPasswordSubject = "Reset password"
     protected val invitationMailSubject = "Invitation"
