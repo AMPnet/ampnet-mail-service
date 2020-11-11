@@ -81,13 +81,15 @@ class GrpcMailServer(
     override fun sendResetPassword(request: ResetPasswordRequest, responseObserver: StreamObserver<Empty>) {
         logger.debug { "Received gRPC request SendForgotPassword to: ${request.email}" }
         userMailService.sendResetPasswordMail(request.email, request.token)
+        returnSuccessfulResponse(responseObserver)
     }
 
-    override fun sendNewWalletMail(request: NewWalletRequest, responseObserver: StreamObserver<Empty>?) {
+    override fun sendNewWalletMail(request: NewWalletRequest, responseObserver: StreamObserver<Empty>) {
         logger.debug { "Received gRPC request SendNewWalletMail for wallet type: ${request.type}" }
         adminMailService.sendNewWalletNotificationMail(
             getWalletType(request.type), request.coop, request.activationData
         )
+        returnSuccessfulResponse(responseObserver)
     }
 
     override fun sendWalletActivated(request: ActivatedWalletRequest, responseObserver: StreamObserver<Empty>) {
@@ -95,6 +97,7 @@ class GrpcMailServer(
         userMailService.sendWalletActivatedMail(
             request.walletOwner, getWalletType(request.type), request.activationData
         )
+        returnSuccessfulResponse(responseObserver)
     }
 
     private fun sendMailToUser(

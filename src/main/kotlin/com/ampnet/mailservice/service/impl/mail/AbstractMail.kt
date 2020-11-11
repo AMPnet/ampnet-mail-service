@@ -47,10 +47,10 @@ abstract class AbstractMail(
     private fun sendEmail(mail: MimeMessage): Boolean {
         return try {
             mailSender.send(mail)
-            logger.info { "Successfully sent email to: ${mail.allRecipients}" }
+            logger.info { "Successfully sent email to: ${mail.allRecipients.joinToString()}" }
             true
         } catch (ex: MailException) {
-            logger.warn { "Cannot send email to: ${mail.allRecipients}" }
+            logger.warn { "Cannot send email to: ${mail.allRecipients.joinToString()}" }
             false
         }
     }
