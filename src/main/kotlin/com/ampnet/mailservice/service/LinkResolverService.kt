@@ -3,7 +3,7 @@ package com.ampnet.mailservice.service
 import com.ampnet.mailservice.enums.WalletType
 
 interface LinkResolverService {
-    fun getOrganizationInvitesLink(): String
+    fun getOrganizationInvitesLink(coop: String): String
     fun getManageWithdrawalsLink(): String
     fun getConfirmationLink(token: String, coop: String): String
     fun getResetPasswordLink(token: String, coop: String): String

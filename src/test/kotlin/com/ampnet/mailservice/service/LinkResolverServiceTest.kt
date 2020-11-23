@@ -18,8 +18,8 @@ class LinkResolverServiceTest : TestBase() {
             applicationProperties.mail.organizationInvitationsPath = "/org//invites///"
 
             val service = LinkResolverServiceImpl(applicationProperties)
-            val generatedPath = service.getOrganizationInvitesLink()
-            assertThat(generatedPath).isEqualTo("https://demo.ampnet.io/org/invites/")
+            val generatedPath = service.getOrganizationInvitesLink("ampnet-test")
+            assertThat(generatedPath).isEqualTo("https://demo.ampnet.io/ampnet-test/org/invites/")
         }
     }
 

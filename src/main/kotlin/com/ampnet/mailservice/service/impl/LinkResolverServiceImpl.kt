@@ -17,11 +17,11 @@ class LinkResolverServiceImpl(applicationProperties: ApplicationProperties) : Li
     private val organizationInvitesPath = applicationProperties.mail.organizationInvitationsPath
     private val manageProjectPath = applicationProperties.mail.manageProjectPath
 
-    private val organizationInvitesLink = "$baseUrl/$organizationInvitesPath".removeDoubleSlashes()
     private val manageWithdrawalsLink =
         "$baseUrl/${applicationProperties.mail.manageWithdrawalsPath}".removeDoubleSlashes()
 
-    override fun getOrganizationInvitesLink() = organizationInvitesLink
+    override fun getOrganizationInvitesLink(coop: String) =
+        "$baseUrl/$coop/$organizationInvitesPath".removeDoubleSlashes()
 
     override fun getManageWithdrawalsLink() = manageWithdrawalsLink
 

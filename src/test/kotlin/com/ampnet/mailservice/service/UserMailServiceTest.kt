@@ -1,6 +1,7 @@
 package com.ampnet.mailservice.service
 
 import com.ampnet.mailservice.enums.WalletType
+import com.ampnet.mailservice.proto.OrganizationInvitationRequest
 import com.ampnet.mailservice.service.impl.UserMailServiceImpl
 import com.ampnet.mailservice.service.impl.mail.toMailFormat
 import com.ampnet.userservice.proto.UserResponse
@@ -58,9 +59,13 @@ class UserMailServiceTest : MailServiceTestBase() {
     @Test
     fun mustSetCorrectOrganizationInvitationMail() {
         suppose("Service sends organizationInvitation e-mails") {
-            service.sendOrganizationInvitationMail(
-                testContext.receiverEmails, testContext.organizationName, "sender@email.com"
-            )
+            val request = OrganizationInvitationRequest.newBuilder()
+                .addAllEmails(testContext.receiverEmails)
+                .setSenderEmail("sender@email.com")
+                .setOrganization(testContext.organizationName)
+                .setCoop(testContext.coop)
+                .build()
+            service.sendOrganizationInvitationMail(request)
         }
 
         verify("The mail is sent to right receiver and has correct data") {
@@ -76,8 +81,8 @@ class UserMailServiceTest : MailServiceTestBase() {
             val mailText = firstMail.mimeMessage.content.toString()
             assertThat(mailText).contains(testContext.organizationName)
 
-            val link = applicationProperties.mail.baseUrl + "/" +
-                applicationProperties.mail.organizationInvitationsPath
+            val link = applicationProperties.mail.baseUrl + "/" + testContext.coop + "/"
+            applicationProperties.mail.organizationInvitationsPath
             assertThat(mailText).contains(link)
         }
     }
@@ -300,9 +305,13 @@ class UserMailServiceTest : MailServiceTestBase() {
         suppose("Service sends organizationInvitation to incorrect and correct email") {
             val correctEmail = "test@email.com"
             val incorrectEmail = "fff5555"
-            service.sendOrganizationInvitationMail(
-                listOf(correctEmail, incorrectEmail), testContext.organizationName, "sender@email.com"
-            )
+            val request = OrganizationInvitationRequest.newBuilder()
+                .addAllEmails(listOf(correctEmail, incorrectEmail))
+                .setSenderEmail("sender@email.com")
+                .setOrganization(testContext.organizationName)
+                .setCoop(testContext.coop)
+                .build()
+            service.sendOrganizationInvitationMail(request)
         }
 
         verify("The mail is only sent to right receiver") {

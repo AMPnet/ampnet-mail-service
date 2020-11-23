@@ -14,8 +14,8 @@ class InvitationMail(
     override val title: String = "Invitation"
     override val template: Mustache = DefaultMustacheFactory().compile("mustache/invitation-template.mustache")
 
-    fun setData(organization: String): InvitationMail {
-        data = InvitationData(organization, linkResolver.getOrganizationInvitesLink())
+    fun setData(organization: String, coop: String): InvitationMail {
+        data = InvitationData(organization, linkResolver.getOrganizationInvitesLink(coop))
         return this
     }
 }

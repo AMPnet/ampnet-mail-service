@@ -5,6 +5,7 @@ import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.exception.ResourceNotFoundException
 import com.ampnet.mailservice.grpc.projectservice.ProjectService
 import com.ampnet.mailservice.grpc.userservice.UserService
+import com.ampnet.mailservice.proto.OrganizationInvitationRequest
 import com.ampnet.mailservice.service.LinkResolverService
 import com.ampnet.mailservice.service.UserMailService
 import com.ampnet.mailservice.service.impl.mail.AbstractMail
@@ -73,11 +74,11 @@ class UserMailServiceImpl(
     override fun sendResetPasswordMail(email: String, token: String, coop: String) =
         resetPasswordMail.setData(token, coop).sendTo(email)
 
-    override fun sendOrganizationInvitationMail(emails: List<String>, organizationName: String, senderEmail: String) =
-        invitationMail.setData(organizationName)
-            .sendTo(emails) { failedMails ->
+    override fun sendOrganizationInvitationMail(request: OrganizationInvitationRequest) =
+        invitationMail.setData(request.organization, request.coop)
+            .sendTo(request.emailsList.toList()) { failedMails ->
                 val filedMailRecipients = failedMails.map { it.allRecipients.toString() }
-                failedDeliveryMail.setData(filedMailRecipients).sendTo(senderEmail)
+                failedDeliveryMail.setData(filedMailRecipients).sendTo(request.senderEmail)
             }
 
     override fun sendDepositRequestMail(user: UserResponse, amount: Long) =
