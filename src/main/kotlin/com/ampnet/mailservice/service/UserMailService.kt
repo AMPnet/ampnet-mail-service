@@ -4,7 +4,7 @@ import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.userservice.proto.UserResponse
 
 interface UserMailService {
-    fun sendConfirmationMail(email: String, token: String)
+    fun sendConfirmationMail(email: String, token: String, coop: String)
     fun sendResetPasswordMail(email: String, token: String)
     fun sendOrganizationInvitationMail(emails: List<String>, organizationName: String, senderEmail: String)
     fun sendDepositRequestMail(user: UserResponse, amount: Long)

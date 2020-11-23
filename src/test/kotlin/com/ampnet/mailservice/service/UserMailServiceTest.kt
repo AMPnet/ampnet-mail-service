@@ -18,7 +18,7 @@ class UserMailServiceTest : MailServiceTestBase() {
     @Test
     fun mustSetCorrectSendConfirmationMail() {
         suppose("Service sent the mail") {
-            service.sendConfirmationMail(testContext.receiverMail, testContext.token)
+            service.sendConfirmationMail(testContext.receiverMail, testContext.token, testContext.coop)
         }
 
         verify("The mail is sent to right receiver and has confirmation link") {
@@ -29,8 +29,8 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(mail.mimeMessage.subject).isEqualTo(confirmationMailSubject)
 
-            val confirmationLink = applicationProperties.mail.baseUrl + "/" +
-                "${applicationProperties.mail.confirmationPath}?token=${testContext.token}"
+            val confirmationLink = applicationProperties.mail.baseUrl + "/" + testContext.coop + "/"
+            "${applicationProperties.mail.confirmationPath}?token=${testContext.token}"
             assertThat(mail.mimeMessage.content.toString()).contains(confirmationLink)
         }
     }

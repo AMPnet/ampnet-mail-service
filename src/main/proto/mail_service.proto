@@ -7,6 +7,7 @@ package com.ampnet.mailservice.proto;
 message MailConfirmationRequest {
     string email = 1;
     string token = 2;
+    string coop = 3;
 }
 
 message OrganizationInvitationRequest {

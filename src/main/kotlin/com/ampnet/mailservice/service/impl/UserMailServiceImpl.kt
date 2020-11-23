@@ -65,8 +65,8 @@ class UserMailServiceImpl(
         FailedDeliveryMail(mailSender, applicationProperties, linkResolverService)
     }
 
-    override fun sendConfirmationMail(email: String, token: String) =
-        confirmationMail.setData(token).sendTo(email)
+    override fun sendConfirmationMail(email: String, token: String, coop: String) =
+        confirmationMail.setData(token, coop).sendTo(email)
 
     override fun sendResetPasswordMail(email: String, token: String) =
         resetPasswordMail.setData(token).sendTo(email)

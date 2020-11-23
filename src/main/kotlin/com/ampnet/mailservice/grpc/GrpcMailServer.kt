@@ -35,7 +35,7 @@ class GrpcMailServer(
 
     override fun sendMailConfirmation(request: MailConfirmationRequest, responseObserver: StreamObserver<Empty>) {
         logger.debug { "Received gRPC request SendMailConfirmationRequest to: ${request.email}" }
-        userMailService.sendConfirmationMail(request.email, request.token)
+        userMailService.sendConfirmationMail(request.email, request.token, request.coop)
         returnSuccessfulResponse(responseObserver)
     }
 

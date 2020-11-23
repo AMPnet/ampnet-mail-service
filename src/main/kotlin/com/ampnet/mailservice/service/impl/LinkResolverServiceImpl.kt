@@ -16,6 +16,7 @@ class LinkResolverServiceImpl(applicationProperties: ApplicationProperties) : Li
     private val walletActivatedPath = applicationProperties.mail.walletActivatedPath
     private val organizationInvitesPath = applicationProperties.mail.organizationInvitationsPath
     private val manageProjectPath = applicationProperties.mail.manageProjectPath
+
     private val organizationInvitesLink = "$baseUrl/$organizationInvitesPath".removeDoubleSlashes()
     private val manageWithdrawalsLink =
         "$baseUrl/${applicationProperties.mail.manageWithdrawalsPath}".removeDoubleSlashes()
@@ -24,8 +25,8 @@ class LinkResolverServiceImpl(applicationProperties: ApplicationProperties) : Li
 
     override fun getManageWithdrawalsLink() = manageWithdrawalsLink
 
-    override fun getConfirmationLink(token: String): String =
-        "$baseUrl/$confirmationPath?token=$token".removeDoubleSlashes()
+    override fun getConfirmationLink(token: String, coop: String): String =
+        "$baseUrl/$coop/$confirmationPath?token=$token".removeDoubleSlashes()
 
     override fun getResetPasswordLink(token: String): String =
         "$baseUrl/$resetPasswordPath?token=$token".removeDoubleSlashes()

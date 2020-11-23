@@ -101,6 +101,7 @@ abstract class MailServiceTestBase : TestBase() {
         val organizationName = "Organization test"
         val amount = 100L
         val receiverEmails = listOf("test@test.com", "test2@test.com")
+        val coop = "ampnet-test"
         lateinit var walletOwner: String
         lateinit var project: ProjectResponse
         lateinit var organization: OrganizationResponse
