@@ -31,7 +31,10 @@ class WithdrawTokenIssuerMail(
         DefaultMustacheFactory().compile("mustache/token-issuer-withdrawal-template.mustache")
 
     fun setData(user: UserResponse, amount: Long): WithdrawTokenIssuerMail {
-        data = UserData(user.firstName, user.lastName, amount.toMailFormat(), linkResolver.getManageWithdrawalsLink())
+        data = UserData(
+            user.firstName, user.lastName, amount.toMailFormat(),
+            linkResolver.getManageWithdrawalsLink(user.coop)
+        )
         return this
     }
 }

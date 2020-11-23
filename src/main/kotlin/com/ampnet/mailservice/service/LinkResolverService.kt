@@ -4,7 +4,7 @@ import com.ampnet.mailservice.enums.WalletType
 
 interface LinkResolverService {
     fun getOrganizationInvitesLink(coop: String): String
-    fun getManageWithdrawalsLink(): String
+    fun getManageWithdrawalsLink(coop: String): String
     fun getConfirmationLink(token: String, coop: String): String
     fun getResetPasswordLink(token: String, coop: String): String
     fun getNewWalletLink(walletType: WalletType, coop: String): String

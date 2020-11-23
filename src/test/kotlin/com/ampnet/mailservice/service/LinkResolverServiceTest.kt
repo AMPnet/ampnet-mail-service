@@ -31,8 +31,8 @@ class LinkResolverServiceTest : TestBase() {
             applicationProperties.mail.manageWithdrawalsPath = "//manage/////withdrawals/"
 
             val service = LinkResolverServiceImpl(applicationProperties)
-            val generatedPath = service.getManageWithdrawalsLink()
-            assertThat(generatedPath).isEqualTo("http://demo.ampnet.io/manage/withdrawals/")
+            val generatedPath = service.getManageWithdrawalsLink("ampnet-test")
+            assertThat(generatedPath).isEqualTo("http://demo.ampnet.io/ampnet-test/manage/withdrawals/")
         }
     }
 }

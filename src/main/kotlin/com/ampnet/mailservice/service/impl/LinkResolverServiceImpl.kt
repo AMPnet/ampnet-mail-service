@@ -16,14 +16,13 @@ class LinkResolverServiceImpl(applicationProperties: ApplicationProperties) : Li
     private val walletActivatedPath = applicationProperties.mail.walletActivatedPath
     private val organizationInvitesPath = applicationProperties.mail.organizationInvitationsPath
     private val manageProjectPath = applicationProperties.mail.manageProjectPath
-
-    private val manageWithdrawalsLink =
-        "$baseUrl/${applicationProperties.mail.manageWithdrawalsPath}".removeDoubleSlashes()
+    private val manageWithdrawalsPath = applicationProperties.mail.manageWithdrawalsPath
 
     override fun getOrganizationInvitesLink(coop: String) =
         "$baseUrl/$coop/$organizationInvitesPath".removeDoubleSlashes()
 
-    override fun getManageWithdrawalsLink() = manageWithdrawalsLink
+    override fun getManageWithdrawalsLink(coop: String) =
+        "$baseUrl/$coop/$manageWithdrawalsPath".removeDoubleSlashes()
 
     override fun getConfirmationLink(token: String, coop: String): String =
         "$baseUrl/$coop/$confirmationPath?token=$token".removeDoubleSlashes()

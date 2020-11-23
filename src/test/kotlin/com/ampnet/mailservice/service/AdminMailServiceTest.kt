@@ -39,9 +39,12 @@ class AdminMailServiceTest : MailServiceTestBase() {
             assertThat(tokenIssuerMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(tokenIssuerMail.envelopeReceiver).isEqualTo(testContext.tokenIssuerMail)
             assertThat(tokenIssuerMail.mimeMessage.subject).isEqualTo(manageWithdrawalsSubject)
+            val manageWithdrawalsLink = applicationProperties.mail.baseUrl + "/" + coop + "/"
+            applicationProperties.mail.manageWithdrawalsPath
 
             val mailText = tokenIssuerMail.mimeMessage.content.toString()
             assertThat(mailText).contains(testContext.amount.toMailFormat())
+            assertThat(mailText).contains(manageWithdrawalsLink)
         }
     }
 
