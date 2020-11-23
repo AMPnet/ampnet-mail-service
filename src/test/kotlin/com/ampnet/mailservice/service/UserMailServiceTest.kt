@@ -30,8 +30,8 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(mail.mimeMessage.subject).isEqualTo(confirmationMailSubject)
 
-            val confirmationLink = applicationProperties.mail.baseUrl + "/" + testContext.coop + "/"
-            "${applicationProperties.mail.confirmationPath}?token=${testContext.token}"
+            val confirmationLink = applicationProperties.mail.baseUrl + "/" + testContext.coop + "/" +
+                "${applicationProperties.mail.confirmationPath}?token=${testContext.token}"
             assertThat(mail.mimeMessage.content.toString()).contains(confirmationLink)
         }
     }
@@ -50,8 +50,8 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(mail.mimeMessage.subject).isEqualTo(resetPasswordSubject)
 
-            val resetPasswordLink = applicationProperties.mail.baseUrl + "/" + testContext.coop + "/"
-            "${applicationProperties.mail.resetPasswordPath}?token=${testContext.token}"
+            val resetPasswordLink = applicationProperties.mail.baseUrl + "/" + testContext.coop + "/" +
+                "${applicationProperties.mail.resetPasswordPath}?token=${testContext.token}"
             assertThat(mail.mimeMessage.content.toString()).contains(resetPasswordLink)
         }
     }
@@ -81,8 +81,8 @@ class UserMailServiceTest : MailServiceTestBase() {
             val mailText = firstMail.mimeMessage.content.toString()
             assertThat(mailText).contains(testContext.organizationName)
 
-            val link = applicationProperties.mail.baseUrl + "/" + testContext.coop + "/"
-            applicationProperties.mail.organizationInvitationsPath
+            val link = applicationProperties.mail.baseUrl + "/" + testContext.coop + "/" +
+                applicationProperties.mail.organizationInvitationsPath
             assertThat(mailText).contains(link)
         }
     }
@@ -260,8 +260,8 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(userMail.mimeMessage.subject).isEqualTo(walletActivatedSubject)
-            val confirmationUserLink = applicationProperties.mail.baseUrl + "/" + testContext.user.coop + "/"
-            applicationProperties.mail.organizationInvitationsPath + "/" + testContext.project.organizationUuid +
+            val confirmationUserLink = applicationProperties.mail.baseUrl + "/" + testContext.user.coop + "/" +
+                applicationProperties.mail.organizationInvitationsPath + "/" + testContext.project.organizationUuid +
                 "/" + applicationProperties.mail.manageProjectPath + "/" + testContext.project.uuid
             val mailText = userMail.mimeMessage.content.toString()
             assertThat(mailText).contains(confirmationUserLink)
@@ -292,8 +292,8 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(userMail.mimeMessage.subject).isEqualTo(walletActivatedSubject)
-            val confirmationUserLink = applicationProperties.mail.baseUrl + "/" + testContext.user.coop + "/"
-            applicationProperties.mail.organizationInvitationsPath + "/" + testContext.organization.uuid
+            val confirmationUserLink = applicationProperties.mail.baseUrl + "/" + testContext.user.coop + "/" +
+                applicationProperties.mail.organizationInvitationsPath + "/" + testContext.organization.uuid
             val mailText = userMail.mimeMessage.content.toString()
             assertThat(mailText).contains(confirmationUserLink)
             assertThat(mailText).doesNotContain(activationData)
