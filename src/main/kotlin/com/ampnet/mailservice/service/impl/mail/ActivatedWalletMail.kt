@@ -18,8 +18,8 @@ class ActivatedUserWalletMail(
     override val template: Mustache =
         DefaultMustacheFactory().compile("mustache/user-wallet-activated-template.mustache")
 
-    fun setData(activationData: String): ActivatedUserWalletMail {
-        data = ActivatedUserWalletData(linkResolver.getWalletActivatedLink(WalletType.USER), activationData)
+    fun setData(activationData: String, coop: String): ActivatedUserWalletMail {
+        data = ActivatedUserWalletData(linkResolver.getWalletActivatedLink(WalletType.USER, coop), activationData)
         return this
     }
 }
@@ -35,10 +35,11 @@ class ActivatedOrganizationWalletMail(
     override val template: Mustache =
         DefaultMustacheFactory().compile("mustache/organization-wallet-activated-template.mustache")
 
-    fun setData(organization: OrganizationResponse): ActivatedOrganizationWalletMail {
+    fun setData(organization: OrganizationResponse, coop: String): ActivatedOrganizationWalletMail {
         data = ActivatedOrganizationWalletData(
             linkResolver.getWalletActivatedLink(
                 WalletType.ORGANIZATION,
+                coop,
                 organizationUUid = organization.uuid
             ),
             organization.name
@@ -58,10 +59,11 @@ class ActivatedProjectWalletMail(
     override val template: Mustache =
         DefaultMustacheFactory().compile("mustache/project-wallet-activated-template.mustache")
 
-    fun setData(project: ProjectResponse): ActivatedProjectWalletMail {
+    fun setData(project: ProjectResponse, coop: String): ActivatedProjectWalletMail {
         data = ActivatedProjectWalletData(
             linkResolver.getWalletActivatedLink(
                 WalletType.PROJECT,
+                coop,
                 organizationUUid = project.organizationUuid,
                 projectUuid = project.uuid
             ),

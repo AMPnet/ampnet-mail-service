@@ -14,8 +14,8 @@ class ConfirmationMail(
     override val title: String = "Confirm your email"
     override val template: Mustache = DefaultMustacheFactory().compile("mustache/mail-confirmation-template.mustache")
 
-    fun setData(token: String): ConfirmationMail {
-        data = MailConfirmationData(linkResolver.getConfirmationLink(token))
+    fun setData(token: String, coop: String): ConfirmationMail {
+        data = MailConfirmationData(linkResolver.getConfirmationLink(token, coop))
         return this
     }
 }

@@ -35,7 +35,7 @@ class GrpcMailServer(
 
     override fun sendMailConfirmation(request: MailConfirmationRequest, responseObserver: StreamObserver<Empty>) {
         logger.debug { "Received gRPC request SendMailConfirmationRequest to: ${request.email}" }
-        userMailService.sendConfirmationMail(request.email, request.token)
+        userMailService.sendConfirmationMail(request.email, request.token, request.coop)
         returnSuccessfulResponse(responseObserver)
     }
 
@@ -45,7 +45,7 @@ class GrpcMailServer(
     ) {
         val emails = request.emailsList.toList()
         logger.debug { "Received gRPC request sendOrganizationInvitation to: ${emails.joinToString()}" }
-        userMailService.sendOrganizationInvitationMail(emails, request.organization, request.senderEmail)
+        userMailService.sendOrganizationInvitationMail(request)
         returnSuccessfulResponse(responseObserver)
     }
 
@@ -80,7 +80,7 @@ class GrpcMailServer(
 
     override fun sendResetPassword(request: ResetPasswordRequest, responseObserver: StreamObserver<Empty>) {
         logger.debug { "Received gRPC request SendForgotPassword to: ${request.email}" }
-        userMailService.sendResetPasswordMail(request.email, request.token)
+        userMailService.sendResetPasswordMail(request.email, request.token, request.coop)
         returnSuccessfulResponse(responseObserver)
     }
 

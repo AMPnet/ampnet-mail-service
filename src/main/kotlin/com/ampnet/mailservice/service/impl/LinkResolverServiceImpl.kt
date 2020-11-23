@@ -16,31 +16,32 @@ class LinkResolverServiceImpl(applicationProperties: ApplicationProperties) : Li
     private val walletActivatedPath = applicationProperties.mail.walletActivatedPath
     private val organizationInvitesPath = applicationProperties.mail.organizationInvitationsPath
     private val manageProjectPath = applicationProperties.mail.manageProjectPath
-    private val organizationInvitesLink = "$baseUrl/$organizationInvitesPath".removeDoubleSlashes()
-    private val manageWithdrawalsLink =
-        "$baseUrl/${applicationProperties.mail.manageWithdrawalsPath}".removeDoubleSlashes()
+    private val manageWithdrawalsPath = applicationProperties.mail.manageWithdrawalsPath
 
-    override fun getOrganizationInvitesLink() = organizationInvitesLink
+    override fun getOrganizationInvitesLink(coop: String) =
+        "$baseUrl/$coop/$organizationInvitesPath".removeDoubleSlashes()
 
-    override fun getManageWithdrawalsLink() = manageWithdrawalsLink
+    override fun getManageWithdrawalsLink(coop: String) =
+        "$baseUrl/$coop/$manageWithdrawalsPath".removeDoubleSlashes()
 
-    override fun getConfirmationLink(token: String): String =
-        "$baseUrl/$confirmationPath?token=$token".removeDoubleSlashes()
+    override fun getConfirmationLink(token: String, coop: String): String =
+        "$baseUrl/$coop/$confirmationPath?token=$token".removeDoubleSlashes()
 
-    override fun getResetPasswordLink(token: String): String =
-        "$baseUrl/$resetPasswordPath?token=$token".removeDoubleSlashes()
+    override fun getResetPasswordLink(token: String, coop: String): String =
+        "$baseUrl/$coop/$resetPasswordPath?token=$token".removeDoubleSlashes()
 
-    override fun getNewWalletLink(walletType: WalletType): String {
+    override fun getNewWalletLink(walletType: WalletType, coop: String): String {
         val typePath = when (walletType) {
             WalletType.USER -> "users"
             WalletType.PROJECT -> "projects"
             WalletType.ORGANIZATION -> "groups"
         }
-        return "$baseUrl/$newWalletPath/$typePath".removeDoubleSlashes()
+        return "$baseUrl/$coop/$newWalletPath/$typePath".removeDoubleSlashes()
     }
 
     override fun getWalletActivatedLink(
         walletType: WalletType,
+        coop: String,
         organizationUUid: String?,
         projectUuid: String?
     ): String {
@@ -49,7 +50,7 @@ class LinkResolverServiceImpl(applicationProperties: ApplicationProperties) : Li
             WalletType.PROJECT -> "$organizationInvitesPath/$organizationUUid/$manageProjectPath/$projectUuid"
             WalletType.ORGANIZATION -> "$organizationInvitesPath/$organizationUUid"
         }
-        return "$baseUrl/$typePath".removeDoubleSlashes()
+        return "$baseUrl/$coop/$typePath".removeDoubleSlashes()
     }
 
     private fun String.removeDoubleSlashes() = this.replace("(?<!(http:)|(https:))//+".toRegex(), "/")

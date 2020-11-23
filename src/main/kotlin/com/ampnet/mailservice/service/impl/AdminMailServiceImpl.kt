@@ -41,5 +41,5 @@ class AdminMailServiceImpl(
             WalletType.USER -> newUserWalletMail
             WalletType.PROJECT -> newProjectWalletMail
             WalletType.ORGANIZATION -> newOrganizationWalletMail
-        }.setData(activationData).sendTo(userService.getPlatformManagers(coop).map { it.email })
+        }.setData(activationData, coop).sendTo(userService.getPlatformManagers(coop).map { it.email })
 }

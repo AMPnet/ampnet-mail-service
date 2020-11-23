@@ -2,10 +2,13 @@ package com.ampnet.mailservice.service.impl
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.enums.WalletType
+import com.ampnet.mailservice.exception.ResourceNotFoundException
 import com.ampnet.mailservice.grpc.projectservice.ProjectService
 import com.ampnet.mailservice.grpc.userservice.UserService
+import com.ampnet.mailservice.proto.OrganizationInvitationRequest
 import com.ampnet.mailservice.service.LinkResolverService
 import com.ampnet.mailservice.service.UserMailService
+import com.ampnet.mailservice.service.impl.mail.AbstractMail
 import com.ampnet.mailservice.service.impl.mail.ActivatedOrganizationWalletMail
 import com.ampnet.mailservice.service.impl.mail.ActivatedProjectWalletMail
 import com.ampnet.mailservice.service.impl.mail.ActivatedUserWalletMail
@@ -65,17 +68,17 @@ class UserMailServiceImpl(
         FailedDeliveryMail(mailSender, applicationProperties, linkResolverService)
     }
 
-    override fun sendConfirmationMail(email: String, token: String) =
-        confirmationMail.setData(token).sendTo(email)
+    override fun sendConfirmationMail(email: String, token: String, coop: String) =
+        confirmationMail.setData(token, coop).sendTo(email)
 
-    override fun sendResetPasswordMail(email: String, token: String) =
-        resetPasswordMail.setData(token).sendTo(email)
+    override fun sendResetPasswordMail(email: String, token: String, coop: String) =
+        resetPasswordMail.setData(token, coop).sendTo(email)
 
-    override fun sendOrganizationInvitationMail(emails: List<String>, organizationName: String, senderEmail: String) =
-        invitationMail.setData(organizationName)
-            .sendTo(emails) { failedMails ->
+    override fun sendOrganizationInvitationMail(request: OrganizationInvitationRequest) =
+        invitationMail.setData(request.organization, request.coop)
+            .sendTo(request.emailsList.toList()) { failedMails ->
                 val filedMailRecipients = failedMails.map { it.allRecipients.toString() }
-                failedDeliveryMail.setData(filedMailRecipients).sendTo(senderEmail)
+                failedDeliveryMail.setData(filedMailRecipients).sendTo(request.senderEmail)
             }
 
     override fun sendDepositRequestMail(user: UserResponse, amount: Long) =
@@ -91,18 +94,26 @@ class UserMailServiceImpl(
         withdrawInfoMail.setData(burned).sendTo(user.email)
 
     override fun sendWalletActivatedMail(walletOwner: String, walletType: WalletType, activationData: String) {
-        val (mail, userUuid) = when (walletType) {
-            WalletType.USER -> Pair(activatedUserWalletMail.setData(activationData), walletOwner)
+        val (mail: AbstractMail, user: UserResponse) = when (walletType) {
+            WalletType.USER -> {
+                val user = getUser(walletOwner)
+                Pair(activatedUserWalletMail.setData(activationData, user.coop), user)
+            }
             WalletType.ORGANIZATION -> {
                 val organization = projectService.getOrganization(UUID.fromString(walletOwner))
-                Pair(activatedOrganizationWalletMail.setData(organization), organization.createdByUser)
+                val user = getUser(organization.createdByUser)
+                Pair(activatedOrganizationWalletMail.setData(organization, user.coop), user)
             }
             WalletType.PROJECT -> {
                 val project = projectService.getProject(UUID.fromString(walletOwner))
-                Pair(activatedProjectWalletMail.setData(project), project.createdByUser)
+                val user = getUser(project.createdByUser)
+                Pair(activatedProjectWalletMail.setData(project, user.coop), user)
             }
         }
-        val userEmails = userService.getUsers(listOf(userUuid)).map { it.email }
-        mail.sendTo(userEmails)
+        mail.sendTo(user.email)
     }
+
+    private fun getUser(userUuid: String): UserResponse =
+        userService.getUsers(listOf(userUuid)).firstOrNull()
+            ?: throw ResourceNotFoundException("Missing user: $userUuid")
 }

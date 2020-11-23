@@ -20,9 +20,9 @@ class NewWalletMail(
         WalletType.ORGANIZATION -> DefaultMustacheFactory().compile("mustache/organization-wallet-template.mustache")
     }
 
-    fun setData(activationData: String): NewWalletMail {
-        data = if (type == WalletType.USER) NewWalletData(linkResolver.getNewWalletLink(type), activationData)
-        else NewWalletData(linkResolver.getNewWalletLink(type))
+    fun setData(activationData: String, coop: String): NewWalletMail {
+        data = if (type == WalletType.USER) NewWalletData(linkResolver.getNewWalletLink(type, coop), activationData)
+        else NewWalletData(linkResolver.getNewWalletLink(type, coop))
         return this
     }
 }
