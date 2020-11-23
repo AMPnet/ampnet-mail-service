@@ -39,6 +39,7 @@ message WithdrawInfoRequest {
 message ResetPasswordRequest {
     string email = 1;
     string token = 2;
+    string coop = 3;
 }
 
 message NewWalletRequest {

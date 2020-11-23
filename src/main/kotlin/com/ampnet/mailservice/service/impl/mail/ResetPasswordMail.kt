@@ -14,8 +14,8 @@ class ResetPasswordMail(
     override val title: String = "Reset password"
     override val template: Mustache = DefaultMustacheFactory().compile("mustache/forgot-password-template.mustache")
 
-    fun setData(token: String): ResetPasswordMail {
-        data = ResetPasswordData(linkResolver.getResetPasswordLink(token))
+    fun setData(token: String, coop: String): ResetPasswordMail {
+        data = ResetPasswordData(linkResolver.getResetPasswordLink(token, coop))
         return this
     }
 }

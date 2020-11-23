@@ -68,8 +68,8 @@ class UserMailServiceImpl(
     override fun sendConfirmationMail(email: String, token: String, coop: String) =
         confirmationMail.setData(token, coop).sendTo(email)
 
-    override fun sendResetPasswordMail(email: String, token: String) =
-        resetPasswordMail.setData(token).sendTo(email)
+    override fun sendResetPasswordMail(email: String, token: String, coop: String) =
+        resetPasswordMail.setData(token, coop).sendTo(email)
 
     override fun sendOrganizationInvitationMail(emails: List<String>, organizationName: String, senderEmail: String) =
         invitationMail.setData(organizationName)

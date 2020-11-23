@@ -80,7 +80,7 @@ class GrpcMailServer(
 
     override fun sendResetPassword(request: ResetPasswordRequest, responseObserver: StreamObserver<Empty>) {
         logger.debug { "Received gRPC request SendForgotPassword to: ${request.email}" }
-        userMailService.sendResetPasswordMail(request.email, request.token)
+        userMailService.sendResetPasswordMail(request.email, request.token, request.coop)
         returnSuccessfulResponse(responseObserver)
     }
 

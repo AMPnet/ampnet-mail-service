@@ -28,8 +28,8 @@ class LinkResolverServiceImpl(applicationProperties: ApplicationProperties) : Li
     override fun getConfirmationLink(token: String, coop: String): String =
         "$baseUrl/$coop/$confirmationPath?token=$token".removeDoubleSlashes()
 
-    override fun getResetPasswordLink(token: String): String =
-        "$baseUrl/$resetPasswordPath?token=$token".removeDoubleSlashes()
+    override fun getResetPasswordLink(token: String, coop: String): String =
+        "$baseUrl/$coop/$resetPasswordPath?token=$token".removeDoubleSlashes()
 
     override fun getNewWalletLink(walletType: WalletType): String {
         val typePath = when (walletType) {

@@ -38,7 +38,7 @@ class UserMailServiceTest : MailServiceTestBase() {
     @Test
     fun mustSetCorrectSendResetPasswordMail() {
         suppose("Service sent reset password mail") {
-            service.sendResetPasswordMail(testContext.receiverMail, testContext.token)
+            service.sendResetPasswordMail(testContext.receiverMail, testContext.token, testContext.coop)
         }
 
         verify("The mail is sent to right receiver and has reset password link") {
@@ -49,8 +49,8 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(mail.mimeMessage.subject).isEqualTo(resetPasswordSubject)
 
-            val resetPasswordLink = "${applicationProperties.mail.baseUrl}/" +
-                "${applicationProperties.mail.resetPasswordPath}?token=${testContext.token}"
+            val resetPasswordLink = applicationProperties.mail.baseUrl + "/" + testContext.coop + "/"
+            "${applicationProperties.mail.resetPasswordPath}?token=${testContext.token}"
             assertThat(mail.mimeMessage.content.toString()).contains(resetPasswordLink)
         }
     }
