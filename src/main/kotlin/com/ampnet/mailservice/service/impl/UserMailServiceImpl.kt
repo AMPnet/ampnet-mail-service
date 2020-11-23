@@ -2,10 +2,12 @@ package com.ampnet.mailservice.service.impl
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.enums.WalletType
+import com.ampnet.mailservice.exception.ResourceNotFoundException
 import com.ampnet.mailservice.grpc.projectservice.ProjectService
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.service.LinkResolverService
 import com.ampnet.mailservice.service.UserMailService
+import com.ampnet.mailservice.service.impl.mail.AbstractMail
 import com.ampnet.mailservice.service.impl.mail.ActivatedOrganizationWalletMail
 import com.ampnet.mailservice.service.impl.mail.ActivatedProjectWalletMail
 import com.ampnet.mailservice.service.impl.mail.ActivatedUserWalletMail
@@ -91,18 +93,26 @@ class UserMailServiceImpl(
         withdrawInfoMail.setData(burned).sendTo(user.email)
 
     override fun sendWalletActivatedMail(walletOwner: String, walletType: WalletType, activationData: String) {
-        val (mail, userUuid) = when (walletType) {
-            WalletType.USER -> Pair(activatedUserWalletMail.setData(activationData), walletOwner)
+        val (mail: AbstractMail, user: UserResponse) = when (walletType) {
+            WalletType.USER -> {
+                val user = getUser(walletOwner)
+                Pair(activatedUserWalletMail.setData(activationData, user.coop), user)
+            }
             WalletType.ORGANIZATION -> {
                 val organization = projectService.getOrganization(UUID.fromString(walletOwner))
-                Pair(activatedOrganizationWalletMail.setData(organization), organization.createdByUser)
+                val user = getUser(organization.createdByUser)
+                Pair(activatedOrganizationWalletMail.setData(organization, user.coop), user)
             }
             WalletType.PROJECT -> {
                 val project = projectService.getProject(UUID.fromString(walletOwner))
-                Pair(activatedProjectWalletMail.setData(project), project.createdByUser)
+                val user = getUser(project.createdByUser)
+                Pair(activatedProjectWalletMail.setData(project, user.coop), user)
             }
         }
-        val userEmails = userService.getUsers(listOf(userUuid)).map { it.email }
-        mail.sendTo(userEmails)
+        mail.sendTo(user.email)
     }
+
+    private fun getUser(userUuid: String): UserResponse =
+        userService.getUsers(listOf(userUuid)).firstOrNull()
+            ?: throw ResourceNotFoundException("Missing user: $userUuid")
 }

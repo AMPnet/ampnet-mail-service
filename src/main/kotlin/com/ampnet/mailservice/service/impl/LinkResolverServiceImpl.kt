@@ -42,6 +42,7 @@ class LinkResolverServiceImpl(applicationProperties: ApplicationProperties) : Li
 
     override fun getWalletActivatedLink(
         walletType: WalletType,
+        coop: String,
         organizationUUid: String?,
         projectUuid: String?
     ): String {
@@ -50,7 +51,7 @@ class LinkResolverServiceImpl(applicationProperties: ApplicationProperties) : Li
             WalletType.PROJECT -> "$organizationInvitesPath/$organizationUUid/$manageProjectPath/$projectUuid"
             WalletType.ORGANIZATION -> "$organizationInvitesPath/$organizationUUid"
         }
-        return "$baseUrl/$typePath".removeDoubleSlashes()
+        return "$baseUrl/$coop/$typePath".removeDoubleSlashes()
     }
 
     private fun String.removeDoubleSlashes() = this.replace("(?<!(http:)|(https:))//+".toRegex(), "/")

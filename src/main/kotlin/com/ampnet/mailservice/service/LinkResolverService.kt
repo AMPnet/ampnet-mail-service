@@ -10,6 +10,7 @@ interface LinkResolverService {
     fun getNewWalletLink(walletType: WalletType, coop: String): String
     fun getWalletActivatedLink(
         walletType: WalletType,
+        coop: String,
         organizationUUid: String? = null,
         projectUuid: String? = null
     ): String

@@ -212,10 +212,10 @@ class UserMailServiceTest : MailServiceTestBase() {
     @Test
     fun mustSetCorrectSendUserWalletActivatedMail() {
         suppose("Service sent mail for user wallet activated") {
-            val user = generateUserResponse(testContext.receiverMail)
-            Mockito.`when`(userService.getUsers(listOf(user.uuid.toString())))
-                .thenReturn(listOf(user))
-            service.sendWalletActivatedMail(user.uuid, WalletType.USER, activationData)
+            testContext.user = generateUserResponse(testContext.receiverMail)
+            Mockito.`when`(userService.getUsers(listOf(testContext.user.uuid.toString())))
+                .thenReturn(listOf(testContext.user))
+            service.sendWalletActivatedMail(testContext.user.uuid, WalletType.USER, activationData)
         }
 
         verify("The mail is sent to right receiver and has correct data") {
@@ -224,8 +224,8 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(userMail.mimeMessage.subject).isEqualTo(walletActivatedSubject)
-            val confirmationUserLink =
-                applicationProperties.mail.baseUrl + "/" + applicationProperties.mail.walletActivatedPath
+            val confirmationUserLink = applicationProperties.mail.baseUrl + "/" +
+                testContext.user.coop + "/" + applicationProperties.mail.walletActivatedPath
             val mailText = userMail.mimeMessage.content.toString()
             assertThat(mailText).contains(confirmationUserLink)
             assertThat(mailText).contains(activationData)
@@ -241,9 +241,9 @@ class UserMailServiceTest : MailServiceTestBase() {
                 .thenReturn(testContext.project)
         }
         suppose("User service returns user") {
-            val user = generateUserResponse(testContext.receiverMail)
+            testContext.user = generateUserResponse(testContext.receiverMail)
             Mockito.`when`(userService.getUsers(listOf(testContext.project.createdByUser)))
-                .thenReturn(listOf(user))
+                .thenReturn(listOf(testContext.user))
         }
         suppose("Service sent mail for project wallet activated") {
             service.sendWalletActivatedMail(testContext.walletOwner, WalletType.PROJECT, activationData)
@@ -255,8 +255,8 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(userMail.mimeMessage.subject).isEqualTo(walletActivatedSubject)
-            val confirmationUserLink = applicationProperties.mail.baseUrl + "/" +
-                applicationProperties.mail.organizationInvitationsPath + "/" + testContext.project.organizationUuid +
+            val confirmationUserLink = applicationProperties.mail.baseUrl + "/" + testContext.user.coop + "/"
+            applicationProperties.mail.organizationInvitationsPath + "/" + testContext.project.organizationUuid +
                 "/" + applicationProperties.mail.manageProjectPath + "/" + testContext.project.uuid
             val mailText = userMail.mimeMessage.content.toString()
             assertThat(mailText).contains(confirmationUserLink)
@@ -273,9 +273,9 @@ class UserMailServiceTest : MailServiceTestBase() {
                 .thenReturn(testContext.organization)
         }
         suppose("User service returns user") {
-            val user = generateUserResponse(testContext.receiverMail)
+            testContext.user = generateUserResponse(testContext.receiverMail)
             Mockito.`when`(userService.getUsers(listOf(testContext.organization.createdByUser)))
-                .thenReturn(listOf(user))
+                .thenReturn(listOf(testContext.user))
         }
         suppose("Service sent mail for organization wallet activated") {
             service.sendWalletActivatedMail(testContext.walletOwner, WalletType.ORGANIZATION, activationData)
@@ -287,8 +287,8 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(userMail.mimeMessage.subject).isEqualTo(walletActivatedSubject)
-            val confirmationUserLink = applicationProperties.mail.baseUrl + "/" +
-                applicationProperties.mail.organizationInvitationsPath + "/" + testContext.organization.uuid
+            val confirmationUserLink = applicationProperties.mail.baseUrl + "/" + testContext.user.coop + "/"
+            applicationProperties.mail.organizationInvitationsPath + "/" + testContext.organization.uuid
             val mailText = userMail.mimeMessage.content.toString()
             assertThat(mailText).contains(confirmationUserLink)
             assertThat(mailText).doesNotContain(activationData)

@@ -105,5 +105,6 @@ abstract class MailServiceTestBase : TestBase() {
         lateinit var walletOwner: String
         lateinit var project: ProjectResponse
         lateinit var organization: OrganizationResponse
+        lateinit var user: UserResponse
     }
 }
