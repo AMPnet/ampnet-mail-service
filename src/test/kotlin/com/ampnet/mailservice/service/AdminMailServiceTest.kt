@@ -63,8 +63,8 @@ class AdminMailServiceTest : MailServiceTestBase() {
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(userMail.mimeMessage.subject).isEqualTo(newWalletSubject)
-            val confirmationUserLink = applicationProperties.mail.baseUrl + "/" +
-                applicationProperties.mail.newWalletPath + "/groups"
+            val confirmationUserLink = applicationProperties.mail.baseUrl + "/" + coop + "/"
+            applicationProperties.mail.newWalletPath + "/groups"
             val mailText = userMail.mimeMessage.content.toString()
             assertThat(mailText).contains(confirmationUserLink)
             assertThat(mailText).doesNotContain(activationData)
@@ -90,8 +90,8 @@ class AdminMailServiceTest : MailServiceTestBase() {
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(userMail.mimeMessage.subject).isEqualTo(newWalletSubject)
-            val confirmationUserLink = applicationProperties.mail.baseUrl + "/" +
-                applicationProperties.mail.newWalletPath + "/user"
+            val confirmationUserLink = applicationProperties.mail.baseUrl + "/" + coop + "/"
+            applicationProperties.mail.newWalletPath + "/user"
             val userMailText = userMail.mimeMessage.content.toString()
             assertThat(userMailText).contains(confirmationUserLink)
             assertThat(userMailText).contains(activationData)
@@ -100,8 +100,8 @@ class AdminMailServiceTest : MailServiceTestBase() {
             assertThat(projectMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(projectMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(projectMail.mimeMessage.subject).isEqualTo(newWalletSubject)
-            val confirmationProjectLink = applicationProperties.mail.baseUrl + "/" +
-                applicationProperties.mail.newWalletPath + "/project"
+            val confirmationProjectLink = applicationProperties.mail.baseUrl + "/" + coop + "/"
+            applicationProperties.mail.newWalletPath + "/project"
             val projectMailText = projectMail.mimeMessage.content.toString()
             assertThat(projectMailText).contains(confirmationProjectLink)
             assertThat(projectMailText).doesNotContain(activationData)

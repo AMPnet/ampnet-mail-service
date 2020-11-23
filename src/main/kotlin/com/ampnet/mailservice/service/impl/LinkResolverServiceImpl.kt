@@ -31,13 +31,13 @@ class LinkResolverServiceImpl(applicationProperties: ApplicationProperties) : Li
     override fun getResetPasswordLink(token: String, coop: String): String =
         "$baseUrl/$coop/$resetPasswordPath?token=$token".removeDoubleSlashes()
 
-    override fun getNewWalletLink(walletType: WalletType): String {
+    override fun getNewWalletLink(walletType: WalletType, coop: String): String {
         val typePath = when (walletType) {
             WalletType.USER -> "users"
             WalletType.PROJECT -> "projects"
             WalletType.ORGANIZATION -> "groups"
         }
-        return "$baseUrl/$newWalletPath/$typePath".removeDoubleSlashes()
+        return "$baseUrl/$coop/$newWalletPath/$typePath".removeDoubleSlashes()
     }
 
     override fun getWalletActivatedLink(

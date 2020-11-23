@@ -7,7 +7,7 @@ interface LinkResolverService {
     fun getManageWithdrawalsLink(): String
     fun getConfirmationLink(token: String, coop: String): String
     fun getResetPasswordLink(token: String, coop: String): String
-    fun getNewWalletLink(walletType: WalletType): String
+    fun getNewWalletLink(walletType: WalletType, coop: String): String
     fun getWalletActivatedLink(
         walletType: WalletType,
         organizationUUid: String? = null,
