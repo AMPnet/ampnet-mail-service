@@ -1,7 +1,9 @@
 package com.ampnet.mailservice.service
 
 import com.ampnet.mailservice.enums.WalletType
+import com.ampnet.mailservice.proto.MailConfirmationRequest
 import com.ampnet.mailservice.proto.OrganizationInvitationRequest
+import com.ampnet.mailservice.proto.ResetPasswordRequest
 import com.ampnet.mailservice.service.impl.UserMailServiceImpl
 import com.ampnet.mailservice.service.impl.mail.toMailFormat
 import com.ampnet.userservice.proto.UserResponse
@@ -19,7 +21,12 @@ class UserMailServiceTest : MailServiceTestBase() {
     @Test
     fun mustSetCorrectSendConfirmationMail() {
         suppose("Service sent the mail") {
-            service.sendConfirmationMail(testContext.receiverMail, testContext.token, testContext.coop)
+            val request = MailConfirmationRequest.newBuilder()
+                .setEmail(testContext.receiverMail)
+                .setToken(testContext.token)
+                .setCoop(testContext.coop)
+                .build()
+            service.sendConfirmationMail(request)
         }
 
         verify("The mail is sent to right receiver and has confirmation link") {
@@ -39,7 +46,13 @@ class UserMailServiceTest : MailServiceTestBase() {
     @Test
     fun mustSetCorrectSendResetPasswordMail() {
         suppose("Service sent reset password mail") {
-            service.sendResetPasswordMail(testContext.receiverMail, testContext.token, testContext.coop)
+            val request = ResetPasswordRequest.newBuilder()
+                .setEmail(testContext.receiverMail)
+                .setToken(testContext.token)
+                .setCoop(testContext.coop)
+                .setLanguage("el")
+                .build()
+            service.sendResetPasswordMail(request)
         }
 
         verify("The mail is sent to right receiver and has reset password link") {
@@ -300,7 +313,7 @@ class UserMailServiceTest : MailServiceTestBase() {
         }
     }
 
-    @Test()
+    @Test
     fun mustNotSendOrganizationInvitationMailIfRecipientEmailIsIncorrect() {
         suppose("Service sends organizationInvitation to incorrect and correct email") {
             val correctEmail = "test@email.com"

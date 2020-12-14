@@ -33,13 +33,17 @@ class AdminMailServiceImpl(
     }
 
     override fun sendWithdrawRequestMail(user: UserResponse, amount: Long) =
-        withdrawTokenIssuerMail.setData(user, amount)
-            .sendTo(userService.getTokenIssuers(user.coop).map { it.email })
+        userService.getTokenIssuers(user.coop).forEach {
+            withdrawTokenIssuerMail.setData(user, amount)
+                .sendTo(it.email, it.language)
+        }
 
     override fun sendNewWalletNotificationMail(walletType: WalletType, coop: String, activationData: String) =
-        when (walletType) {
-            WalletType.USER -> newUserWalletMail
-            WalletType.PROJECT -> newProjectWalletMail
-            WalletType.ORGANIZATION -> newOrganizationWalletMail
-        }.setData(activationData, coop).sendTo(userService.getPlatformManagers(coop).map { it.email })
+        userService.getPlatformManagers(coop).forEach {
+            when (walletType) {
+                WalletType.USER -> newUserWalletMail
+                WalletType.PROJECT -> newProjectWalletMail
+                WalletType.ORGANIZATION -> newOrganizationWalletMail
+            }.setData(activationData, coop).sendTo(it.email, it.language)
+        }
 }

@@ -20,16 +20,19 @@ abstract class AbstractMail(
 
     companion object : KLogging()
 
-    protected abstract val title: String
-    protected abstract val template: Mustache
+    protected abstract val languageData: List<LanguageData>
     protected open var data: Any? = null
 
-    fun sendTo(to: List<String>, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
-        sendEmails(this.createMailMessage(to), notifySenderOnError)
+    fun sendTo(
+        to: List<String>,
+        language: String = DEFAULT_LANGUAGE,
+        notifySenderOnError: (List<MimeMessage>) -> Unit = {}
+    ) {
+        sendEmails(this.createMailMessage(to, language), notifySenderOnError)
     }
 
-    fun sendTo(to: String, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
-        sendEmails(this.createMailMessage(listOf(to)), notifySenderOnError)
+    fun sendTo(to: String, language: String = DEFAULT_LANGUAGE, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
+        sendEmails(this.createMailMessage(listOf(to), language), notifySenderOnError)
     }
 
     private fun sendEmails(mails: List<MimeMessage>, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
@@ -55,16 +58,17 @@ abstract class AbstractMail(
         }
     }
 
-    private fun createMailMessage(to: List<String>): List<MimeMessage> =
+    private fun createMailMessage(to: List<String>, language: String): List<MimeMessage> =
         to.mapNotNull {
             val mail = mailSender.createMimeMessage()
             val helper = MimeMessageHelper(mail)
+            val languageData = getLanguageData(language)
             try {
                 helper.isValidateAddresses = true
                 helper.setFrom(applicationProperties.mail.sender)
                 helper.setTo(it)
-                helper.setSubject(title)
-                helper.setText(fillTemplate(), true)
+                helper.setSubject(languageData.title)
+                helper.setText(fillTemplate(languageData.template), true)
                 helper.setSentDate(Date())
                 mail
             } catch (ex: MessagingException) {
@@ -73,13 +77,23 @@ abstract class AbstractMail(
             }
         }
 
-    private fun fillTemplate(): String {
+    private fun fillTemplate(template: Mustache): String {
         val writer = StringWriter()
         template.execute(writer, data).flush()
         return writer.toString()
     }
+
+    private fun getLanguageData(language: String): LanguageData =
+        languageData.firstOrNull { it.language == language } ?: languageData.first { it.language == DEFAULT_LANGUAGE }
+
+    data class LanguageData(
+        val language: String,
+        val title: String,
+        val template: Mustache
+    )
 }
 
+const val DEFAULT_LANGUAGE = "en"
 const val FROM_CENTS_TO_EUROS = 100.0
 const val TWO_DECIMAL_FORMAT = "%.2f"
 fun Long.toMailFormat(): String = TWO_DECIMAL_FORMAT.format(this / FROM_CENTS_TO_EUROS)
