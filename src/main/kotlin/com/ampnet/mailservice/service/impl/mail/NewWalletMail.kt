@@ -16,7 +16,8 @@ class NewWalletMail(
         val englishTemplate = when (type) {
             WalletType.USER -> DefaultMustacheFactory().compile("mustache/user-wallet-template.mustache")
             WalletType.PROJECT -> DefaultMustacheFactory().compile("mustache/project-wallet-template.mustache")
-            WalletType.ORGANIZATION -> DefaultMustacheFactory().compile("mustache/organization-wallet-template.mustache")
+            WalletType.ORGANIZATION ->
+                DefaultMustacheFactory().compile("mustache/organization-wallet-template.mustache")
         }
         listOf(LanguageData("en", "New wallet created", englishTemplate))
     }
