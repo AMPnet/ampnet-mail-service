@@ -14,7 +14,7 @@ class WithdrawRequestMail(
 
     override val languageData = listOf(
         LanguageData(
-            "en", "Withdraw",
+            EN_LANGUAGE, "Withdraw",
             DefaultMustacheFactory().compile("mustache/withdraw-request-template.mustache")
         )
     )
@@ -33,7 +33,7 @@ class WithdrawTokenIssuerMail(
 
     override val languageData = listOf(
         LanguageData(
-            "en", "New withdrawal request",
+            EN_LANGUAGE, "New withdrawal request",
             DefaultMustacheFactory().compile("mustache/token-issuer-withdrawal-template.mustache")
         )
     )

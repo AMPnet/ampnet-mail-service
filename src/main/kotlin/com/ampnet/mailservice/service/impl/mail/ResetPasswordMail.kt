@@ -13,7 +13,7 @@ class ResetPasswordMail(
 
     override val languageData = listOf(
         LanguageData(
-            "en", "Reset password",
+            EN_LANGUAGE, "Reset password",
             DefaultMustacheFactory().compile("mustache/forgot-password-template.mustache")
         )
     )

@@ -13,7 +13,7 @@ class ConfirmationMail(
 
     override val languageData = listOf(
         LanguageData(
-            "en", "Confirm your email",
+            EN_LANGUAGE, "Confirm your email",
             DefaultMustacheFactory().compile("mustache/mail-confirmation-template.mustache")
         )
     )

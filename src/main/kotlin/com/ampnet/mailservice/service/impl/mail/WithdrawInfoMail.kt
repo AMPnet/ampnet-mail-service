@@ -13,7 +13,7 @@ class WithdrawInfoMail(
 
     override val languageData = listOf(
         LanguageData(
-            "en", "Withdraw",
+            EN_LANGUAGE, "Withdraw",
             DefaultMustacheFactory().compile("mustache/withdraw-template.mustache")
         )
     )

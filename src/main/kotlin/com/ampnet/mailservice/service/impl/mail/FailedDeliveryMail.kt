@@ -13,7 +13,7 @@ class FailedDeliveryMail(
 
     override val languageData = listOf(
         LanguageData(
-            "en", "Email delivery failed",
+            EN_LANGUAGE, "Email delivery failed",
             DefaultMustacheFactory().compile("mustache/failed-delivery-message-template.mustache")
         )
     )

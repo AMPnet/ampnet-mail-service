@@ -8,6 +8,8 @@ import com.ampnet.projectservice.proto.ProjectResponse
 import com.github.mustachejava.DefaultMustacheFactory
 import org.springframework.mail.javamail.JavaMailSender
 
+const val WALLET_ACTIVATED_TITLE = "Wallet activated"
+
 class ActivatedUserWalletMail(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
@@ -16,8 +18,7 @@ class ActivatedUserWalletMail(
 
     override val languageData = listOf(
         LanguageData(
-            "en",
-            "Wallet activated",
+            EN_LANGUAGE, WALLET_ACTIVATED_TITLE,
             DefaultMustacheFactory().compile("mustache/user-wallet-activated-template.mustache")
         )
     )
@@ -38,7 +39,7 @@ class ActivatedOrganizationWalletMail(
 
     override val languageData = listOf(
         LanguageData(
-            "en", "Wallet activated",
+            EN_LANGUAGE, WALLET_ACTIVATED_TITLE,
             DefaultMustacheFactory().compile("mustache/organization-wallet-activated-template.mustache")
         )
     )
@@ -66,8 +67,7 @@ class ActivatedProjectWalletMail(
 
     override val languageData = listOf(
         LanguageData(
-            "en",
-            "Wallet activated",
+            EN_LANGUAGE, WALLET_ACTIVATED_TITLE,
             DefaultMustacheFactory().compile("mustache/project-wallet-activated-template.mustache")
         )
     )

@@ -12,7 +12,7 @@ class InvitationMail(
 ) : AbstractMail(mailSender, applicationProperties, linkResolver) {
     override val languageData = listOf(
         LanguageData(
-            "en", "Invitation",
+            EN_LANGUAGE, "Invitation",
             DefaultMustacheFactory().compile("mustache/invitation-template.mustache")
         )
     )

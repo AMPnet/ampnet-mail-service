@@ -13,7 +13,7 @@ class DepositRequestMail(
 
     override val languageData = listOf(
         LanguageData(
-            "en", "Deposit",
+            EN_LANGUAGE, "Deposit",
             DefaultMustacheFactory().compile("mustache/deposit-request-template.mustache")
         )
     )

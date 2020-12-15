@@ -80,7 +80,7 @@ class UserMailServiceImpl(
         invitationMail.setData(request.organization, request.coop)
             .sendTo(request.emailsList.toList(), request.language) { failedMails ->
                 val filedMailRecipients = failedMails.map { it.allRecipients.toString() }
-                failedDeliveryMail.setData(filedMailRecipients).sendTo(request.senderEmail)
+                failedDeliveryMail.setData(filedMailRecipients).sendTo(request.senderEmail, request.language)
             }
 
     override fun sendDepositRequestMail(user: UserResponse, amount: Long) =

@@ -19,7 +19,7 @@ class NewWalletMail(
             WalletType.ORGANIZATION ->
                 DefaultMustacheFactory().compile("mustache/organization-wallet-template.mustache")
         }
-        listOf(LanguageData("en", "New wallet created", englishTemplate))
+        listOf(LanguageData(EN_LANGUAGE, "New wallet created", englishTemplate))
     }
 
     fun setData(activationData: String, coop: String): NewWalletMail {
