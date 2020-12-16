@@ -5,7 +5,9 @@ import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.exception.ResourceNotFoundException
 import com.ampnet.mailservice.grpc.projectservice.ProjectService
 import com.ampnet.mailservice.grpc.userservice.UserService
+import com.ampnet.mailservice.proto.MailConfirmationRequest
 import com.ampnet.mailservice.proto.OrganizationInvitationRequest
+import com.ampnet.mailservice.proto.ResetPasswordRequest
 import com.ampnet.mailservice.service.LinkResolverService
 import com.ampnet.mailservice.service.UserMailService
 import com.ampnet.mailservice.service.impl.mail.AbstractMail
@@ -68,30 +70,30 @@ class UserMailServiceImpl(
         FailedDeliveryMail(mailSender, applicationProperties, linkResolverService)
     }
 
-    override fun sendConfirmationMail(email: String, token: String, coop: String) =
-        confirmationMail.setData(token, coop).sendTo(email)
+    override fun sendConfirmationMail(request: MailConfirmationRequest) =
+        confirmationMail.setData(request.token, request.coop).sendTo(request.email, request.language)
 
-    override fun sendResetPasswordMail(email: String, token: String, coop: String) =
-        resetPasswordMail.setData(token, coop).sendTo(email)
+    override fun sendResetPasswordMail(request: ResetPasswordRequest) =
+        resetPasswordMail.setData(request.token, request.coop).sendTo(request.email, request.language)
 
     override fun sendOrganizationInvitationMail(request: OrganizationInvitationRequest) =
         invitationMail.setData(request.organization, request.coop)
-            .sendTo(request.emailsList.toList()) { failedMails ->
+            .sendTo(request.emailsList.toList(), request.language) { failedMails ->
                 val filedMailRecipients = failedMails.map { it.allRecipients.toString() }
-                failedDeliveryMail.setData(filedMailRecipients).sendTo(request.senderEmail)
+                failedDeliveryMail.setData(filedMailRecipients).sendTo(request.senderEmail, request.language)
             }
 
     override fun sendDepositRequestMail(user: UserResponse, amount: Long) =
-        depositRequestMail.setData(amount).sendTo(user.email)
+        depositRequestMail.setData(amount).sendTo(user.email, user.language)
 
     override fun sendDepositInfoMail(user: UserResponse, minted: Boolean) =
-        depositMail.setData(minted).sendTo(user.email)
+        depositMail.setData(minted).sendTo(user.email, user.language)
 
     override fun sendWithdrawRequestMail(user: UserResponse, amount: Long) =
-        withdrawRequestMail.setData(amount).sendTo(user.email)
+        withdrawRequestMail.setData(amount).sendTo(user.email, user.language)
 
     override fun sendWithdrawInfoMail(user: UserResponse, burned: Boolean) =
-        withdrawInfoMail.setData(burned).sendTo(user.email)
+        withdrawInfoMail.setData(burned).sendTo(user.email, user.language)
 
     override fun sendWalletActivatedMail(walletOwner: String, walletType: WalletType, activationData: String) {
         val (mail: AbstractMail, user: UserResponse) = when (walletType) {
@@ -110,7 +112,7 @@ class UserMailServiceImpl(
                 Pair(activatedProjectWalletMail.setData(project, user.coop), user)
             }
         }
-        mail.sendTo(user.email)
+        mail.sendTo(user.email, user.language)
     }
 
     private fun getUser(userUuid: String): UserResponse =

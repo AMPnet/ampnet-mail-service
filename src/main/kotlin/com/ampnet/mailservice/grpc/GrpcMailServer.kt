@@ -35,7 +35,7 @@ class GrpcMailServer(
 
     override fun sendMailConfirmation(request: MailConfirmationRequest, responseObserver: StreamObserver<Empty>) {
         logger.debug { "Received gRPC request SendMailConfirmationRequest to: ${request.email}" }
-        userMailService.sendConfirmationMail(request.email, request.token, request.coop)
+        userMailService.sendConfirmationMail(request)
         returnSuccessfulResponse(responseObserver)
     }
 
@@ -80,7 +80,7 @@ class GrpcMailServer(
 
     override fun sendResetPassword(request: ResetPasswordRequest, responseObserver: StreamObserver<Empty>) {
         logger.debug { "Received gRPC request SendForgotPassword to: ${request.email}" }
-        userMailService.sendResetPasswordMail(request.email, request.token, request.coop)
+        userMailService.sendResetPasswordMail(request)
         returnSuccessfulResponse(responseObserver)
     }
 

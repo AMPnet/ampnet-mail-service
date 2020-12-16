@@ -6,17 +6,22 @@ import com.ampnet.mailservice.service.LinkResolverService
 import com.ampnet.projectservice.proto.OrganizationResponse
 import com.ampnet.projectservice.proto.ProjectResponse
 import com.github.mustachejava.DefaultMustacheFactory
-import com.github.mustachejava.Mustache
 import org.springframework.mail.javamail.JavaMailSender
+
+const val WALLET_ACTIVATED_TITLE = "Wallet activated"
 
 class ActivatedUserWalletMail(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
     linkResolver: LinkResolverService
 ) : AbstractMail(mailSender, applicationProperties, linkResolver) {
-    override val title: String = "Wallet activated"
-    override val template: Mustache =
-        DefaultMustacheFactory().compile("mustache/user-wallet-activated-template.mustache")
+
+    override val languageData = listOf(
+        LanguageData(
+            EN_LANGUAGE, WALLET_ACTIVATED_TITLE,
+            DefaultMustacheFactory().compile("mustache/user-wallet-activated-template.mustache")
+        )
+    )
 
     fun setData(activationData: String, coop: String): ActivatedUserWalletMail {
         data = ActivatedUserWalletData(linkResolver.getWalletActivatedLink(WalletType.USER, coop), activationData)
@@ -31,9 +36,13 @@ class ActivatedOrganizationWalletMail(
     applicationProperties: ApplicationProperties,
     linkResolver: LinkResolverService
 ) : AbstractMail(mailSender, applicationProperties, linkResolver) {
-    override val title: String = "Wallet activated"
-    override val template: Mustache =
-        DefaultMustacheFactory().compile("mustache/organization-wallet-activated-template.mustache")
+
+    override val languageData = listOf(
+        LanguageData(
+            EN_LANGUAGE, WALLET_ACTIVATED_TITLE,
+            DefaultMustacheFactory().compile("mustache/organization-wallet-activated-template.mustache")
+        )
+    )
 
     fun setData(organization: OrganizationResponse, coop: String): ActivatedOrganizationWalletMail {
         data = ActivatedOrganizationWalletData(
@@ -55,9 +64,13 @@ class ActivatedProjectWalletMail(
     applicationProperties: ApplicationProperties,
     linkResolver: LinkResolverService
 ) : AbstractMail(mailSender, applicationProperties, linkResolver) {
-    override val title: String = "Wallet activated"
-    override val template: Mustache =
-        DefaultMustacheFactory().compile("mustache/project-wallet-activated-template.mustache")
+
+    override val languageData = listOf(
+        LanguageData(
+            EN_LANGUAGE, WALLET_ACTIVATED_TITLE,
+            DefaultMustacheFactory().compile("mustache/project-wallet-activated-template.mustache")
+        )
+    )
 
     fun setData(project: ProjectResponse, coop: String): ActivatedProjectWalletMail {
         data = ActivatedProjectWalletData(
