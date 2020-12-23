@@ -14,4 +14,9 @@ interface LinkResolverService {
         organizationUUid: String? = null,
         projectUuid: String? = null
     ): String
+    fun getProjectFullyFundedLink(
+        coop: String,
+        organizationUUid: String,
+        projectUuid: String
+    ): String
 }

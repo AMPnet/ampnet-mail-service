@@ -15,7 +15,7 @@ class MailProperties {
     lateinit var baseUrl: String
     var confirmationPath: String = "mail-confirmation"
     var resetPasswordPath: String = "reset-password"
-    var organizationInvitationsPath: String = "dash/manage_groups"
+    var manageOrganizationPath: String = "dash/manage_groups"
     var newWalletPath: String = "dash/activation"
     var manageWithdrawalsPath: String = "dash/manage_withdrawals"
     var walletActivatedPath: String = "dash/wallet"
@@ -27,4 +27,5 @@ class MailProperties {
 class GrpcProperties {
     var userServiceTimeout: Long = 10000
     var projectServiceTimeout: Long = 10000
+    var walletServiceTimeout: Long = 10000
 }

@@ -11,6 +11,7 @@ import com.ampnet.mailservice.proto.MailConfirmationRequest
 import com.ampnet.mailservice.proto.MailServiceGrpc
 import com.ampnet.mailservice.proto.NewWalletRequest
 import com.ampnet.mailservice.proto.OrganizationInvitationRequest
+import com.ampnet.mailservice.proto.ProjectFullyFundedRequest
 import com.ampnet.mailservice.proto.ResetPasswordRequest
 import com.ampnet.mailservice.proto.WithdrawInfoRequest
 import com.ampnet.mailservice.proto.WithdrawRequest
@@ -97,6 +98,12 @@ class GrpcMailServer(
         userMailService.sendWalletActivatedMail(
             request.walletOwner, getWalletType(request.type), request.activationData
         )
+        returnSuccessfulResponse(responseObserver)
+    }
+
+    override fun sendProjectFullyFunded(request: ProjectFullyFundedRequest, responseObserver: StreamObserver<Empty>) {
+        logger.debug { "Received gRPC request sendProjectFullyFunded for wallet: ${request.walletHash}" }
+        userMailService.sendProjectFullyFundedMail(request.walletHash)
         returnSuccessfulResponse(responseObserver)
     }
 

@@ -5,6 +5,7 @@ import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.exception.ResourceNotFoundException
 import com.ampnet.mailservice.grpc.projectservice.ProjectService
 import com.ampnet.mailservice.grpc.userservice.UserService
+import com.ampnet.mailservice.grpc.walletservice.WalletService
 import com.ampnet.mailservice.proto.MailConfirmationRequest
 import com.ampnet.mailservice.proto.OrganizationInvitationRequest
 import com.ampnet.mailservice.proto.ResetPasswordRequest
@@ -19,6 +20,7 @@ import com.ampnet.mailservice.service.impl.mail.DepositInfoMail
 import com.ampnet.mailservice.service.impl.mail.DepositRequestMail
 import com.ampnet.mailservice.service.impl.mail.FailedDeliveryMail
 import com.ampnet.mailservice.service.impl.mail.InvitationMail
+import com.ampnet.mailservice.service.impl.mail.ProjectFullyFundedMail
 import com.ampnet.mailservice.service.impl.mail.ResetPasswordMail
 import com.ampnet.mailservice.service.impl.mail.WithdrawInfoMail
 import com.ampnet.mailservice.service.impl.mail.WithdrawRequestMail
@@ -33,7 +35,8 @@ class UserMailServiceImpl(
     applicationProperties: ApplicationProperties,
     linkResolverService: LinkResolverService,
     private val userService: UserService,
-    private val projectService: ProjectService
+    private val projectService: ProjectService,
+    private val walletService: WalletService
 ) : UserMailService {
 
     private val confirmationMail: ConfirmationMail by lazy {
@@ -68,6 +71,9 @@ class UserMailServiceImpl(
     }
     private val failedDeliveryMail: FailedDeliveryMail by lazy {
         FailedDeliveryMail(mailSender, applicationProperties, linkResolverService)
+    }
+    private val projectFullyFundedMail: ProjectFullyFundedMail by lazy {
+        ProjectFullyFundedMail(mailSender, applicationProperties, linkResolverService)
     }
 
     override fun sendConfirmationMail(request: MailConfirmationRequest) =
@@ -113,6 +119,13 @@ class UserMailServiceImpl(
             }
         }
         mail.sendTo(user.email, user.language)
+    }
+
+    override fun sendProjectFullyFundedMail(walletHash: String) {
+        val wallet = walletService.getWalletByHash(walletHash)
+        val project = projectService.getProject(UUID.fromString(wallet.owner))
+        val user = getUser(project.createdByUser)
+        projectFullyFundedMail.setData(user, project).sendTo(user.email, user.language)
     }
 
     private fun getUser(userUuid: String): UserResponse =
