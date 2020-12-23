@@ -53,5 +53,8 @@ class LinkResolverServiceImpl(applicationProperties: ApplicationProperties) : Li
         return "$baseUrl/$coop/$typePath".removeDoubleSlashes()
     }
 
+    override fun getProjectFullyFundedLink(coop: String, organizationUUid: String, projectUuid: String) =
+        "$baseUrl/$coop/$manageWithdrawalsPath/$organizationUUid/$manageProjectPath/$projectUuid".removeDoubleSlashes()
+
     private fun String.removeDoubleSlashes() = this.replace("(?<!(http:)|(https:))//+".toRegex(), "/")
 }

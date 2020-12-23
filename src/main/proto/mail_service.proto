@@ -58,6 +58,10 @@ message ActivatedWalletRequest {
     string activation_data = 3;
 }
 
+message ProjectFullyFundedRequest {
+    string wallet_hash = 1;
+}
+
 message Empty {
 }
 
@@ -77,4 +81,5 @@ service MailService {
     rpc SendResetPassword(ResetPasswordRequest) returns (Empty);
     rpc SendNewWalletMail(NewWalletRequest) returns (Empty);
     rpc SendWalletActivated(ActivatedWalletRequest) returns (Empty);
+    rpc SendProjectFullyFunded(ProjectFullyFundedRequest) returns (Empty);
 }

@@ -27,4 +27,5 @@ class MailProperties {
 class GrpcProperties {
     var userServiceTimeout: Long = 10000
     var projectServiceTimeout: Long = 10000
+    var walletServiceTimeout: Long = 10000
 }
