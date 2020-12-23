@@ -14,12 +14,12 @@ class LinkResolverServiceImpl(applicationProperties: ApplicationProperties) : Li
     private val resetPasswordPath = applicationProperties.mail.resetPasswordPath
     private val newWalletPath = applicationProperties.mail.newWalletPath
     private val walletActivatedPath = applicationProperties.mail.walletActivatedPath
-    private val organizationInvitesPath = applicationProperties.mail.organizationInvitationsPath
+    private val manageOrganizationPath = applicationProperties.mail.manageOrganizationPath
     private val manageProjectPath = applicationProperties.mail.manageProjectPath
     private val manageWithdrawalsPath = applicationProperties.mail.manageWithdrawalsPath
 
     override fun getOrganizationInvitesLink(coop: String) =
-        "$baseUrl/$coop/$organizationInvitesPath".removeDoubleSlashes()
+        "$baseUrl/$coop/$manageOrganizationPath".removeDoubleSlashes()
 
     override fun getManageWithdrawalsLink(coop: String) =
         "$baseUrl/$coop/$manageWithdrawalsPath".removeDoubleSlashes()
@@ -47,14 +47,14 @@ class LinkResolverServiceImpl(applicationProperties: ApplicationProperties) : Li
     ): String {
         val typePath = when (walletType) {
             WalletType.USER -> walletActivatedPath
-            WalletType.PROJECT -> "$organizationInvitesPath/$organizationUUid/$manageProjectPath/$projectUuid"
-            WalletType.ORGANIZATION -> "$organizationInvitesPath/$organizationUUid"
+            WalletType.PROJECT -> "$manageOrganizationPath/$organizationUUid/$manageProjectPath/$projectUuid"
+            WalletType.ORGANIZATION -> "$manageOrganizationPath/$organizationUUid"
         }
         return "$baseUrl/$coop/$typePath".removeDoubleSlashes()
     }
 
     override fun getProjectFullyFundedLink(coop: String, organizationUUid: String, projectUuid: String) =
-        "$baseUrl/$coop/$manageWithdrawalsPath/$organizationUUid/$manageProjectPath/$projectUuid".removeDoubleSlashes()
+        "$baseUrl/$coop/$manageOrganizationPath/$organizationUUid/$manageProjectPath/$projectUuid".removeDoubleSlashes()
 
     private fun String.removeDoubleSlashes() = this.replace("(?<!(http:)|(https:))//+".toRegex(), "/")
 }
