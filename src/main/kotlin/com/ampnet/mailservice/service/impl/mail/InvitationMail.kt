@@ -2,8 +2,9 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.LinkResolverService
-import com.github.mustachejava.DefaultMustacheFactory
 import org.springframework.mail.javamail.JavaMailSender
+
+const val INVITATION_TEMPLATE = "invitation-template.mustache"
 
 class InvitationMail(
     mailSender: JavaMailSender,
@@ -11,10 +12,8 @@ class InvitationMail(
     linkResolver: LinkResolverService
 ) : AbstractMail(mailSender, applicationProperties, linkResolver) {
     override val languageData = listOf(
-        LanguageData(
-            EN_LANGUAGE, "Invitation",
-            DefaultMustacheFactory().compile("mustache/invitation-template.mustache")
-        )
+        generateLanguageData(EN_LANGUAGE, INVITATION_TEMPLATE, "Invitation"),
+        generateLanguageData(EL_LANGUAGE, INVITATION_TEMPLATE, "Πρόσκληση")
     )
 
     fun setData(organization: String, coop: String): InvitationMail {

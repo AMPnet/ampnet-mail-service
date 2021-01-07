@@ -2,8 +2,9 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.LinkResolverService
-import com.github.mustachejava.DefaultMustacheFactory
 import org.springframework.mail.javamail.JavaMailSender
+
+const val CONFIRMATION_TEMPLATE = "mail-confirmation-template.mustache"
 
 class ConfirmationMail(
     mailSender: JavaMailSender,
@@ -12,10 +13,8 @@ class ConfirmationMail(
 ) : AbstractMail(mailSender, applicationProperties, linkResolver) {
 
     override val languageData = listOf(
-        LanguageData(
-            EN_LANGUAGE, "Confirm your email",
-            DefaultMustacheFactory().compile("mustache/mail-confirmation-template.mustache")
-        )
+        generateLanguageData(EN_LANGUAGE, CONFIRMATION_TEMPLATE, "Confirm your email"),
+        generateLanguageData(EL_LANGUAGE, CONFIRMATION_TEMPLATE, "Επιβεβαιώστε το email σας")
     )
 
     fun setData(token: String, coop: String): ConfirmationMail {

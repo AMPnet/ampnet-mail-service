@@ -2,8 +2,9 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.LinkResolverService
-import com.github.mustachejava.DefaultMustacheFactory
 import org.springframework.mail.javamail.JavaMailSender
+
+const val FAILED_DELIVERY_TEMPLATE = "failed-delivery-message-template.mustache"
 
 class FailedDeliveryMail(
     mailSender: JavaMailSender,
@@ -12,10 +13,8 @@ class FailedDeliveryMail(
 ) : AbstractMail(mailSender, applicationProperties, linkResolver) {
 
     override val languageData = listOf(
-        LanguageData(
-            EN_LANGUAGE, "Email delivery failed",
-            DefaultMustacheFactory().compile("mustache/failed-delivery-message-template.mustache")
-        )
+        generateLanguageData(EN_LANGUAGE, FAILED_DELIVERY_TEMPLATE, "Email delivery failed"),
+        generateLanguageData(EL_LANGUAGE, FAILED_DELIVERY_TEMPLATE, "Η παράδοση email απέτυχε")
     )
 
     fun setData(emails: List<String>): FailedDeliveryMail {

@@ -83,6 +83,7 @@ abstract class MailServiceTestBase : TestBase() {
             .setFirstName("First")
             .setLastName("Last")
             .setCoop(coop)
+            // .setLanguage("el")
             .build()
 
     protected fun generateProjectResponse(createdBy: String): ProjectResponse =

@@ -53,7 +53,7 @@ class UserMailServiceTest : MailServiceTestBase() {
                 .setEmail(testContext.receiverMail)
                 .setToken(testContext.token)
                 .setCoop(testContext.coop)
-                .setLanguage("el")
+                // .setLanguage("el")
                 .build()
             service.sendResetPasswordMail(request)
         }

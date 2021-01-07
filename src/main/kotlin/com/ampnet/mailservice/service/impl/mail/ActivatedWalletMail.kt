@@ -5,10 +5,10 @@ import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.service.LinkResolverService
 import com.ampnet.projectservice.proto.OrganizationResponse
 import com.ampnet.projectservice.proto.ProjectResponse
-import com.github.mustachejava.DefaultMustacheFactory
 import org.springframework.mail.javamail.JavaMailSender
 
 const val WALLET_ACTIVATED_TITLE = "Wallet activated"
+const val WALLET_ACTIVATED_TITLE_EL = "Το πορτοφόλι ενεργοποιήθηκε"
 
 class ActivatedUserWalletMail(
     mailSender: JavaMailSender,
@@ -16,11 +16,11 @@ class ActivatedUserWalletMail(
     linkResolver: LinkResolverService
 ) : AbstractMail(mailSender, applicationProperties, linkResolver) {
 
+    private val templateName = "user-wallet-activated-template.mustache"
+
     override val languageData = listOf(
-        LanguageData(
-            EN_LANGUAGE, WALLET_ACTIVATED_TITLE,
-            DefaultMustacheFactory().compile("mustache/user-wallet-activated-template.mustache")
-        )
+        generateLanguageData(EN_LANGUAGE, templateName, WALLET_ACTIVATED_TITLE),
+        generateLanguageData(EL_LANGUAGE, templateName, WALLET_ACTIVATED_TITLE_EL)
     )
 
     fun setData(activationData: String, coop: String): ActivatedUserWalletMail {
@@ -37,11 +37,11 @@ class ActivatedOrganizationWalletMail(
     linkResolver: LinkResolverService
 ) : AbstractMail(mailSender, applicationProperties, linkResolver) {
 
+    private val templateName = "organization-wallet-activated-template.mustache"
+
     override val languageData = listOf(
-        LanguageData(
-            EN_LANGUAGE, WALLET_ACTIVATED_TITLE,
-            DefaultMustacheFactory().compile("mustache/organization-wallet-activated-template.mustache")
-        )
+        generateLanguageData(EN_LANGUAGE, templateName, WALLET_ACTIVATED_TITLE),
+        generateLanguageData(EL_LANGUAGE, templateName, WALLET_ACTIVATED_TITLE_EL)
     )
 
     fun setData(organization: OrganizationResponse, coop: String): ActivatedOrganizationWalletMail {
@@ -65,11 +65,11 @@ class ActivatedProjectWalletMail(
     linkResolver: LinkResolverService
 ) : AbstractMail(mailSender, applicationProperties, linkResolver) {
 
+    private val templateName = "project-wallet-activated-template.mustache"
+
     override val languageData = listOf(
-        LanguageData(
-            EN_LANGUAGE, WALLET_ACTIVATED_TITLE,
-            DefaultMustacheFactory().compile("mustache/project-wallet-activated-template.mustache")
-        )
+        generateLanguageData(EN_LANGUAGE, templateName, WALLET_ACTIVATED_TITLE),
+        generateLanguageData(EL_LANGUAGE, templateName, WALLET_ACTIVATED_TITLE_EL)
     )
 
     fun setData(project: ProjectResponse, coop: String): ActivatedProjectWalletMail {

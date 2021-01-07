@@ -3,7 +3,6 @@ package com.ampnet.mailservice.service.impl.mail
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.service.LinkResolverService
-import com.github.mustachejava.DefaultMustacheFactory
 import org.springframework.mail.javamail.JavaMailSender
 
 class NewWalletMail(
@@ -13,13 +12,16 @@ class NewWalletMail(
     linkResolver: LinkResolverService
 ) : AbstractMail(mailSender, applicationProperties, linkResolver) {
     override val languageData: List<LanguageData> by lazy {
-        val englishTemplate = when (type) {
-            WalletType.USER -> DefaultMustacheFactory().compile("mustache/user-wallet-template.mustache")
-            WalletType.PROJECT -> DefaultMustacheFactory().compile("mustache/project-wallet-template.mustache")
+        val templateName = when (type) {
+            WalletType.USER -> "user-wallet-template.mustache"
+            WalletType.PROJECT -> "project-wallet-template.mustache"
             WalletType.ORGANIZATION ->
-                DefaultMustacheFactory().compile("mustache/organization-wallet-template.mustache")
+                "organization-wallet-template.mustache"
         }
-        listOf(LanguageData(EN_LANGUAGE, "New wallet created", englishTemplate))
+        listOf(
+            generateLanguageData(EN_LANGUAGE, templateName, "New wallet created"),
+            generateLanguageData(EL_LANGUAGE, templateName, "Δημιουργήθηκε νέο πορτοφόλι")
+        )
     }
 
     fun setData(activationData: String, coop: String): NewWalletMail {

@@ -2,8 +2,9 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.LinkResolverService
-import com.github.mustachejava.DefaultMustacheFactory
 import org.springframework.mail.javamail.JavaMailSender
+
+const val DEPOSIT_INFO_TEMPLATE = "deposit-template.mustache"
 
 class DepositInfoMail(
     mailSender: JavaMailSender,
@@ -12,10 +13,8 @@ class DepositInfoMail(
 ) : AbstractMail(mailSender, applicationProperties, linkResolver) {
 
     override val languageData = listOf(
-        LanguageData(
-            EN_LANGUAGE, "Deposit",
-            DefaultMustacheFactory().compile("mustache/deposit-template.mustache")
-        )
+        generateLanguageData(EN_LANGUAGE, DEPOSIT_INFO_TEMPLATE, "Deposit"),
+        generateLanguageData(EL_LANGUAGE, DEPOSIT_INFO_TEMPLATE, "Κατάθεση")
     )
 
     fun setData(minted: Boolean): DepositInfoMail {
