@@ -53,7 +53,6 @@ class UserMailServiceTest : MailServiceTestBase() {
                 .setEmail(testContext.receiverMail)
                 .setToken(testContext.token)
                 .setCoop(testContext.coop)
-                // .setLanguage("el")
                 .build()
             service.sendResetPasswordMail(request)
         }
@@ -69,6 +68,34 @@ class UserMailServiceTest : MailServiceTestBase() {
             val resetPasswordLink = applicationProperties.mail.baseUrl + "/" + testContext.coop + "/" +
                 "${applicationProperties.mail.resetPasswordPath}?token=${testContext.token}"
             assertThat(mail.mimeMessage.content.toString()).contains(resetPasswordLink)
+        }
+    }
+
+    @Test
+    fun mustSetCorrectSendResetPasswordMailOnGreek() {
+        suppose("Service sent reset password mail") {
+            val request = ResetPasswordRequest.newBuilder()
+                .setEmail(testContext.receiverMail)
+                .setToken(testContext.token)
+                .setCoop(testContext.coop)
+                .setLanguage("el")
+                .build()
+            service.sendResetPasswordMail(request)
+        }
+
+        verify("The mail is on Greek and sent to right receiver with reset password link") {
+            val mailList = wiser.messages
+            assertThat(mailList).hasSize(1)
+            val mail = mailList.first()
+            assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
+            assertThat(mail.mimeMessage.subject).isEqualTo("Επαναφορά κωδικού πρόσβασης")
+
+            val content = mail.mimeMessage.content.toString()
+            val resetPasswordLink = applicationProperties.mail.baseUrl + "/" + testContext.coop + "/" +
+                "${applicationProperties.mail.resetPasswordPath}?token=${testContext.token}"
+            assertThat(content).contains(resetPasswordLink)
+            assertThat(content).contains("Εάν δεν ζήτησες αλλαγή κωδικού")
         }
     }
 
