@@ -77,7 +77,6 @@ abstract class AbstractMail(
                 helper.setSubject(languageData.title)
                 helper.setText(fillTemplate(languageData.template), true)
                 helper.setSentDate(Date())
-                helper.encoding
                 mail
             } catch (ex: MessagingException) {
                 logger.warn { "Cannot create mail from: $to" }
