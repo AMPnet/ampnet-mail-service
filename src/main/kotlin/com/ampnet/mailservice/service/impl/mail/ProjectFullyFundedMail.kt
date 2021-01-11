@@ -4,7 +4,6 @@ import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.LinkResolverService
 import com.ampnet.projectservice.proto.ProjectResponse
 import com.ampnet.userservice.proto.UserResponse
-import com.github.mustachejava.DefaultMustacheFactory
 import org.springframework.mail.javamail.JavaMailSender
 
 class ProjectFullyFundedMail(
@@ -13,11 +12,11 @@ class ProjectFullyFundedMail(
     linkResolver: LinkResolverService
 ) : AbstractMail(mailSender, applicationProperties, linkResolver) {
 
+    private val templateName = "project-fully-funded-template.mustache"
+
     override val languageData = listOf(
-        LanguageData(
-            EN_LANGUAGE, "Project is fully funded",
-            DefaultMustacheFactory().compile("mustache/project-fully-funded-template.mustache")
-        )
+        generateLanguageData(EN_LANGUAGE, templateName, "Project is fully funded"),
+        generateLanguageData(EL_LANGUAGE, templateName, "Το έργο χρηματοδοτείται πλήρως")
     )
 
     fun setData(user: UserResponse, project: ProjectResponse): ProjectFullyFundedMail {

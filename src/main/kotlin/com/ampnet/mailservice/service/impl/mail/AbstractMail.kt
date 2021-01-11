@@ -2,6 +2,7 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.LinkResolverService
+import com.github.mustachejava.DefaultMustacheFactory
 import com.github.mustachejava.Mustache
 import mu.KLogging
 import org.springframework.mail.MailException
@@ -35,6 +36,12 @@ abstract class AbstractMail(
         sendEmails(this.createMailMessage(listOf(to), language), notifySenderOnError)
     }
 
+    protected fun generateLanguageData(language: String, templateName: String, title: String): LanguageData =
+        LanguageData(language, title, generateMustache(language, templateName))
+
+    private fun generateMustache(language: String, name: String): Mustache =
+        DefaultMustacheFactory().compile("mustache/$language/$name")
+
     private fun sendEmails(mails: List<MimeMessage>, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
         if (applicationProperties.mail.enabled.not()) {
             logger.warn { "Sending email is disabled. \nEmail: ${mails.first().content}" }
@@ -61,7 +68,7 @@ abstract class AbstractMail(
     private fun createMailMessage(to: List<String>, language: String): List<MimeMessage> =
         to.mapNotNull {
             val mail = mailSender.createMimeMessage()
-            val helper = MimeMessageHelper(mail)
+            val helper = MimeMessageHelper(mail, "UTF-8")
             val languageData = getLanguageData(language)
             try {
                 helper.isValidateAddresses = true
@@ -94,6 +101,7 @@ abstract class AbstractMail(
 }
 
 const val EN_LANGUAGE = "en"
+const val EL_LANGUAGE = "el"
 const val FROM_CENTS_TO_EUROS = 100.0
 const val TWO_DECIMAL_FORMAT = "%.2f"
 fun Long.toMailFormat(): String = TWO_DECIMAL_FORMAT.format(this / FROM_CENTS_TO_EUROS)

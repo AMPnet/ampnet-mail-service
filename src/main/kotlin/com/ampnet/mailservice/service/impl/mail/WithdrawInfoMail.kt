@@ -2,7 +2,6 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.LinkResolverService
-import com.github.mustachejava.DefaultMustacheFactory
 import org.springframework.mail.javamail.JavaMailSender
 
 class WithdrawInfoMail(
@@ -11,11 +10,11 @@ class WithdrawInfoMail(
     linkResolver: LinkResolverService
 ) : AbstractMail(mailSender, applicationProperties, linkResolver) {
 
+    private val templateName = "withdraw-template.mustache"
+
     override val languageData = listOf(
-        LanguageData(
-            EN_LANGUAGE, "Withdraw",
-            DefaultMustacheFactory().compile("mustache/withdraw-template.mustache")
-        )
+        generateLanguageData(EN_LANGUAGE, templateName, "Withdraw"),
+        generateLanguageData(EL_LANGUAGE, templateName, "Ανάληψη")
     )
 
     fun setData(burned: Boolean): WithdrawInfoMail {
