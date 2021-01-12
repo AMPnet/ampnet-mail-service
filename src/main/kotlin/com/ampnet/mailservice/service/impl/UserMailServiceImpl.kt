@@ -9,6 +9,7 @@ import com.ampnet.mailservice.grpc.walletservice.WalletService
 import com.ampnet.mailservice.proto.MailConfirmationRequest
 import com.ampnet.mailservice.proto.OrganizationInvitationRequest
 import com.ampnet.mailservice.proto.ResetPasswordRequest
+import com.ampnet.mailservice.proto.SuccessfullyInvestedRequest
 import com.ampnet.mailservice.service.LinkResolverService
 import com.ampnet.mailservice.service.UserMailService
 import com.ampnet.mailservice.service.impl.mail.AbstractMail
@@ -22,14 +23,17 @@ import com.ampnet.mailservice.service.impl.mail.FailedDeliveryMail
 import com.ampnet.mailservice.service.impl.mail.InvitationMail
 import com.ampnet.mailservice.service.impl.mail.ProjectFullyFundedMail
 import com.ampnet.mailservice.service.impl.mail.ResetPasswordMail
+import com.ampnet.mailservice.service.impl.mail.SuccessfullyInvestedMail
 import com.ampnet.mailservice.service.impl.mail.WithdrawInfoMail
 import com.ampnet.mailservice.service.impl.mail.WithdrawRequestMail
 import com.ampnet.userservice.proto.UserResponse
+import com.ampnet.walletservice.proto.WalletResponse
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
+@Suppress("TooManyFunctions")
 class UserMailServiceImpl(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
@@ -74,6 +78,9 @@ class UserMailServiceImpl(
     }
     private val projectFullyFundedMail: ProjectFullyFundedMail by lazy {
         ProjectFullyFundedMail(mailSender, applicationProperties, linkResolverService)
+    }
+    private val successfullyInvestedMail: SuccessfullyInvestedMail by lazy {
+        SuccessfullyInvestedMail(mailSender, applicationProperties, linkResolverService)
     }
 
     override fun sendConfirmationMail(request: MailConfirmationRequest) =
@@ -127,6 +134,18 @@ class UserMailServiceImpl(
         val user = getUser(project.createdByUser)
         projectFullyFundedMail.setData(user, project).sendTo(user.email, user.language)
     }
+
+    override fun sendSuccessfullyInvested(request: SuccessfullyInvestedRequest) {
+        val wallets = walletService.getWalletsByHash(setOf(request.walletHashFrom, request.walletHashTo))
+        val user = getUser(getOwnerByHash(wallets, request.walletHashFrom))
+        val project = projectService.getProject(UUID.fromString(getOwnerByHash(wallets, request.walletHashTo)))
+        successfullyInvestedMail.setData(project, request.amount.toLong())
+            .sendTo(user.email, user.language)
+    }
+
+    private fun getOwnerByHash(wallets: List<WalletResponse>, hash: String): String =
+        wallets.firstOrNull { it.hash == hash }?.owner
+            ?: throw ResourceNotFoundException("Missing owner for wallet hash: $hash")
 
     private fun getUser(userUuid: String): UserResponse =
         userService.getUsers(listOf(userUuid)).firstOrNull()

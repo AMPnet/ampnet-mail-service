@@ -4,6 +4,7 @@ import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.proto.MailConfirmationRequest
 import com.ampnet.mailservice.proto.OrganizationInvitationRequest
 import com.ampnet.mailservice.proto.ResetPasswordRequest
+import com.ampnet.mailservice.proto.SuccessfullyInvestedRequest
 import com.ampnet.userservice.proto.UserResponse
 
 interface UserMailService {
@@ -16,4 +17,5 @@ interface UserMailService {
     fun sendWithdrawInfoMail(user: UserResponse, burned: Boolean)
     fun sendWalletActivatedMail(walletOwner: String, walletType: WalletType, activationData: String)
     fun sendProjectFullyFundedMail(walletHash: String)
+    fun sendSuccessfullyInvested(request: SuccessfullyInvestedRequest)
 }
