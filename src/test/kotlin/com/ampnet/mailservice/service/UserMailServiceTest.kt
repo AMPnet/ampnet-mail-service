@@ -381,7 +381,7 @@ class UserMailServiceTest : MailServiceTestBase() {
             Mockito.`when`(userService.getUsers(listOf(testContext.project.createdByUser)))
                 .thenReturn(listOf(testContext.user))
         }
-        suppose("Service sent mail for organization wallet activated") {
+        suppose("Service sent mail for project fully funded") {
             service.sendProjectFullyFundedMail(testContext.walletHash)
         }
 
@@ -401,7 +401,7 @@ class UserMailServiceTest : MailServiceTestBase() {
 
     @Test
     fun mustSendSuccessfullyInvested() {
-        suppose("Wallet service returns wallet") {
+        suppose("Wallet service returns wallets for project and user") {
             testContext.walletFrom = generateWalletResponse(UUID.randomUUID().toString())
             testContext.walletTo = generateWalletResponse(UUID.randomUUID().toString())
             Mockito.`when`(
@@ -420,7 +420,7 @@ class UserMailServiceTest : MailServiceTestBase() {
             Mockito.`when`(userService.getUsers(listOf(testContext.walletFrom.owner)))
                 .thenReturn(listOf(testContext.user))
         }
-        suppose("Service sent mail for organization wallet activated") {
+        suppose("Service sent mail for successful funding") {
             val request = SuccessfullyInvestedRequest.newBuilder()
                 .setWalletHashFrom(testContext.walletFrom.hash)
                 .setWalletHashTo(testContext.walletTo.hash)
@@ -429,7 +429,7 @@ class UserMailServiceTest : MailServiceTestBase() {
             service.sendSuccessfullyInvested(request)
         }
 
-        verify("The mail is sent to right receiver and has correct data") {
+        verify("The mail is sent to right receiver and has correct investment data") {
             val mailList = wiser.messages
             val userMail = mailList.first()
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
