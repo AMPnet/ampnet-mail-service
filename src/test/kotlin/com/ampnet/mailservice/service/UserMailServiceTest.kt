@@ -4,6 +4,7 @@ import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.proto.MailConfirmationRequest
 import com.ampnet.mailservice.proto.OrganizationInvitationRequest
 import com.ampnet.mailservice.proto.ResetPasswordRequest
+import com.ampnet.mailservice.proto.SuccessfullyInvestedRequest
 import com.ampnet.mailservice.service.impl.UserMailServiceImpl
 import com.ampnet.mailservice.service.impl.mail.toMailFormat
 import com.ampnet.userservice.proto.UserResponse
@@ -380,7 +381,7 @@ class UserMailServiceTest : MailServiceTestBase() {
             Mockito.`when`(userService.getUsers(listOf(testContext.project.createdByUser)))
                 .thenReturn(listOf(testContext.user))
         }
-        suppose("Service sent mail for organization wallet activated") {
+        suppose("Service sent mail for project fully funded") {
             service.sendProjectFullyFundedMail(testContext.walletHash)
         }
 
@@ -395,6 +396,49 @@ class UserMailServiceTest : MailServiceTestBase() {
                 applicationProperties.mail.manageProjectPath + "/" + testContext.project.uuid
             val mailText = userMail.mimeMessage.content.toString()
             assertThat(mailText).contains(projectFullyFundedLink)
+        }
+    }
+
+    @Test
+    fun mustSendSuccessfullyInvested() {
+        suppose("Wallet service returns wallets for project and user") {
+            testContext.walletFrom = generateWalletResponse(UUID.randomUUID().toString())
+            testContext.walletTo = generateWalletResponse(UUID.randomUUID().toString())
+            Mockito.`when`(
+                walletService.getWalletsByHash(
+                    setOf(testContext.walletFrom.hash, testContext.walletTo.hash)
+                )
+            ).thenReturn(listOf(testContext.walletFrom, testContext.walletTo))
+        }
+        suppose("Project service returns project") {
+            testContext.project = generateProjectResponse(UUID.randomUUID().toString())
+            Mockito.`when`(projectService.getProject(UUID.fromString(testContext.walletTo.owner)))
+                .thenReturn(testContext.project)
+        }
+        suppose("User service returns user") {
+            testContext.user = generateUserResponse(testContext.receiverMail)
+            Mockito.`when`(userService.getUsers(listOf(testContext.walletFrom.owner)))
+                .thenReturn(listOf(testContext.user))
+        }
+        suppose("Service sent mail for successful funding") {
+            val request = SuccessfullyInvestedRequest.newBuilder()
+                .setWalletHashFrom(testContext.walletFrom.hash)
+                .setWalletHashTo(testContext.walletTo.hash)
+                .setAmount(testContext.amount.toString())
+                .build()
+            service.sendSuccessfullyInvested(request)
+        }
+
+        verify("The mail is sent to right receiver and has correct investment data") {
+            val mailList = wiser.messages
+            val userMail = mailList.first()
+            assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
+            assertThat(userMail.mimeMessage.subject).isEqualTo(investmentSubject)
+            val mailText = userMail.mimeMessage.content.toString()
+            assertThat(mailText).contains(testContext.project.name)
+            assertThat(mailText).contains(testContext.project.tosUrl)
+            assertThat(mailText).contains(testContext.amount.toMailFormat())
         }
     }
 }

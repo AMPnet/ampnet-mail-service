@@ -60,6 +60,7 @@ abstract class MailServiceTestBase : TestBase() {
     protected val manageWithdrawalsSubject = "New withdrawal request"
     protected val walletActivatedSubject = "Wallet activated"
     protected val projectFullyFundedSubject = "Project is fully funded"
+    protected val investmentSubject = "Investment"
 
     @BeforeEach
     fun init() {
@@ -92,6 +93,7 @@ abstract class MailServiceTestBase : TestBase() {
             .setCreatedByUser(createdBy)
             .setName("Duimane Investement")
             .setOrganizationUuid(UUID.randomUUID().toString())
+            .setTosUrl("https://tos.url")
             .build()
 
     protected fun generateOrganizationResponse(createdBy: String): OrganizationResponse =
@@ -104,6 +106,7 @@ abstract class MailServiceTestBase : TestBase() {
     protected fun generateWalletResponse(owner: String): WalletResponse =
         WalletResponse.newBuilder()
             .setUuid(UUID.randomUUID().toString())
+            .setHash(UUID.randomUUID().toString())
             .setOwner(owner)
             .build()
 
@@ -121,5 +124,7 @@ abstract class MailServiceTestBase : TestBase() {
         lateinit var user: UserResponse
         lateinit var walletHash: String
         lateinit var wallet: WalletResponse
+        lateinit var walletFrom: WalletResponse
+        lateinit var walletTo: WalletResponse
     }
 }
