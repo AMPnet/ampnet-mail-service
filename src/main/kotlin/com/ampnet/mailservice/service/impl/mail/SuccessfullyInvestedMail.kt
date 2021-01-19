@@ -2,7 +2,7 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.LinkResolverService
-import com.ampnet.projectservice.proto.ProjectResponse
+import com.ampnet.projectservice.proto.ProjectWithDataResponse
 import org.springframework.mail.javamail.JavaMailSender
 
 class SuccessfullyInvestedMail(
@@ -14,8 +14,8 @@ class SuccessfullyInvestedMail(
     override val languageData: List<LanguageData>
         get() = listOf(generateLanguageData(EN_LANGUAGE, "investment-template.mustache", "Investment"))
 
-    fun setData(project: ProjectResponse, amount: Long): SuccessfullyInvestedMail {
-        data = InvestmentData(project.name, amount.toMailFormat(), project.tosUrl)
+    fun setData(project: ProjectWithDataResponse, amount: Long): SuccessfullyInvestedMail {
+        data = InvestmentData(project.project.name, amount.toMailFormat(), project.tosUrl)
         return this
     }
 }
