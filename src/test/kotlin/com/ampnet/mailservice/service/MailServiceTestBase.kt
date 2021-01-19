@@ -37,6 +37,9 @@ abstract class MailServiceTestBase : TestBase() {
     @Autowired
     protected lateinit var applicationProperties: ApplicationProperties
 
+    @Autowired
+    protected lateinit var templateService: TemplateService
+
     @MockBean
     protected lateinit var userService: UserService
 

@@ -2,23 +2,26 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.LinkResolverService
+import com.ampnet.mailservice.service.TemplateService
 import org.springframework.mail.javamail.JavaMailSender
-
-const val CONFIRMATION_TEMPLATE = "mail-confirmation-template.mustache"
 
 class ConfirmationMail(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    linkResolver: LinkResolverService
-) : AbstractMail(mailSender, applicationProperties, linkResolver) {
+    linkResolver: LinkResolverService,
+    templateService: TemplateService
+) : AbstractMail(mailSender, applicationProperties, linkResolver, templateService) {
 
-    override val languageData = listOf(
-        generateLanguageData(EN_LANGUAGE, CONFIRMATION_TEMPLATE, "Confirm your email"),
-        generateLanguageData(EL_LANGUAGE, CONFIRMATION_TEMPLATE, "Επιβεβαιώστε το email σας")
-    )
+    override val templateName = "mailConfirmationTemplate"
+    override val title = "confirmationTitle"
 
     fun setData(token: String, coop: String): ConfirmationMail {
         data = MailConfirmationData(linkResolver.getConfirmationLink(token, coop))
+        return this
+    }
+
+    fun setTemplate(language: String): ConfirmationMail {
+        template = TemplateRequestData(language, templateName, title)
         return this
     }
 }

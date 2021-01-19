@@ -3,28 +3,30 @@ package com.ampnet.mailservice.service.impl.mail
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.service.LinkResolverService
+import com.ampnet.mailservice.service.TemplateService
 import com.ampnet.projectservice.proto.OrganizationResponse
 import com.ampnet.projectservice.proto.ProjectResponse
 import org.springframework.mail.javamail.JavaMailSender
 
-const val WALLET_ACTIVATED_TITLE = "Wallet activated"
-const val WALLET_ACTIVATED_TITLE_EL = "Το πορτοφόλι ενεργοποιήθηκε"
+const val WALLET_ACTIVATED_TITLE = "walletActivatedTitle"
 
 class ActivatedUserWalletMail(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    linkResolver: LinkResolverService
-) : AbstractMail(mailSender, applicationProperties, linkResolver) {
+    linkResolver: LinkResolverService,
+    templateService: TemplateService
+) : AbstractMail(mailSender, applicationProperties, linkResolver, templateService) {
 
-    private val templateName = "user-wallet-activated-template.mustache"
-
-    override val languageData = listOf(
-        generateLanguageData(EN_LANGUAGE, templateName, WALLET_ACTIVATED_TITLE),
-        generateLanguageData(EL_LANGUAGE, templateName, WALLET_ACTIVATED_TITLE_EL)
-    )
+    override val templateName = "userWalletActivatedTemplate"
+    override val title = WALLET_ACTIVATED_TITLE
 
     fun setData(activationData: String, coop: String): ActivatedUserWalletMail {
         data = ActivatedUserWalletData(linkResolver.getWalletActivatedLink(WalletType.USER, coop), activationData)
+        return this
+    }
+
+    fun setTemplate(language: String): ActivatedUserWalletMail {
+        template = TemplateRequestData(language, templateName, WALLET_ACTIVATED_TITLE)
         return this
     }
 }
@@ -34,15 +36,12 @@ data class ActivatedUserWalletData(val link: String, val activationData: String)
 class ActivatedOrganizationWalletMail(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    linkResolver: LinkResolverService
-) : AbstractMail(mailSender, applicationProperties, linkResolver) {
+    linkResolver: LinkResolverService,
+    templateService: TemplateService
+) : AbstractMail(mailSender, applicationProperties, linkResolver, templateService) {
 
-    private val templateName = "organization-wallet-activated-template.mustache"
-
-    override val languageData = listOf(
-        generateLanguageData(EN_LANGUAGE, templateName, WALLET_ACTIVATED_TITLE),
-        generateLanguageData(EL_LANGUAGE, templateName, WALLET_ACTIVATED_TITLE_EL)
-    )
+    override val templateName = "organizationWalletActivatedTemplate"
+    override val title = WALLET_ACTIVATED_TITLE
 
     fun setData(organization: OrganizationResponse, coop: String): ActivatedOrganizationWalletMail {
         data = ActivatedOrganizationWalletData(
@@ -55,6 +54,11 @@ class ActivatedOrganizationWalletMail(
         )
         return this
     }
+
+    fun setTemplate(language: String): ActivatedOrganizationWalletMail {
+        template = TemplateRequestData(language, templateName, WALLET_ACTIVATED_TITLE)
+        return this
+    }
 }
 
 data class ActivatedOrganizationWalletData(val link: String, val organizationName: String)
@@ -62,15 +66,12 @@ data class ActivatedOrganizationWalletData(val link: String, val organizationNam
 class ActivatedProjectWalletMail(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    linkResolver: LinkResolverService
-) : AbstractMail(mailSender, applicationProperties, linkResolver) {
+    linkResolver: LinkResolverService,
+    templateService: TemplateService
+) : AbstractMail(mailSender, applicationProperties, linkResolver, templateService) {
 
-    private val templateName = "project-wallet-activated-template.mustache"
-
-    override val languageData = listOf(
-        generateLanguageData(EN_LANGUAGE, templateName, WALLET_ACTIVATED_TITLE),
-        generateLanguageData(EL_LANGUAGE, templateName, WALLET_ACTIVATED_TITLE_EL)
-    )
+    override val templateName = "projectWalletActivatedTemplate"
+    override val title = WALLET_ACTIVATED_TITLE
 
     fun setData(project: ProjectResponse, coop: String): ActivatedProjectWalletMail {
         data = ActivatedProjectWalletData(
@@ -82,6 +83,11 @@ class ActivatedProjectWalletMail(
             ),
             project.name
         )
+        return this
+    }
+
+    fun setTemplate(language: String): ActivatedProjectWalletMail {
+        template = TemplateRequestData(language, templateName, WALLET_ACTIVATED_TITLE)
         return this
     }
 }

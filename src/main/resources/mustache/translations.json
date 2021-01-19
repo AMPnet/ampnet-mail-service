@@ -1,0 +1,142 @@
+{
+  "depositRequestTemplate":{
+    "en":"<p>You have requested deposit with amount: {{amount}}.</p>\n\n<p>You will be informed after your deposit request has been processed.</p>",
+    "es":"<p>Ha solicitado un depósito por un importe de: {{amount}}.</p>\n \n <p>Le informaremos cuando su solicitud de depósito se haya procesado.</p>",
+    "el":"<p>Ζήτησε να καταθέσεις το εξής ποσό: {{amount}}€.</p>\n\n<p>Θα ενημερωθείς μόλις επεξεργαστούμε το αίτημα σου.</p>\n"
+  },
+  "depositTemplate":{
+    "en":"{{#minted}}\n    <p>Your deposit has been approved and your funds are ready.</p>\n{{/minted}}\n{{^minted}}\n    <p>Your deposit request has been rejected. Try to create new deposit request or contact support for more information.</p>\n{{/minted}}",
+    "es":"{{#minted}}\n  <p>Su depósito ha sido autorizado y sus fondos están disponibles.</p>\n {{/minted}}\n {{^minted}}\n  <p>Su solicitud de depósito ha sido rechazada. Intente crear una nueva solicitud de depósito o contacte con soporte para más información.</p>\n {{/minted}}",
+    "el":"{{#minted}}\n    <p>Η κατάθεσή σου έχει εγκριθεί και το κεφάλαιό σου είναι έτοιμο.</p>\n{{/minted}}\n{{^minted}}\n    <p>Το αίτημά σου απορρίθφηκε. Κάνε ένα νέο αίτημα κατάθεσης ή επικοινώνησε μαζί μας για περισσότερες πληροφορίες.</p>\n{{/minted}}\n"
+  },
+  "failedDeliveryMessageTemplate":{
+    "en":"<p>Mail delivery to the following address(es) failed: {{failedRecipients}}.</p>",
+    "es":"<p>No se pudo entregar el correo a la(s) siguiente(s) dirección(es): {{failedRecipients}}.</p>",
+    "el":"<p>Η αποστολή email στους παρακάτω παραλήπτες απέτυχε: {{failedRecipients}}.</p>\n"
+  },
+  "forgotPasswordTemplate":{
+    "en":"<p>To set new password, please follow the link: <a href=\"{{& link}}\">{{& link}}</a></p>\n<p>If you did not request a change of password, ignore this mail.</p>",
+    "es":"<p>Por favor, para establecer una nueva contraseña, haga clic en el siguiente enlace: <a href=\"{{& link}}\">{{& link}}</a></p>\n <p>Si no ha solicitado un cambio de contraseña, ignore este correo.</p>",
+    "el":"<p>Για να ορίσεις νέο κωδικό πρόσβασης, ακολούθησε τον σύνδεσμο: <a href=\"{{& link}}\">{{& link}}</a></p>\n<p>Εάν δεν ζήτησες αλλαγή κωδικού πρόσβασης, αγνόησε αυτό το μήνυμα.</p>\n"
+  },
+  "invitationTemplate":{
+    "en":"<p>You have been invited to join organization: {{organization}} </p>\n\n<p>To review invite, please follow the link: <a href=\"{{& link}}\">{{& link}}</a></p>",
+    "es":"<p>Ha recibido una invitación para unirse a la organización: {{organization}} </p>\n \n <p>Por favor, para revisar la invitación, haga clic en el siguiente enlace: <a href=\"{{& link}}\">{{& link}}</a></p>",
+    "el":"<p>Έχεις προσκληθεί να συμμετάσχεις στον οργανισμό:{{organization}} </p>\n\n<p>Για να δεις την πρόσκληση, κάνε click στον σύνδεσμο: <a href=\"{{& link}}\">{{& link}}</a></p>\n"
+  },
+  "mailConfirmationTemplate":{
+    "en":"<h2>Please confirmation your email</h2>\n\n<p>Follow the link the confirm your email: <a href=\"{{& link}}\">{{& link}}</a></p>",
+    "es":"<h2>Por favor, confirme su correo electrónico</h2>\n \n <p>Haga clic en el siguiente enlace para confirmar su correo electrónico: <a href=\"{{& link}}\">{{& link}}</a></p>",
+    "el":"<h2>Επιβεβαίωσε το email σου</h2>\n\n<p>Κάνε click στον σύνδεσμο για να επιβεβαιώσεις το email σου: <a href=\"{{& link}}\">{{& link}}</a></p>\n"
+  },
+  "organizationWalletActivatedTemplate":{
+    "en":"<p>New investment group wallet has just been created on crowdfunding platform that you manage!</p>\n<p>Please go <a href=\"{{& link}}\">{{& link}}</a> to review and approve investment group wallet.</p>",
+    "es":"<p>Se acaba de crear el monedero de un nuevo grupo de inversión en la plataforma de inversión colectiva que usted gestiona!</p>\n <p>Por favor, diríjase a <a href=\"{{& link}}\">{{& link}}</a> para revisar y autorizar el monedero del grupo de inversión.</p>",
+    "el":"<p>Το Χαρτοφυλάκιο επενδύσεων με τίτλο {{organizationName}} πρέπει να εγκριθεί!</p>\n<p>Μπορείς να προσθέσεις νέα έργα για χρηματοδότηση στο Χαρτοφυλάκιό σου. <a href=\"{{& link}}\">{{& link}}</a></p>\n"
+  },
+  "organizationWalletTemplate":{
+    "en":"<p>New investment group wallet has just been created on crowdfunding platform that you manage!</p>\n<p>Please go <a href=\"{{& link}}\">{{& link}}</a> to review and approve investment group wallet.</p>",
+    "es":"<p>Se acaba de crear el monedero de un nuevo grupo de inversión en la plataforma de inversión colectiva que usted gestiona!</p>\n <p>Por favor, diríjase a <a href=\"{{& link}}\">{{& link}}</a> para revisar y autorizar el monedero del grupo de inversión.</p>",
+    "el":"<p>Το νέο πορτοφόλι του χαρτοφυλακίου επενδύσεων μόλις δημιουργήθηκε στην πλατφόρμα crowdfunding που διαχειρίζεσαι!</p>\n<p>Πάρακαλώ πήγαινε στο <a href=\"{{& link}}\">{{& link}}</a> για ελέγξεις και να εγκρίνεις το πορτοφόλι του χαρτοφυλακίου επενδύσεων.</p>\n"
+  },
+  "projectFullyFundedTemplate":{
+    "en":"<p>Hey: {{firstName}},</p>\n<p>Your project {{projectName}} has been funded completely!</p>\n<p>Go to <a href=\"{{& link}}\">{{& link}}</a> to access the funds.</p>",
+    "es":"<p>Hola: {{firstName}},</p>\n <p>Su proyecto {{projectName}} ha sido financiado en su totalidad!</p>\n <p>Diríjase a <a href=\"{{& link}}\">{{& link}}</a> para acceder a los fondos.</p>",
+    "el":"<p>Γειά σου: {{firstName}},</p>\n<p>Το έργο σου με τίτλο {{projectName}} χρηματοδοτήθηκε πλήρως!</p>\n<p>Πήγαινε στο <a href=\"{{& link}}\">{{& link}}</a> για να έχεις πρόσβαση στα χρήματα.</p>\n"
+  },
+  "projectWalletActivatedTemplate":{
+    "en":"<p>Your {{projectName}} Project has just been approved and is ready for receiving investments!</p>\n<p>Manage your project and track the funding status <a href=\"{{& link}}\">{{& link}}</a></p>",
+    "es":"<p>Su proyecto {{projectName}} se acaba de autorizar y está listo para recibir inversiones!</p>\n <p>Gestione su proyecto y siga el estado de la financiación <a href=\"{{& link}}\">{{& link}}</a></p>",
+    "el":"<p>To έργο σου με τίτλο{{projectName}} έχει εγκριθεί και είναι έτοιμο για να δεχθεί επενδύσεις!</p>\n<p>Για να διαχειριστείς το έργο σου και για να παρακολουθήσεις την κατάσταση χρηματοδότησης κάνε click στο <a href=\"{{& link}}\">{{& link}}</a></p>\n"
+  },
+  "projectWalletTemplate":{
+    "en":"<p>New project wallet has just been created on crowdfunding platform that you manage!</p>\n<p>Please go <a href=\"{{& link}}\">{{& link}}</a> to review and approve new wallet creation. This action will unlock the project to receive investments.</p>",
+    "es":"<p>Se acaba de crear el monedero de un nuevo proyecto en la plataforma de inversión colectiva que usted gestiona!</p>\n <p>Por favor, diríjase a <a href=\"{{& link}}\">{{& link}}</a> para revisar y autorizar la creación del nuevo monedero. Esta acción permitirá que el proyecto reciba inversiones.</p>",
+    "el":"<p>Το νέο πορτοφόλι του έργου μόλις δημιουργήθηκε στην πλατφόρμα crowdfunding που διαχειρίζεσαι!</p>\n<p>Πήγαινε στο <a href=\"{{& link}}\">{{& link}}</a> για να έλεγξεις και να εγκρίνεις το πορτοφόλι. Αφού το κάνεις αυτό το έργο θα είναι έτοιμο για να λάβει επενδύσεις.</p>\n"
+  },
+  "tokenIssuerWithdrawalTemplate":{
+    "en":"<p>User {{firstName}} {{lastName}} has requested withdrawal with amount €{{amount}} on the crowdfunding platform that you manage.</p>\n<p>Please go <a href=\"{{& link}}\">{{& link}}</a> to review and approve withdrawal request.</p>",
+    "es":"<p>El usuario {{firstName}} {{lastName}} ha solicitado una retirada por un importe de {{amount}}€ en la plataforma de inversión colectiva que usted gestiona.</p>\n <p>Por favor, diríjase a <a href=\"{{& link}}\">{{& link}}</a> para revisar y autorizar la solicitud de retirada.</p>",
+    "el":"<p>Ο χρήστης {{firstName}} {{lastName}} έχει ζητήσει ανάληψη του ποσού των {{amount}}€ από την από την πλατφόρμα crowdfunding που διαχειρίζεσαι.</p>\n<p>Πήγαινε στο <a href=\"{{& link}}\">{{& link}}</a> για να ελεγξεις και να εγκρίνεις το αίτημα ανάληψης.</p>\n"
+  },
+  "userWalletActivatedTemplate":{
+    "en":"<p>Your wallet has just been approved!</p>\n<p>Your wallet address is: {{activationData}}</p>\n<p>You can start investing by making a deposit on your <a href=\"{{& link}}\">{{& link}}</p>",
+    "es":"<p>Se acaba de autorizar su monedero!</p>\n <p>La dirección de su monedero es: {{activationData}}</p>\n <p>Puede comenzar a invertir haciendo un depósito en <a href=\"{{& link}}\">{{& link}}</p>",
+    "el":"<p>Το πορτοφόλι σου μόλις εγκρίθηκε!</p>\n<p>Το πορτοφόλι σου βρίσκεται εδώ: {{activationData}}</p>\n<p>Μπορείς να αρχίσεις να επενδύεις κάνοντας μια κατάθεση στο λογαριασμό σου <a href=\"{{& link}}\">{{& link}}</p>\n"
+  },
+  "userWalletTemplate":{
+    "en":"<p>New wallet has just been created on crowdfunding platform that you manage!</p>\n<p>New user wallet address is: {{activationData}}</p>\n<p>Please go <a href=\"{{& link}}\">{{& link}}</a> to review and approve new wallet creation.</p>",
+    "es":"<p>Se acaba de crear un nuevo monedero en la plataforma de inversión colectiva que usted gestiona!</p>\n <p>La dirección del nuevo monedero de usuario es: {{activationData}}</p>\n <p>Por favor, diríjase a <a href=\"{{& link}}\">{{& link}}</a> para revisar y autorizar la creación del nuevo monedero.</p>",
+    "el":"<p>Ένα νέο πορτοφόλι μόλις δημιουργήθηκε στην πλατφόρμα crowdfunding που διαχειρίζεσαι!</p>\n<p>Το πορτοφόλι βρίσκεται εδώ: {{activationData}}</p>\n<p>Πήγαινε στο <a href=\"{{& link}}\">{{& link}}</a> για να ελεγξεις και να εγκρίνεις τη δημιουργία του.</p>\n"
+  },
+  "withdrawRequestTemplate":{
+    "en":"<p>You have requested withdraw with amount: €{{amount}}.</p>\n\n<p>You will be informed after your withdraw request has been processed.</p>",
+    "es":"<p>Ha solicitado una retirada por un importe de: {{amount}}€.</p>\n \n <p>Se le informará cuando su solicitud de retirada se haya procesado.</p>",
+    "el":"<p>Ζήτησες ανάληψη με ποσό:{{amount}}€.</p>\n\n<p>Θα ενημερωθείς μόλις επεξεργαστούμε το αίτημά σου.</p>\n"
+  },
+  "withdrawTemplate":{
+    "en":"{{#burned}}\n    <p>Your withdraw have been approved and your funds have been transferred to your bank account.</p>\n{{/burned}}\n{{^burned}}\n    <p>Your withdraw request has been rejected. For more information contact support.</p>\n{{/burned}}",
+    "es":"{{#burned}}\n  <p>Su retirada ha sido autorizada y sus fondos se han transferido a su cuenta bancaria.</p>\n {{/burned}}\n {{^burned}}\n  <p>Su solicitud de retirada ha sido rechazada. Para más información, contacte con soporte.</p>\n {{/burned}}",
+    "el":"{{#burned}}\n    <p>Η ανάληψή σου έχει εγκριθεί και τα χρήματά έχουν μεταφερθεί στον τραπεζικό σου λογαριασμό.</p>\n{{/burned}}\n{{^burned}}\n    <p>Το αίτημα ανάληψης απορρίφθηκε. Για περισσότερες πληροφορίες επικοινώνησε μαζί μας.</p>\n{{/burned}}\n"
+  },
+  "investmentTemplate":{
+    "en":"<p>You have successfully invested amount: €{{amount}} in project {{projectName}}.</p>\n{{#link}}\n<p>Investment in completed under conditions: <a href=\"{{& link}}\">{{& link}}</a></p>\n{{/link}}",
+    "es":"",
+    "el":""
+  },
+  "walletActivatedTitle":{
+    "en":"Wallet activated",
+    "es":"Monedero activado",
+    "el":"Το πορτοφόλι ενεργοποιήθηκε"
+  },
+  "confirmationTitle":{
+    "en":"Confirm your email",
+    "es":"Confirme su correo electrónico",
+    "el":"Επιβεβαιώστε το email σας"
+  },
+  "depositInfoTitle":{
+    "en":"Deposit",
+    "es":"Depósito",
+    "el":"Κατάθεση"
+  },
+  "failedDeliveryTitle":{
+    "en":"Email delivery failed",
+    "es":"Entrega de correo electrónico fallida",
+    "el":"Η παράδοση email απέτυχε"
+  },
+  "invitationTitle":{
+    "en":"Invitation",
+    "es":"Invitación",
+    "el":"Πρόσκληση"
+  },
+  "newWalletTitle":{
+    "en":"New wallet created",
+    "es":"Nuevo monedero creado",
+    "el":"Δημιουργήθηκε νέο πορτοφόλι"
+  },
+  "projectFullyFundedTitle":{
+    "en":"Project is fully funded",
+    "es":"El proyecto está financiado en su totalidad",
+    "el":"Το έργο χρηματοδοτείται πλήρως"
+  },
+  "resetPasswordTitle":{
+    "en":"Reset password",
+    "es":"Restablecer contraseña",
+    "el":"Επαναφορά κωδικού πρόσβασης"
+  },
+  "withdrawTitle":{
+    "en":"Withdraw",
+    "es":"Retirar",
+    "el":"Ανάληψη"
+  },
+  "newWithdrawTitle":{
+    "en":"New withdrawal request",
+    "es":"Nueva solicitud de retirada",
+    "el":"Νέο αίτημα ανάληψης"
+  },
+  "investmentTitle":{
+    "en":"Investment",
+    "es":"Inversión",
+    "el":"\nΕπένδυση"
+  }
+}
