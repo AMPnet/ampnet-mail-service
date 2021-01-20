@@ -11,7 +11,7 @@ import com.ampnet.mailservice.proto.OrganizationInvitationRequest
 import com.ampnet.mailservice.proto.ResetPasswordRequest
 import com.ampnet.mailservice.proto.SuccessfullyInvestedRequest
 import com.ampnet.mailservice.service.LinkResolverService
-import com.ampnet.mailservice.service.TemplateTranslationService
+import com.ampnet.mailservice.service.TranslationService
 import com.ampnet.mailservice.service.UserMailService
 import com.ampnet.mailservice.service.impl.mail.AbstractMail
 import com.ampnet.mailservice.service.impl.mail.ActivatedOrganizationWalletMail
@@ -39,95 +39,95 @@ class UserMailServiceImpl(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
     linkResolverService: LinkResolverService,
-    templateTranslationService: TemplateTranslationService,
+    translationService: TranslationService,
     private val userService: UserService,
     private val projectService: ProjectService,
     private val walletService: WalletService
 ) : UserMailService {
 
     private val confirmationMail: ConfirmationMail by lazy {
-        ConfirmationMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
+        ConfirmationMail(mailSender, applicationProperties, linkResolverService, translationService)
     }
     private val resetPasswordMail: ResetPasswordMail by lazy {
-        ResetPasswordMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
+        ResetPasswordMail(mailSender, applicationProperties, linkResolverService, translationService)
     }
     private val invitationMail: InvitationMail by lazy {
-        InvitationMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
+        InvitationMail(mailSender, applicationProperties, linkResolverService, translationService)
     }
     private val depositRequestMail: DepositRequestMail by lazy {
-        DepositRequestMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
+        DepositRequestMail(mailSender, applicationProperties, linkResolverService, translationService)
     }
     private val depositMail: DepositInfoMail by lazy {
-        DepositInfoMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
+        DepositInfoMail(mailSender, applicationProperties, linkResolverService, translationService)
     }
     private val withdrawRequestMail: WithdrawRequestMail by lazy {
-        WithdrawRequestMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
+        WithdrawRequestMail(mailSender, applicationProperties, linkResolverService, translationService)
     }
     private val withdrawInfoMail: WithdrawInfoMail by lazy {
-        WithdrawInfoMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
+        WithdrawInfoMail(mailSender, applicationProperties, linkResolverService, translationService)
     }
     private val activatedUserWalletMail: ActivatedUserWalletMail by lazy {
-        ActivatedUserWalletMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
+        ActivatedUserWalletMail(mailSender, applicationProperties, linkResolverService, translationService)
     }
     private val activatedOrganizationWalletMail: ActivatedOrganizationWalletMail by lazy {
         ActivatedOrganizationWalletMail(
-            mailSender, applicationProperties, linkResolverService, templateTranslationService
+            mailSender, applicationProperties, linkResolverService, translationService
         )
     }
     private val activatedProjectWalletMail: ActivatedProjectWalletMail by lazy {
-        ActivatedProjectWalletMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
+        ActivatedProjectWalletMail(mailSender, applicationProperties, linkResolverService, translationService)
     }
     private val failedDeliveryMail: FailedDeliveryMail by lazy {
-        FailedDeliveryMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
+        FailedDeliveryMail(mailSender, applicationProperties, linkResolverService, translationService)
     }
     private val projectFullyFundedMail: ProjectFullyFundedMail by lazy {
-        ProjectFullyFundedMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
+        ProjectFullyFundedMail(mailSender, applicationProperties, linkResolverService, translationService)
     }
     private val successfullyInvestedMail: SuccessfullyInvestedMail by lazy {
-        SuccessfullyInvestedMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
+        SuccessfullyInvestedMail(mailSender, applicationProperties, linkResolverService, translationService)
     }
 
     override fun sendConfirmationMail(request: MailConfirmationRequest) =
-        confirmationMail.setData(request.token, request.coop).setTemplate(request.language).sendTo(request.email)
+        confirmationMail.setData(request.token, request.coop).setLanguage(request.language).sendTo(request.email)
 
     override fun sendResetPasswordMail(request: ResetPasswordRequest) =
-        resetPasswordMail.setData(request.token, request.coop).setTemplate(request.language).sendTo(request.email)
+        resetPasswordMail.setData(request.token, request.coop).setLanguage(request.language).sendTo(request.email)
 
     override fun sendOrganizationInvitationMail(request: OrganizationInvitationRequest) =
-        invitationMail.setData(request.organization, request.coop).setTemplate(request.language)
+        invitationMail.setData(request.organization, request.coop).setLanguage(request.language)
             .sendTo(request.emailsList.toList()) { failedMails ->
                 val filedMailRecipients = failedMails.map { it.allRecipients.toString() }
-                failedDeliveryMail.setData(filedMailRecipients)
-                    .setTemplate(request.language).sendTo(request.senderEmail)
+                failedDeliveryMail.setData(filedMailRecipients).setLanguage(request.language)
+                    .setLanguage(request.language).sendTo(request.senderEmail)
             }
 
     override fun sendDepositRequestMail(user: UserResponse, amount: Long) =
-        depositRequestMail.setData(amount).setTemplate(user.language).sendTo(user.email)
+        depositRequestMail.setData(amount).setLanguage(user.language).sendTo(user.email)
 
     override fun sendDepositInfoMail(user: UserResponse, minted: Boolean) =
-        depositMail.setData(minted).setTemplate(user.language).sendTo(user.email)
+        depositMail.setData(minted).setLanguage(user.language).sendTo(user.email)
 
     override fun sendWithdrawRequestMail(user: UserResponse, amount: Long) =
-        withdrawRequestMail.setData(amount).setTemplate(user.language).sendTo(user.email)
+        withdrawRequestMail.setData(amount).setLanguage(user.language).sendTo(user.email)
 
     override fun sendWithdrawInfoMail(user: UserResponse, burned: Boolean) =
-        withdrawInfoMail.setData(burned).setTemplate(user.language).sendTo(user.email)
+        withdrawInfoMail.setData(burned).setLanguage(user.language).sendTo(user.email)
 
     override fun sendWalletActivatedMail(walletOwner: String, walletType: WalletType, activationData: String) {
         val (mail: AbstractMail, user: UserResponse) = when (walletType) {
             WalletType.USER -> {
                 val user = getUser(walletOwner)
-                Pair(activatedUserWalletMail.setData(activationData, user.coop).setTemplate(user.language), user)
+                Pair(activatedUserWalletMail.setData(activationData, user.coop).setLanguage(user.language), user)
             }
             WalletType.ORGANIZATION -> {
                 val organization = projectService.getOrganization(UUID.fromString(walletOwner))
                 val user = getUser(organization.createdByUser)
-                Pair(activatedOrganizationWalletMail.setData(organization, user.coop).setTemplate(user.language), user)
+                Pair(activatedOrganizationWalletMail.setData(organization, user.coop).setLanguage(user.language), user)
             }
             WalletType.PROJECT -> {
                 val project = projectService.getProject(UUID.fromString(walletOwner))
                 val user = getUser(project.createdByUser)
-                Pair(activatedProjectWalletMail.setData(project, user.coop).setTemplate(user.language), user)
+                Pair(activatedProjectWalletMail.setData(project, user.coop).setLanguage(user.language), user)
             }
         }
         mail.sendTo(user.email)
@@ -137,14 +137,14 @@ class UserMailServiceImpl(
         val wallet = walletService.getWalletByHash(walletHash)
         val project = projectService.getProject(UUID.fromString(wallet.owner))
         val user = getUser(project.createdByUser)
-        projectFullyFundedMail.setData(user, project).setTemplate(user.language).sendTo(user.email)
+        projectFullyFundedMail.setData(user, project).setLanguage(user.language).sendTo(user.email)
     }
 
     override fun sendSuccessfullyInvested(request: SuccessfullyInvestedRequest) {
         val wallets = walletService.getWalletsByHash(setOf(request.walletHashFrom, request.walletHashTo))
         val user = getUser(getOwnerByHash(wallets, request.walletHashFrom))
         val project = projectService.getProjectWithData(UUID.fromString(getOwnerByHash(wallets, request.walletHashTo)))
-        successfullyInvestedMail.setData(project, request.amount.toLong()).setTemplate(user.language)
+        successfullyInvestedMail.setData(project, request.amount.toLong()).setLanguage(user.language)
             .sendTo(user.email)
     }
 

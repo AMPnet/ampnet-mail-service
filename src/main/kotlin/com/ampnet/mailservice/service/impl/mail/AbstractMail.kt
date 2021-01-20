@@ -1,15 +1,14 @@
 package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
+import com.ampnet.mailservice.exception.InternalException
 import com.ampnet.mailservice.service.LinkResolverService
-import com.ampnet.mailservice.service.TemplateTranslationService
-import com.github.mustachejava.DefaultMustacheFactory
+import com.ampnet.mailservice.service.TranslationService
 import com.github.mustachejava.Mustache
 import mu.KLogging
 import org.springframework.mail.MailException
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
-import java.io.StringReader
 import java.io.StringWriter
 import java.util.Date
 import javax.mail.MessagingException
@@ -19,15 +18,21 @@ abstract class AbstractMail(
     private val mailSender: JavaMailSender,
     private val applicationProperties: ApplicationProperties,
     protected val linkResolver: LinkResolverService,
-    private val templateTranslationService: TemplateTranslationService
+    private val translationService: TranslationService
 ) {
 
     companion object : KLogging()
 
     abstract val templateName: String
-    abstract val title: String
-    protected lateinit var template: TemplateRequestData
+    abstract val titleKey: String
+    protected lateinit var language: String
     protected open var data: Any? = null
+    private val templateTranslations: Map<String, Mustache> by lazy {
+        translationService.getTemplateTranslations(templateName)
+    }
+    private val titleTranslations: Map<String, String> by lazy { translationService.getTitleTranslations(titleKey) }
+
+    fun setLanguage(language: String) = apply { this.language = language }
 
     fun sendTo(to: List<String>, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
         sendEmails(this.createMailMessage(to), notifySenderOnError)
@@ -64,14 +69,12 @@ abstract class AbstractMail(
         to.mapNotNull {
             val mail = mailSender.createMimeMessage()
             val helper = MimeMessageHelper(mail, "UTF-8")
-            val templateTranslation =
-                templateTranslationService.getTemplateData(template)
             try {
                 helper.isValidateAddresses = true
                 helper.setFrom(applicationProperties.mail.sender)
                 helper.setTo(it)
-                helper.setSubject(templateTranslation.title)
-                helper.setText(fillTemplate(generateMustache(templateTranslation.template, template.name)), true)
+                helper.setSubject(getTitle())
+                helper.setText(fillTemplate(getTemplate()), true)
                 helper.setSentDate(Date())
                 mail
             } catch (ex: MessagingException) {
@@ -80,20 +83,21 @@ abstract class AbstractMail(
             }
         }
 
-    private fun generateMustache(template: String, name: String): Mustache =
-        DefaultMustacheFactory().compile(StringReader(template), name)
-
     private fun fillTemplate(template: Mustache): String {
         val writer = StringWriter()
         template.execute(writer, data).flush()
         return writer.toString()
     }
 
-    data class TemplateRequestData(
-        val language: String,
-        val name: String,
-        val title: String
-    )
+    private fun getTitle(): String {
+        return titleTranslations[language] ?: titleTranslations[EN_LANGUAGE]
+            ?: throw InternalException("Could not find default[en] title")
+    }
+
+    private fun getTemplate(): Mustache {
+        return templateTranslations[language] ?: templateTranslations[EN_LANGUAGE]
+            ?: throw InternalException("Could not find default[en] template")
+    }
 }
 
 const val EN_LANGUAGE = "en"

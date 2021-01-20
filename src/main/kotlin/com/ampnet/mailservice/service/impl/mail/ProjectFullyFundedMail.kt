@@ -2,7 +2,7 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.LinkResolverService
-import com.ampnet.mailservice.service.TemplateTranslationService
+import com.ampnet.mailservice.service.TranslationService
 import com.ampnet.projectservice.proto.ProjectResponse
 import com.ampnet.userservice.proto.UserResponse
 import org.springframework.mail.javamail.JavaMailSender
@@ -11,20 +11,14 @@ class ProjectFullyFundedMail(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
     linkResolver: LinkResolverService,
-    templateTranslationService: TemplateTranslationService
-) : AbstractMail(mailSender, applicationProperties, linkResolver, templateTranslationService) {
+    translationService: TranslationService
+) : AbstractMail(mailSender, applicationProperties, linkResolver, translationService) {
 
     override val templateName = "projectFullyFundedTemplate"
-    override val title = "projectFullyFundedTitle"
+    override val titleKey = "projectFullyFundedTitle"
 
-    fun setData(user: UserResponse, project: ProjectResponse): ProjectFullyFundedMail {
+    fun setData(user: UserResponse, project: ProjectResponse) = apply {
         data = ProjectFullyFundedData(user, project, linkResolver)
-        return this
-    }
-
-    fun setTemplate(language: String): ProjectFullyFundedMail {
-        template = TemplateRequestData(language, templateName, title)
-        return this
     }
 }
 data class ProjectFullyFundedData(
