@@ -2,7 +2,7 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.LinkResolverService
-import com.ampnet.mailservice.service.TemplateService
+import com.ampnet.mailservice.service.TemplateTranslationService
 import com.ampnet.projectservice.proto.ProjectWithDataResponse
 import org.springframework.mail.javamail.JavaMailSender
 
@@ -10,8 +10,8 @@ class SuccessfullyInvestedMail(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
     linkResolver: LinkResolverService,
-    templateService: TemplateService
-) : AbstractMail(mailSender, applicationProperties, linkResolver, templateService) {
+    templateTranslationService: TemplateTranslationService
+) : AbstractMail(mailSender, applicationProperties, linkResolver, templateTranslationService) {
 
     override val templateName = "investmentTemplate"
     override val title = "investmentTitle"

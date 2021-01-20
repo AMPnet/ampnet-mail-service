@@ -11,7 +11,7 @@ import com.ampnet.mailservice.proto.OrganizationInvitationRequest
 import com.ampnet.mailservice.proto.ResetPasswordRequest
 import com.ampnet.mailservice.proto.SuccessfullyInvestedRequest
 import com.ampnet.mailservice.service.LinkResolverService
-import com.ampnet.mailservice.service.TemplateService
+import com.ampnet.mailservice.service.TemplateTranslationService
 import com.ampnet.mailservice.service.UserMailService
 import com.ampnet.mailservice.service.impl.mail.AbstractMail
 import com.ampnet.mailservice.service.impl.mail.ActivatedOrganizationWalletMail
@@ -39,50 +39,52 @@ class UserMailServiceImpl(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
     linkResolverService: LinkResolverService,
-    templateService: TemplateService,
+    templateTranslationService: TemplateTranslationService,
     private val userService: UserService,
     private val projectService: ProjectService,
     private val walletService: WalletService
 ) : UserMailService {
 
     private val confirmationMail: ConfirmationMail by lazy {
-        ConfirmationMail(mailSender, applicationProperties, linkResolverService, templateService)
+        ConfirmationMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
     }
     private val resetPasswordMail: ResetPasswordMail by lazy {
-        ResetPasswordMail(mailSender, applicationProperties, linkResolverService, templateService)
+        ResetPasswordMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
     }
     private val invitationMail: InvitationMail by lazy {
-        InvitationMail(mailSender, applicationProperties, linkResolverService, templateService)
+        InvitationMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
     }
     private val depositRequestMail: DepositRequestMail by lazy {
-        DepositRequestMail(mailSender, applicationProperties, linkResolverService, templateService)
+        DepositRequestMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
     }
     private val depositMail: DepositInfoMail by lazy {
-        DepositInfoMail(mailSender, applicationProperties, linkResolverService, templateService)
+        DepositInfoMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
     }
     private val withdrawRequestMail: WithdrawRequestMail by lazy {
-        WithdrawRequestMail(mailSender, applicationProperties, linkResolverService, templateService)
+        WithdrawRequestMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
     }
     private val withdrawInfoMail: WithdrawInfoMail by lazy {
-        WithdrawInfoMail(mailSender, applicationProperties, linkResolverService, templateService)
+        WithdrawInfoMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
     }
     private val activatedUserWalletMail: ActivatedUserWalletMail by lazy {
-        ActivatedUserWalletMail(mailSender, applicationProperties, linkResolverService, templateService)
+        ActivatedUserWalletMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
     }
     private val activatedOrganizationWalletMail: ActivatedOrganizationWalletMail by lazy {
-        ActivatedOrganizationWalletMail(mailSender, applicationProperties, linkResolverService, templateService)
+        ActivatedOrganizationWalletMail(
+            mailSender, applicationProperties, linkResolverService, templateTranslationService
+        )
     }
     private val activatedProjectWalletMail: ActivatedProjectWalletMail by lazy {
-        ActivatedProjectWalletMail(mailSender, applicationProperties, linkResolverService, templateService)
+        ActivatedProjectWalletMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
     }
     private val failedDeliveryMail: FailedDeliveryMail by lazy {
-        FailedDeliveryMail(mailSender, applicationProperties, linkResolverService, templateService)
+        FailedDeliveryMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
     }
     private val projectFullyFundedMail: ProjectFullyFundedMail by lazy {
-        ProjectFullyFundedMail(mailSender, applicationProperties, linkResolverService, templateService)
+        ProjectFullyFundedMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
     }
     private val successfullyInvestedMail: SuccessfullyInvestedMail by lazy {
-        SuccessfullyInvestedMail(mailSender, applicationProperties, linkResolverService, templateService)
+        SuccessfullyInvestedMail(mailSender, applicationProperties, linkResolverService, templateTranslationService)
     }
 
     override fun sendConfirmationMail(request: MailConfirmationRequest) =

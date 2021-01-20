@@ -2,7 +2,7 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.LinkResolverService
-import com.ampnet.mailservice.service.TemplateService
+import com.ampnet.mailservice.service.TemplateTranslationService
 import com.github.mustachejava.DefaultMustacheFactory
 import com.github.mustachejava.Mustache
 import mu.KLogging
@@ -19,7 +19,7 @@ abstract class AbstractMail(
     private val mailSender: JavaMailSender,
     private val applicationProperties: ApplicationProperties,
     protected val linkResolver: LinkResolverService,
-    private val templateService: TemplateService
+    private val templateTranslationService: TemplateTranslationService
 ) {
 
     companion object : KLogging()
@@ -65,7 +65,7 @@ abstract class AbstractMail(
             val mail = mailSender.createMimeMessage()
             val helper = MimeMessageHelper(mail, "UTF-8")
             val templateTranslation =
-                templateService.getTemplateData(template)
+                templateTranslationService.getTemplateData(template)
             try {
                 helper.isValidateAddresses = true
                 helper.setFrom(applicationProperties.mail.sender)

@@ -3,7 +3,7 @@ package com.ampnet.mailservice.service.impl.mail
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.service.LinkResolverService
-import com.ampnet.mailservice.service.TemplateService
+import com.ampnet.mailservice.service.TemplateTranslationService
 import com.ampnet.projectservice.proto.OrganizationResponse
 import com.ampnet.projectservice.proto.ProjectResponse
 import org.springframework.mail.javamail.JavaMailSender
@@ -14,8 +14,8 @@ class ActivatedUserWalletMail(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
     linkResolver: LinkResolverService,
-    templateService: TemplateService
-) : AbstractMail(mailSender, applicationProperties, linkResolver, templateService) {
+    templateTranslationService: TemplateTranslationService
+) : AbstractMail(mailSender, applicationProperties, linkResolver, templateTranslationService) {
 
     override val templateName = "userWalletActivatedTemplate"
     override val title = WALLET_ACTIVATED_TITLE
@@ -37,8 +37,8 @@ class ActivatedOrganizationWalletMail(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
     linkResolver: LinkResolverService,
-    templateService: TemplateService
-) : AbstractMail(mailSender, applicationProperties, linkResolver, templateService) {
+    templateTranslationService: TemplateTranslationService
+) : AbstractMail(mailSender, applicationProperties, linkResolver, templateTranslationService) {
 
     override val templateName = "organizationWalletActivatedTemplate"
     override val title = WALLET_ACTIVATED_TITLE
@@ -67,8 +67,8 @@ class ActivatedProjectWalletMail(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
     linkResolver: LinkResolverService,
-    templateService: TemplateService
-) : AbstractMail(mailSender, applicationProperties, linkResolver, templateService) {
+    templateTranslationService: TemplateTranslationService
+) : AbstractMail(mailSender, applicationProperties, linkResolver, templateTranslationService) {
 
     override val templateName = "projectWalletActivatedTemplate"
     override val title = WALLET_ACTIVATED_TITLE
