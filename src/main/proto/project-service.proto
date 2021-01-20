@@ -6,6 +6,10 @@ message GetByUuids {
   repeated string uuids = 1;
 }
 
+message GetByUuid {
+  string project_uuid = 1;
+}
+
 message OrganizationResponse {
   string uuid = 1;
   string name = 2;
@@ -32,7 +36,11 @@ message ProjectResponse {
   string image_url = 12;
   string description = 13;
   string coop = 14;
-  string tos_url = 15;
+}
+
+message ProjectWithDataResponse {
+  ProjectResponse project = 1;
+  string tos_url = 2;
 }
 
 message OrganizationsResponse {
@@ -46,4 +54,5 @@ message ProjectsResponse {
 service ProjectService {
   rpc GetOrganizations(GetByUuids) returns (OrganizationsResponse);
   rpc GetProjects(GetByUuids) returns (ProjectsResponse);
+  rpc GetProjectWithData(GetByUuid) returns (ProjectWithDataResponse);
 }

@@ -7,6 +7,7 @@ import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.grpc.walletservice.WalletService
 import com.ampnet.projectservice.proto.OrganizationResponse
 import com.ampnet.projectservice.proto.ProjectResponse
+import com.ampnet.projectservice.proto.ProjectWithDataResponse
 import com.ampnet.userservice.proto.UserResponse
 import com.ampnet.walletservice.proto.WalletResponse
 import org.junit.jupiter.api.AfterEach
@@ -96,7 +97,6 @@ abstract class MailServiceTestBase : TestBase() {
             .setCreatedByUser(createdBy)
             .setName("Duimane Investement")
             .setOrganizationUuid(UUID.randomUUID().toString())
-            .setTosUrl("https://tos.url")
             .build()
 
     protected fun generateOrganizationResponse(createdBy: String): OrganizationResponse =
@@ -123,6 +123,7 @@ abstract class MailServiceTestBase : TestBase() {
         val coop = "ampnet-test"
         lateinit var walletOwner: String
         lateinit var project: ProjectResponse
+        lateinit var projectWithData: ProjectWithDataResponse
         lateinit var organization: OrganizationResponse
         lateinit var user: UserResponse
         lateinit var walletHash: String

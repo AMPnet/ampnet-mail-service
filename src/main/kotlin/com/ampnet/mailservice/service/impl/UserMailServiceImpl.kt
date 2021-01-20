@@ -141,7 +141,7 @@ class UserMailServiceImpl(
     override fun sendSuccessfullyInvested(request: SuccessfullyInvestedRequest) {
         val wallets = walletService.getWalletsByHash(setOf(request.walletHashFrom, request.walletHashTo))
         val user = getUser(getOwnerByHash(wallets, request.walletHashFrom))
-        val project = projectService.getProject(UUID.fromString(getOwnerByHash(wallets, request.walletHashTo)))
+        val project = projectService.getProjectWithData(UUID.fromString(getOwnerByHash(wallets, request.walletHashTo)))
         successfullyInvestedMail.setData(project, request.amount.toLong()).setTemplate(user.language)
             .sendTo(user.email)
     }

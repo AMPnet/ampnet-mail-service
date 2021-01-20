@@ -3,10 +3,12 @@ package com.ampnet.mailservice.grpc.projectservice
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.exception.GrpcException
 import com.ampnet.mailservice.exception.ResourceNotFoundException
+import com.ampnet.projectservice.proto.GetByUuid
 import com.ampnet.projectservice.proto.GetByUuids
 import com.ampnet.projectservice.proto.OrganizationResponse
 import com.ampnet.projectservice.proto.ProjectResponse
 import com.ampnet.projectservice.proto.ProjectServiceGrpc
+import com.ampnet.projectservice.proto.ProjectWithDataResponse
 import io.grpc.StatusRuntimeException
 import mu.KLogging
 import net.devh.boot.grpc.client.channelfactory.GrpcChannelFactory
@@ -37,6 +39,17 @@ class ProjectServiceImpl(
     override fun getProject(uuid: UUID): ProjectResponse {
         return getProjects(listOf(uuid)).firstOrNull()
             ?: throw ResourceNotFoundException("Missing project: $uuid")
+    }
+
+    @Throws(ResourceNotFoundException::class)
+    override fun getProjectWithData(uuid: UUID): ProjectWithDataResponse {
+        logger.debug { "Fetching project with data: $uuid" }
+        val request = GetByUuid.newBuilder()
+            .setProjectUuid(uuid.toString())
+            .build()
+        val response = serviceWithTimeout().getProjectWithData(request)
+        logger.debug { "Fetched project with data: $response" }
+        return response
     }
 
     override fun getOrganizations(uuids: Iterable<UUID>): List<OrganizationResponse> {

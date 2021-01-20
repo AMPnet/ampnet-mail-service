@@ -7,6 +7,7 @@ import com.ampnet.mailservice.proto.ResetPasswordRequest
 import com.ampnet.mailservice.proto.SuccessfullyInvestedRequest
 import com.ampnet.mailservice.service.impl.UserMailServiceImpl
 import com.ampnet.mailservice.service.impl.mail.toMailFormat
+import com.ampnet.projectservice.proto.ProjectWithDataResponse
 import com.ampnet.userservice.proto.UserResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -412,8 +413,12 @@ class UserMailServiceTest : MailServiceTestBase() {
         }
         suppose("Project service returns project") {
             testContext.project = generateProjectResponse(UUID.randomUUID().toString())
-            Mockito.`when`(projectService.getProject(UUID.fromString(testContext.walletTo.owner)))
-                .thenReturn(testContext.project)
+            testContext.projectWithData = ProjectWithDataResponse.newBuilder()
+                .setProject(testContext.project)
+                .setTosUrl("tos-url")
+                .build()
+            Mockito.`when`(projectService.getProjectWithData(UUID.fromString(testContext.walletTo.owner)))
+                .thenReturn(testContext.projectWithData)
         }
         suppose("User service returns user") {
             testContext.user = generateUserResponse(testContext.receiverMail)
@@ -436,8 +441,8 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(userMail.mimeMessage.subject).isEqualTo(investmentSubject)
             val mailText = userMail.mimeMessage.content.toString()
-            assertThat(mailText).contains(testContext.project.name)
-            assertThat(mailText).contains(testContext.project.tosUrl)
+            assertThat(mailText).contains(testContext.projectWithData.project.name)
+            assertThat(mailText).contains(testContext.projectWithData.tosUrl)
             assertThat(mailText).contains(testContext.amount.toMailFormat())
         }
     }
