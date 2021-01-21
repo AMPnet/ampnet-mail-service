@@ -21,13 +21,13 @@ class TranslationServiceImpl(
     }
 
     override fun getTemplateTranslations(templateName: String): Map<String, Mustache> {
-        val templates = translations[templateName]?.filter { !it.value.isBlank() }
+        val templates = translations[templateName]?.filter { it.value.isNotBlank() }
             ?: throw InternalException("Could not find template: $templateName")
         return templates.mapValues { generateMustache(it.value, templateName) }
     }
 
     override fun getTitleTranslations(titleKey: String): Map<String, String> {
-        return translations[titleKey]?.filter { !it.value.isBlank() }
+        return translations[titleKey]?.filter { it.value.isNotBlank() }
             ?: throw InternalException("Could not find titleKey: $titleKey")
     }
 

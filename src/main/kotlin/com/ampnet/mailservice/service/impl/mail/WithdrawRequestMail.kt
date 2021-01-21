@@ -7,11 +7,11 @@ import com.ampnet.userservice.proto.UserResponse
 import org.springframework.mail.javamail.JavaMailSender
 
 class WithdrawRequestMail(
+    linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    linkResolver: LinkResolverService,
     translationService: TranslationService
-) : AbstractMail(mailSender, applicationProperties, linkResolver, translationService) {
+) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
 
     override val templateName = "withdrawRequestTemplate"
     override val titleKey = "withdrawTitle"
@@ -20,11 +20,11 @@ class WithdrawRequestMail(
 }
 
 class WithdrawTokenIssuerMail(
+    linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    linkResolver: LinkResolverService,
     translationService: TranslationService
-) : AbstractMail(mailSender, applicationProperties, linkResolver, translationService) {
+) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
 
     override val templateName = "tokenIssuerWithdrawalTemplate"
     override val titleKey = "newWithdrawTitle"

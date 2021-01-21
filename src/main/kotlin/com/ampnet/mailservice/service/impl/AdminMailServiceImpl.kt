@@ -23,25 +23,25 @@ class AdminMailServiceImpl(
 
     private val withdrawTokenIssuerMail: WithdrawTokenIssuerMail by lazy {
         WithdrawTokenIssuerMail(
-            mailSender, applicationProperties, linkResolverService, translationService
+            linkResolverService, mailSender, applicationProperties, translationService
         )
     }
     private val newUserWalletMail: NewWalletMail by lazy {
         NewWalletMail(
-            WalletType.USER, mailSender, applicationProperties,
-            linkResolverService, translationService
+            WalletType.USER, linkResolverService, mailSender, applicationProperties,
+            translationService
         )
     }
     private val newOrganizationWalletMail: NewWalletMail by lazy {
         NewWalletMail(
-            WalletType.ORGANIZATION, mailSender, applicationProperties,
-            linkResolverService, translationService
+            WalletType.ORGANIZATION, linkResolverService, mailSender, applicationProperties,
+            translationService
         )
     }
     private val newProjectWalletMail: NewWalletMail by lazy {
         NewWalletMail(
-            WalletType.PROJECT, mailSender, applicationProperties,
-            linkResolverService, translationService
+            WalletType.PROJECT, linkResolverService, mailSender, applicationProperties,
+            translationService
         )
     }
 

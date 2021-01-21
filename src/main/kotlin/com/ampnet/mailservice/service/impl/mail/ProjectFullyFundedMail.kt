@@ -8,11 +8,11 @@ import com.ampnet.userservice.proto.UserResponse
 import org.springframework.mail.javamail.JavaMailSender
 
 class ProjectFullyFundedMail(
+    linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    linkResolver: LinkResolverService,
     translationService: TranslationService
-) : AbstractMail(mailSender, applicationProperties, linkResolver, translationService) {
+) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
 
     override val templateName = "projectFullyFundedTemplate"
     override val titleKey = "projectFullyFundedTitle"

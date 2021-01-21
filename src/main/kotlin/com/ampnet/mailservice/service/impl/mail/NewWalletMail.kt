@@ -8,11 +8,11 @@ import org.springframework.mail.javamail.JavaMailSender
 
 class NewWalletMail(
     val type: WalletType,
+    linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    linkResolver: LinkResolverService,
     translationService: TranslationService
-) : AbstractMail(mailSender, applicationProperties, linkResolver, translationService) {
+) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
 
     override val templateName = when (type) {
         WalletType.USER -> "userWalletTemplate"

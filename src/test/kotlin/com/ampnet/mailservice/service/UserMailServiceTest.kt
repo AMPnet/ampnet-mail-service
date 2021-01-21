@@ -28,7 +28,7 @@ class UserMailServiceTest : MailServiceTestBase() {
         suppose("Service sent the mail") {
             val request = MailConfirmationRequest.newBuilder()
                 .setEmail(testContext.receiverMail)
-                .setLanguage("invalid")
+                .setLanguage("")
                 .setToken(testContext.token)
                 .setCoop(testContext.coop)
                 .build()

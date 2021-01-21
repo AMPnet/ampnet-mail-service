@@ -15,16 +15,16 @@ import javax.mail.MessagingException
 import javax.mail.internet.MimeMessage
 
 abstract class AbstractMail(
+    protected val linkResolver: LinkResolverService,
     private val mailSender: JavaMailSender,
     private val applicationProperties: ApplicationProperties,
-    protected val linkResolver: LinkResolverService,
     private val translationService: TranslationService
 ) {
 
     companion object : KLogging()
 
-    abstract val templateName: String
-    abstract val titleKey: String
+    protected abstract val templateName: String
+    protected abstract val titleKey: String
     protected lateinit var language: String
     protected open var data: Any? = null
     private val templateTranslations: Map<String, Mustache> by lazy {

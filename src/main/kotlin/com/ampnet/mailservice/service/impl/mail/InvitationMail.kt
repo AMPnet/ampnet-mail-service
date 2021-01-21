@@ -6,11 +6,11 @@ import com.ampnet.mailservice.service.TranslationService
 import org.springframework.mail.javamail.JavaMailSender
 
 class InvitationMail(
+    linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    linkResolver: LinkResolverService,
     translationService: TranslationService
-) : AbstractMail(mailSender, applicationProperties, linkResolver, translationService) {
+) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
 
     override val templateName = "invitationTemplate"
     override val titleKey = "invitationTitle"

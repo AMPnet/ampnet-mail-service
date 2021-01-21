@@ -11,11 +11,11 @@ import org.springframework.mail.javamail.JavaMailSender
 const val WALLET_ACTIVATED_TITLE_KEY = "walletActivatedTitle"
 
 class ActivatedUserWalletMail(
+    linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    linkResolver: LinkResolverService,
     translationService: TranslationService
-) : AbstractMail(mailSender, applicationProperties, linkResolver, translationService) {
+) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
 
     override val templateName = "userWalletActivatedTemplate"
     override val titleKey = WALLET_ACTIVATED_TITLE_KEY
@@ -28,11 +28,11 @@ class ActivatedUserWalletMail(
 data class ActivatedUserWalletData(val link: String, val activationData: String)
 
 class ActivatedOrganizationWalletMail(
+    linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    linkResolver: LinkResolverService,
     translationService: TranslationService
-) : AbstractMail(mailSender, applicationProperties, linkResolver, translationService) {
+) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
 
     override val templateName = "organizationWalletActivatedTemplate"
     override val titleKey = WALLET_ACTIVATED_TITLE_KEY
@@ -52,11 +52,11 @@ class ActivatedOrganizationWalletMail(
 data class ActivatedOrganizationWalletData(val link: String, val organizationName: String)
 
 class ActivatedProjectWalletMail(
+    linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    linkResolver: LinkResolverService,
     translationService: TranslationService
-) : AbstractMail(mailSender, applicationProperties, linkResolver, translationService) {
+) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
 
     override val templateName = "projectWalletActivatedTemplate"
     override val titleKey = WALLET_ACTIVATED_TITLE_KEY
