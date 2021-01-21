@@ -19,7 +19,7 @@ class UserMailServiceTest : MailServiceTestBase() {
     private val service: UserMailService by lazy {
         UserMailServiceImpl(
             mailSender, applicationProperties, linkResolverService,
-            userService, projectService, walletService
+            translationService, userService, projectService, walletService
         )
     }
 
@@ -28,6 +28,7 @@ class UserMailServiceTest : MailServiceTestBase() {
         suppose("Service sent the mail") {
             val request = MailConfirmationRequest.newBuilder()
                 .setEmail(testContext.receiverMail)
+                .setLanguage("")
                 .setToken(testContext.token)
                 .setCoop(testContext.coop)
                 .build()

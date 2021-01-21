@@ -2,24 +2,19 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.LinkResolverService
+import com.ampnet.mailservice.service.TranslationService
 import org.springframework.mail.javamail.JavaMailSender
 
 class WithdrawInfoMail(
+    linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    linkResolver: LinkResolverService
-) : AbstractMail(mailSender, applicationProperties, linkResolver) {
+    translationService: TranslationService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
 
-    private val templateName = "withdraw-template.mustache"
+    override val templateName = "withdrawTemplate"
+    override val titleKey = "withdrawTitle"
 
-    override val languageData = listOf(
-        generateLanguageData(EN_LANGUAGE, templateName, "Withdraw"),
-        generateLanguageData(EL_LANGUAGE, templateName, "Ανάληψη")
-    )
-
-    fun setData(burned: Boolean): WithdrawInfoMail {
-        data = WithdrawInfo(burned)
-        return this
-    }
+    fun setData(burned: Boolean) = apply { data = WithdrawInfo(burned) }
 }
 data class WithdrawInfo(val burned: Boolean)

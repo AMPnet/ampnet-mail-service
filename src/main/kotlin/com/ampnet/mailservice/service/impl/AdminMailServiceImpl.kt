@@ -5,6 +5,7 @@ import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.service.AdminMailService
 import com.ampnet.mailservice.service.LinkResolverService
+import com.ampnet.mailservice.service.TranslationService
 import com.ampnet.mailservice.service.impl.mail.NewWalletMail
 import com.ampnet.mailservice.service.impl.mail.WithdrawTokenIssuerMail
 import com.ampnet.userservice.proto.UserResponse
@@ -16,26 +17,37 @@ class AdminMailServiceImpl(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
     linkResolverService: LinkResolverService,
+    translationService: TranslationService,
     private val userService: UserService
 ) : AdminMailService {
 
     private val withdrawTokenIssuerMail: WithdrawTokenIssuerMail by lazy {
-        WithdrawTokenIssuerMail(mailSender, applicationProperties, linkResolverService)
+        WithdrawTokenIssuerMail(
+            linkResolverService, mailSender, applicationProperties, translationService
+        )
     }
     private val newUserWalletMail: NewWalletMail by lazy {
-        NewWalletMail(WalletType.USER, mailSender, applicationProperties, linkResolverService)
+        NewWalletMail(
+            WalletType.USER, linkResolverService, mailSender, applicationProperties,
+            translationService
+        )
     }
     private val newOrganizationWalletMail: NewWalletMail by lazy {
-        NewWalletMail(WalletType.ORGANIZATION, mailSender, applicationProperties, linkResolverService)
+        NewWalletMail(
+            WalletType.ORGANIZATION, linkResolverService, mailSender, applicationProperties,
+            translationService
+        )
     }
     private val newProjectWalletMail: NewWalletMail by lazy {
-        NewWalletMail(WalletType.PROJECT, mailSender, applicationProperties, linkResolverService)
+        NewWalletMail(
+            WalletType.PROJECT, linkResolverService, mailSender, applicationProperties,
+            translationService
+        )
     }
 
     override fun sendWithdrawRequestMail(user: UserResponse, amount: Long) =
         userService.getTokenIssuers(user.coop).forEach {
-            withdrawTokenIssuerMail.setData(user, amount)
-                .sendTo(it.email, it.language)
+            withdrawTokenIssuerMail.setData(user, amount).setLanguage(user.language).sendTo(it.email)
         }
 
     override fun sendNewWalletNotificationMail(walletType: WalletType, coop: String, activationData: String) =
@@ -44,6 +56,6 @@ class AdminMailServiceImpl(
                 WalletType.USER -> newUserWalletMail
                 WalletType.PROJECT -> newProjectWalletMail
                 WalletType.ORGANIZATION -> newOrganizationWalletMail
-            }.setData(activationData, coop).sendTo(it.email, it.language)
+            }.setData(activationData, coop).setLanguage(it.language).sendTo(it.email)
         }
 }

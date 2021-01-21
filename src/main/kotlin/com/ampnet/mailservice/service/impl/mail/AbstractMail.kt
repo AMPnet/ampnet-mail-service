@@ -1,8 +1,9 @@
 package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
+import com.ampnet.mailservice.exception.InternalException
 import com.ampnet.mailservice.service.LinkResolverService
-import com.github.mustachejava.DefaultMustacheFactory
+import com.ampnet.mailservice.service.TranslationService
 import com.github.mustachejava.Mustache
 import mu.KLogging
 import org.springframework.mail.MailException
@@ -14,33 +15,32 @@ import javax.mail.MessagingException
 import javax.mail.internet.MimeMessage
 
 abstract class AbstractMail(
+    protected val linkResolver: LinkResolverService,
     private val mailSender: JavaMailSender,
     private val applicationProperties: ApplicationProperties,
-    protected val linkResolver: LinkResolverService
+    private val translationService: TranslationService
 ) {
 
     companion object : KLogging()
 
-    protected abstract val languageData: List<LanguageData>
+    protected abstract val templateName: String
+    protected abstract val titleKey: String
+    protected lateinit var language: String
     protected open var data: Any? = null
+    private val templateTranslations: Map<String, Mustache> by lazy {
+        translationService.getTemplateTranslations(templateName)
+    }
+    private val titleTranslations: Map<String, String> by lazy { translationService.getTitleTranslations(titleKey) }
 
-    fun sendTo(
-        to: List<String>,
-        language: String = EN_LANGUAGE,
-        notifySenderOnError: (List<MimeMessage>) -> Unit = {}
-    ) {
-        sendEmails(this.createMailMessage(to, language), notifySenderOnError)
+    fun setLanguage(language: String) = apply { this.language = language }
+
+    fun sendTo(to: List<String>, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
+        sendEmails(this.createMailMessage(to), notifySenderOnError)
     }
 
-    fun sendTo(to: String, language: String = EN_LANGUAGE, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
-        sendEmails(this.createMailMessage(listOf(to), language), notifySenderOnError)
+    fun sendTo(to: String, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
+        sendEmails(this.createMailMessage(listOf(to)), notifySenderOnError)
     }
-
-    protected fun generateLanguageData(language: String, templateName: String, title: String): LanguageData =
-        LanguageData(language, title, generateMustache(language, templateName))
-
-    private fun generateMustache(language: String, name: String): Mustache =
-        DefaultMustacheFactory().compile("mustache/$language/$name")
 
     private fun sendEmails(mails: List<MimeMessage>, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
         if (applicationProperties.mail.enabled.not()) {
@@ -65,17 +65,16 @@ abstract class AbstractMail(
         }
     }
 
-    private fun createMailMessage(to: List<String>, language: String): List<MimeMessage> =
+    private fun createMailMessage(to: List<String>): List<MimeMessage> =
         to.mapNotNull {
             val mail = mailSender.createMimeMessage()
             val helper = MimeMessageHelper(mail, "UTF-8")
-            val languageData = getLanguageData(language)
             try {
                 helper.isValidateAddresses = true
                 helper.setFrom(applicationProperties.mail.sender)
                 helper.setTo(it)
-                helper.setSubject(languageData.title)
-                helper.setText(fillTemplate(languageData.template), true)
+                helper.setSubject(getTitle())
+                helper.setText(fillTemplate(getTemplate()), true)
                 helper.setSentDate(Date())
                 mail
             } catch (ex: MessagingException) {
@@ -90,18 +89,18 @@ abstract class AbstractMail(
         return writer.toString()
     }
 
-    private fun getLanguageData(language: String): LanguageData =
-        languageData.firstOrNull { it.language == language } ?: languageData.first { it.language == EN_LANGUAGE }
+    private fun getTitle(): String {
+        return titleTranslations[language] ?: titleTranslations[EN_LANGUAGE]
+            ?: throw InternalException("Could not find default[en] title")
+    }
 
-    data class LanguageData(
-        val language: String,
-        val title: String,
-        val template: Mustache
-    )
+    private fun getTemplate(): Mustache {
+        return templateTranslations[language] ?: templateTranslations[EN_LANGUAGE]
+            ?: throw InternalException("Could not find default[en] template")
+    }
 }
 
 const val EN_LANGUAGE = "en"
-const val EL_LANGUAGE = "el"
 const val FROM_CENTS_TO_EUROS = 100.0
 const val TWO_DECIMAL_FORMAT = "%.2f"
 fun Long.toMailFormat(): String = TWO_DECIMAL_FORMAT.format(this / FROM_CENTS_TO_EUROS)

@@ -12,7 +12,9 @@ import java.util.UUID
 class AdminMailServiceTest : MailServiceTestBase() {
 
     private val service: AdminMailService by lazy {
-        AdminMailServiceImpl(mailSender, applicationProperties, linkResolverService, userService)
+        AdminMailServiceImpl(
+            mailSender, applicationProperties, linkResolverService, translationService, userService
+        )
     }
 
     @Test

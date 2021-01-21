@@ -2,24 +2,21 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.LinkResolverService
+import com.ampnet.mailservice.service.TranslationService
 import org.springframework.mail.javamail.JavaMailSender
 
 class ResetPasswordMail(
+    linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    linkResolver: LinkResolverService
-) : AbstractMail(mailSender, applicationProperties, linkResolver) {
+    translationService: TranslationService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
 
-    private val templateName = "forgot-password-template.mustache"
+    override val templateName = "forgotPasswordTemplate"
+    override val titleKey = "resetPasswordTitle"
 
-    override val languageData = listOf(
-        generateLanguageData(EN_LANGUAGE, templateName, "Reset password"),
-        generateLanguageData(EL_LANGUAGE, templateName, "Επαναφορά κωδικού πρόσβασης")
-    )
-
-    fun setData(token: String, coop: String): ResetPasswordMail {
+    fun setData(token: String, coop: String) = apply {
         data = ResetPasswordData(linkResolver.getResetPasswordLink(token, coop))
-        return this
     }
 }
 

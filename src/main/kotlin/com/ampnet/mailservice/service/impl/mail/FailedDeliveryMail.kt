@@ -2,25 +2,20 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.LinkResolverService
+import com.ampnet.mailservice.service.TranslationService
 import org.springframework.mail.javamail.JavaMailSender
 
-const val FAILED_DELIVERY_TEMPLATE = "failed-delivery-message-template.mustache"
-
 class FailedDeliveryMail(
+    linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    linkResolver: LinkResolverService
-) : AbstractMail(mailSender, applicationProperties, linkResolver) {
+    translationService: TranslationService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
 
-    override val languageData = listOf(
-        generateLanguageData(EN_LANGUAGE, FAILED_DELIVERY_TEMPLATE, "Email delivery failed"),
-        generateLanguageData(EL_LANGUAGE, FAILED_DELIVERY_TEMPLATE, "Η παράδοση email απέτυχε")
-    )
+    override val templateName = "failedDeliveryMessageTemplate"
+    override val titleKey = "failedDeliveryTitle"
 
-    fun setData(emails: List<String>): FailedDeliveryMail {
-        FailedDeliveryRecipients(emails.joinToString { ", " })
-        return this
-    }
+    fun setData(emails: List<String>) = apply { FailedDeliveryRecipients(emails.joinToString { ", " }) }
 }
 
 data class FailedDeliveryRecipients(val failedRecipients: String)

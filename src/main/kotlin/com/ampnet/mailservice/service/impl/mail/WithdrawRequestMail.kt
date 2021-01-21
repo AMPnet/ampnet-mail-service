@@ -2,47 +2,38 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.LinkResolverService
+import com.ampnet.mailservice.service.TranslationService
 import com.ampnet.userservice.proto.UserResponse
 import org.springframework.mail.javamail.JavaMailSender
 
 class WithdrawRequestMail(
+    linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    linkResolver: LinkResolverService
-) : AbstractMail(mailSender, applicationProperties, linkResolver) {
+    translationService: TranslationService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
 
-    private val templateName = "withdraw-request-template.mustache"
+    override val templateName = "withdrawRequestTemplate"
+    override val titleKey = "withdrawTitle"
 
-    override val languageData = listOf(
-        generateLanguageData(EN_LANGUAGE, templateName, "Withdraw"),
-        generateLanguageData(EL_LANGUAGE, templateName, "Ανάληψη")
-    )
-
-    fun setData(amount: Long): WithdrawRequestMail {
-        data = AmountData(amount.toMailFormat())
-        return this
-    }
+    fun setData(amount: Long) = apply { data = AmountData(amount.toMailFormat()) }
 }
 
 class WithdrawTokenIssuerMail(
+    linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    linkResolver: LinkResolverService
-) : AbstractMail(mailSender, applicationProperties, linkResolver) {
+    translationService: TranslationService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
 
-    private val templateName = "token-issuer-withdrawal-template.mustache"
+    override val templateName = "tokenIssuerWithdrawalTemplate"
+    override val titleKey = "newWithdrawTitle"
 
-    override val languageData = listOf(
-        generateLanguageData(EN_LANGUAGE, templateName, "New withdrawal request"),
-        generateLanguageData(EL_LANGUAGE, templateName, "Νέο αίτημα ανάληψης")
-    )
-
-    fun setData(user: UserResponse, amount: Long): WithdrawTokenIssuerMail {
+    fun setData(user: UserResponse, amount: Long) = apply {
         data = UserData(
             user.firstName, user.lastName, amount.toMailFormat(),
             linkResolver.getManageWithdrawalsLink(user.coop)
         )
-        return this
     }
 }
 

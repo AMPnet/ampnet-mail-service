@@ -2,25 +2,20 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.LinkResolverService
+import com.ampnet.mailservice.service.TranslationService
 import org.springframework.mail.javamail.JavaMailSender
 
-const val DEPOSIT_REQUEST_TEMPLATE = "deposit-request-template.mustache"
-
 class DepositRequestMail(
+    linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    linkResolver: LinkResolverService
-) : AbstractMail(mailSender, applicationProperties, linkResolver) {
+    translationService: TranslationService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
 
-    override val languageData = listOf(
-        generateLanguageData(EN_LANGUAGE, DEPOSIT_REQUEST_TEMPLATE, "Deposit"),
-        generateLanguageData(EL_LANGUAGE, DEPOSIT_REQUEST_TEMPLATE, "Κατάθεση")
-    )
+    override val templateName = "depositRequestTemplate"
+    override val titleKey = "depositInfoTitle"
 
-    fun setData(amount: Long): DepositRequestMail {
-        data = AmountData(amount.toMailFormat())
-        return this
-    }
+    fun setData(amount: Long) = apply { data = AmountData(amount.toMailFormat()) }
 }
 
 data class AmountData(val amount: String)

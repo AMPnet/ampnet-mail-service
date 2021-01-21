@@ -2,23 +2,21 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.LinkResolverService
+import com.ampnet.mailservice.service.TranslationService
 import org.springframework.mail.javamail.JavaMailSender
 
-const val INVITATION_TEMPLATE = "invitation-template.mustache"
-
 class InvitationMail(
+    linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    linkResolver: LinkResolverService
-) : AbstractMail(mailSender, applicationProperties, linkResolver) {
-    override val languageData = listOf(
-        generateLanguageData(EN_LANGUAGE, INVITATION_TEMPLATE, "Invitation"),
-        generateLanguageData(EL_LANGUAGE, INVITATION_TEMPLATE, "Πρόσκληση")
-    )
+    translationService: TranslationService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
 
-    fun setData(organization: String, coop: String): InvitationMail {
+    override val templateName = "invitationTemplate"
+    override val titleKey = "invitationTitle"
+
+    fun setData(organization: String, coop: String) = apply {
         data = InvitationData(organization, linkResolver.getOrganizationInvitesLink(coop))
-        return this
     }
 }
 

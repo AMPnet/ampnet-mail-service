@@ -2,26 +2,23 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.LinkResolverService
+import com.ampnet.mailservice.service.TranslationService
 import com.ampnet.projectservice.proto.ProjectResponse
 import com.ampnet.userservice.proto.UserResponse
 import org.springframework.mail.javamail.JavaMailSender
 
 class ProjectFullyFundedMail(
+    linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    linkResolver: LinkResolverService
-) : AbstractMail(mailSender, applicationProperties, linkResolver) {
+    translationService: TranslationService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
 
-    private val templateName = "project-fully-funded-template.mustache"
+    override val templateName = "projectFullyFundedTemplate"
+    override val titleKey = "projectFullyFundedTitle"
 
-    override val languageData = listOf(
-        generateLanguageData(EN_LANGUAGE, templateName, "Project is fully funded"),
-        generateLanguageData(EL_LANGUAGE, templateName, "Το έργο χρηματοδοτείται πλήρως")
-    )
-
-    fun setData(user: UserResponse, project: ProjectResponse): ProjectFullyFundedMail {
+    fun setData(user: UserResponse, project: ProjectResponse) = apply {
         data = ProjectFullyFundedData(user, project, linkResolver)
-        return this
     }
 }
 data class ProjectFullyFundedData(
