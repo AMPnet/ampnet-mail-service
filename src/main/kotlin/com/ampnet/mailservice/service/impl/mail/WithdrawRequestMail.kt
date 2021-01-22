@@ -16,7 +16,7 @@ class WithdrawRequestMail(
     override val templateName = "withdrawRequestTemplate"
     override val titleKey = "withdrawTitle"
 
-    fun setData(amount: Long) = apply { data = AmountData(amount.toMailFormat()) }
+    fun setTemplateData(amount: Long) = apply { templateData = AmountData(amount.toMailFormat()) }
 }
 
 class WithdrawTokenIssuerMail(
@@ -29,8 +29,8 @@ class WithdrawTokenIssuerMail(
     override val templateName = "tokenIssuerWithdrawalTemplate"
     override val titleKey = "newWithdrawTitle"
 
-    fun setData(user: UserResponse, amount: Long) = apply {
-        data = UserData(
+    fun setTemplateData(user: UserResponse, amount: Long) = apply {
+        templateData = UserData(
             user.firstName, user.lastName, amount.toMailFormat(),
             linkResolver.getManageWithdrawalsLink(user.coop)
         )

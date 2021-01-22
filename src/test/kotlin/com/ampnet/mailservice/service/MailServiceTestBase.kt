@@ -42,6 +42,9 @@ abstract class MailServiceTestBase : TestBase() {
     protected lateinit var translationService: TranslationService
 
     @MockBean
+    protected lateinit var fileService: FileService
+
+    @MockBean
     protected lateinit var userService: UserService
 
     @MockBean
@@ -121,6 +124,7 @@ abstract class MailServiceTestBase : TestBase() {
         val amount = 100L
         val receiverEmails = listOf("test@test.com", "test2@test.com")
         val coop = "ampnet-test"
+        val tosUrl = "tosUrl"
         lateinit var walletOwner: String
         lateinit var project: ProjectResponse
         lateinit var projectWithData: ProjectWithDataResponse

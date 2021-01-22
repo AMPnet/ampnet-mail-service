@@ -22,7 +22,7 @@ plugins {
 }
 
 group = "com.ampnet"
-version = "0.5.7"
+version = "0.5.8"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
@@ -45,6 +45,7 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.subethamail:subethasmtp:3.1.7")
+    testImplementation("org.apache.commons:commons-email:1.5")
 }
 
 tasks.withType<KotlinCompile> {

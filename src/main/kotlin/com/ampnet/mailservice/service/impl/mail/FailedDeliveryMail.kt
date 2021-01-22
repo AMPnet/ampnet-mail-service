@@ -15,7 +15,9 @@ class FailedDeliveryMail(
     override val templateName = "failedDeliveryMessageTemplate"
     override val titleKey = "failedDeliveryTitle"
 
-    fun setData(emails: List<String>) = apply { FailedDeliveryRecipients(emails.joinToString { ", " }) }
+    fun setTemplateData(emails: List<String>) = apply {
+        templateData = FailedDeliveryRecipients(emails.joinToString { ", " })
+    }
 }
 
 data class FailedDeliveryRecipients(val failedRecipients: String)

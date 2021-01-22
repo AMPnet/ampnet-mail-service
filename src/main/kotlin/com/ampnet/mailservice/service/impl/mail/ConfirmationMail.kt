@@ -15,8 +15,8 @@ class ConfirmationMail(
     override val templateName = "mailConfirmationTemplate"
     override val titleKey = "confirmationTitle"
 
-    fun setData(token: String, coop: String) = apply {
-        data = MailConfirmationData(linkResolver.getConfirmationLink(token, coop))
+    fun setTemplateData(token: String, coop: String) = apply {
+        templateData = MailConfirmationData(linkResolver.getConfirmationLink(token, coop))
     }
 }
 

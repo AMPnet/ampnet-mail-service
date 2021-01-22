@@ -17,8 +17,8 @@ class ProjectFullyFundedMail(
     override val templateName = "projectFullyFundedTemplate"
     override val titleKey = "projectFullyFundedTitle"
 
-    fun setData(user: UserResponse, project: ProjectResponse) = apply {
-        data = ProjectFullyFundedData(user, project, linkResolver)
+    fun setTemplateData(user: UserResponse, project: ProjectResponse) = apply {
+        templateData = ProjectFullyFundedData(user, project, linkResolver)
     }
 }
 data class ProjectFullyFundedData(
