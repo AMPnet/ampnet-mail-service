@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.client.RestTemplate
 
+@Disabled("Not for automated testing")
 @Import(RestTemplateConfig::class)
 @ExtendWith(SpringExtension::class)
 class FileServiceTest : TestBase() {
@@ -29,14 +30,20 @@ class FileServiceTest : TestBase() {
     }
 
     @Test
-    @Disabled("Not for automated testing")
     fun mustGetInputStream() {
-        val inputStream = fileService.getInputStream(pdfUrl)
+        val inputStream = fileService.getTermsOfService(pdfUrl)
         assertThat(inputStream).isNotNull()
     }
 
     @Test
     fun mustThrowExceptionForInvalidUrl() {
-        assertThrows<ResourceNotFoundException> { fileService.getInputStream(invalidUrl) }
+        assertThrows<ResourceNotFoundException> { fileService.getTermsOfService(invalidUrl) }
+    }
+
+    @Test
+    fun mustReturnCorrectInputStreamFromLocalTermsOfService() {
+        val inputStream = fileService.getTermsOfService(pdfUrl)
+        val inputStreamLocal = fileService.getTermsOfService(pdfUrl)
+        assertThat(inputStream).isEqualTo(inputStreamLocal)
     }
 }

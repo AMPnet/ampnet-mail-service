@@ -27,7 +27,7 @@ abstract class AbstractMail(
     protected abstract val templateName: String
     protected abstract val titleKey: String
     protected lateinit var language: String
-    protected lateinit var attachment: Attachment
+    protected open var attachment: Attachment? = null
     protected open var templateData: Any? = null
     private val templateTranslations: Map<String, Mustache> by lazy {
         translationService.getTemplateTranslations(templateName)
@@ -71,9 +71,8 @@ abstract class AbstractMail(
         to.mapNotNull {
             val mail = mailSender.createMimeMessage()
             try {
-                val helper = if (this::attachment.isInitialized) {
+                val helper = if (attachment != null) {
                     MimeMessageHelper(mail, true, UTF_8_ENCODING)
-                        .also { helper -> helper.addAttachment(attachment.name) { attachment.file } }
                 } else {
                     MimeMessageHelper(mail, UTF_8_ENCODING)
                 }
@@ -83,6 +82,7 @@ abstract class AbstractMail(
                 helper.setSubject(getTitle())
                 helper.setText(fillTemplate(getTemplate()), true)
                 helper.setSentDate(Date())
+                attachment?.let { attachment -> helper.addAttachment(attachment.name) { attachment.file } }
                 mail
             } catch (ex: MessagingException) {
                 logger.warn { "Cannot create mail from: $to" }

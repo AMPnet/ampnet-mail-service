@@ -16,11 +16,18 @@ import java.io.InputStream
 @Service
 class FileServiceImpl(private val restTemplate: RestTemplate) : FileService {
 
-    override fun getInputStream(url: String): InputStream {
+    private val termsOfService: MutableMap<String, InputStream> = mutableMapOf()
+
+    @Throws(ResourceNotFoundException::class)
+    override fun getTermsOfService(url: String): InputStream {
         try {
+            termsOfService[url]?.let { return it }
             val responseEntity =
                 restTemplate.exchange<Resource>(url, HttpMethod.GET, HttpEntity.EMPTY)
-            return readInputStream(responseEntity, url)
+            readInputStream(responseEntity, url).also {
+                this.termsOfService[url] = it
+                return it
+            }
         } catch (ex: RestClientException) {
             throw ResourceNotFoundException("Error while reading response from $url", ex)
         }

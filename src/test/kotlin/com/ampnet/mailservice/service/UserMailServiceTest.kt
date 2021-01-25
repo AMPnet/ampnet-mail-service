@@ -430,7 +430,7 @@ class UserMailServiceTest : MailServiceTestBase() {
         }
         suppose("File service returns input stream") {
             val termsOfService = ByteArrayInputStream("terms_of_service.pdf".toByteArray())
-            Mockito.`when`(fileService.getInputStream(testContext.tosUrl)).thenReturn(termsOfService)
+            Mockito.`when`(fileService.getTermsOfService(testContext.tosUrl)).thenReturn(termsOfService)
         }
         suppose("Service sent mail for successful funding") {
             val request = SuccessfullyInvestedRequest.newBuilder()

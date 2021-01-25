@@ -155,7 +155,7 @@ class UserMailServiceImpl(
         val wallets = walletService.getWalletsByHash(setOf(request.walletHashFrom, request.walletHashTo))
         val user = getUser(getOwnerByHash(wallets, request.walletHashFrom))
         val project = projectService.getProjectWithData(UUID.fromString(getOwnerByHash(wallets, request.walletHashTo)))
-        val termsOfService = Attachment("Terms_of_service.pdf", fileService.getInputStream(project.tosUrl))
+        val termsOfService = Attachment("Terms_of_service.pdf", fileService.getTermsOfService(project.tosUrl))
         successfullyInvestedMail.setTemplateData(project, request.amount.toLong()).addAttachment(termsOfService)
             .setLanguage(user.language).sendTo(user.email)
     }
