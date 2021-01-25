@@ -15,8 +15,8 @@ class ResetPasswordMail(
     override val templateName = "forgotPasswordTemplate"
     override val titleKey = "resetPasswordTitle"
 
-    fun setData(token: String, coop: String) = apply {
-        data = ResetPasswordData(linkResolver.getResetPasswordLink(token, coop))
+    fun setTemplateData(token: String, coop: String) = apply {
+        templateData = ResetPasswordData(linkResolver.getResetPasswordLink(token, coop))
     }
 }
 

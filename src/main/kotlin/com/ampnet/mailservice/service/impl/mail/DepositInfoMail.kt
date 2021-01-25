@@ -15,7 +15,7 @@ class DepositInfoMail(
     override val templateName = "depositTemplate"
     override val titleKey = "depositInfoTitle"
 
-    fun setData(minted: Boolean) = apply { data = DepositInfo(minted) }
+    fun setTemplateData(minted: Boolean) = apply { templateData = DepositInfo(minted) }
 }
 
 data class DepositInfo(val minted: Boolean)

@@ -47,7 +47,7 @@ class AdminMailServiceImpl(
 
     override fun sendWithdrawRequestMail(user: UserResponse, amount: Long) =
         userService.getTokenIssuers(user.coop).forEach {
-            withdrawTokenIssuerMail.setData(user, amount).setLanguage(user.language).sendTo(it.email)
+            withdrawTokenIssuerMail.setTemplateData(user, amount).setLanguage(user.language).sendTo(it.email)
         }
 
     override fun sendNewWalletNotificationMail(walletType: WalletType, coop: String, activationData: String) =
@@ -56,6 +56,6 @@ class AdminMailServiceImpl(
                 WalletType.USER -> newUserWalletMail
                 WalletType.PROJECT -> newProjectWalletMail
                 WalletType.ORGANIZATION -> newOrganizationWalletMail
-            }.setData(activationData, coop).setLanguage(it.language).sendTo(it.email)
+            }.setTemplateData(activationData, coop).setLanguage(it.language).sendTo(it.email)
         }
 }

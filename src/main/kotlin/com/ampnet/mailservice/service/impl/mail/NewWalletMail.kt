@@ -21,8 +21,9 @@ class NewWalletMail(
     }
     override val titleKey = "newWalletTitle"
 
-    fun setData(activationData: String, coop: String) = apply {
-        data = if (type == WalletType.USER) NewWalletData(linkResolver.getNewWalletLink(type, coop), activationData)
+    fun setTemplateData(activationData: String, coop: String) = apply {
+        templateData = if (type == WalletType.USER)
+            NewWalletData(linkResolver.getNewWalletLink(type, coop), activationData)
         else NewWalletData(linkResolver.getNewWalletLink(type, coop))
     }
 }

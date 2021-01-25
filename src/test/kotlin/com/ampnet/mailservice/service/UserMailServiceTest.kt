@@ -9,17 +9,19 @@ import com.ampnet.mailservice.service.impl.UserMailServiceImpl
 import com.ampnet.mailservice.service.impl.mail.toMailFormat
 import com.ampnet.projectservice.proto.ProjectWithDataResponse
 import com.ampnet.userservice.proto.UserResponse
+import org.apache.commons.mail.util.MimeMessageParser
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import java.io.ByteArrayInputStream
 import java.util.UUID
 
 class UserMailServiceTest : MailServiceTestBase() {
 
     private val service: UserMailService by lazy {
         UserMailServiceImpl(
-            mailSender, applicationProperties, linkResolverService,
-            translationService, userService, projectService, walletService
+            mailSender, applicationProperties, linkResolverService, translationService,
+            userService, projectService, walletService, fileService
         )
     }
 
@@ -416,7 +418,7 @@ class UserMailServiceTest : MailServiceTestBase() {
             testContext.project = generateProjectResponse(UUID.randomUUID().toString())
             testContext.projectWithData = ProjectWithDataResponse.newBuilder()
                 .setProject(testContext.project)
-                .setTosUrl("tos-url")
+                .setTosUrl(testContext.tosUrl)
                 .build()
             Mockito.`when`(projectService.getProjectWithData(UUID.fromString(testContext.walletTo.owner)))
                 .thenReturn(testContext.projectWithData)
@@ -425,6 +427,10 @@ class UserMailServiceTest : MailServiceTestBase() {
             testContext.user = generateUserResponse(testContext.receiverMail)
             Mockito.`when`(userService.getUsers(listOf(testContext.walletFrom.owner)))
                 .thenReturn(listOf(testContext.user))
+        }
+        suppose("File service returns input stream") {
+            val termsOfService = ByteArrayInputStream("terms_of_service.pdf".toByteArray())
+            Mockito.`when`(fileService.getTermsOfService(testContext.tosUrl)).thenReturn(termsOfService)
         }
         suppose("Service sent mail for successful funding") {
             val request = SuccessfullyInvestedRequest.newBuilder()
@@ -441,7 +447,9 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(userMail.mimeMessage.subject).isEqualTo(investmentSubject)
-            val mailText = userMail.mimeMessage.content.toString()
+            val mimeMessageParser = MimeMessageParser(userMail.mimeMessage).parse()
+            assertThat(mimeMessageParser.hasAttachments()).isTrue()
+            val mailText = mimeMessageParser.htmlContent
             assertThat(mailText).contains(testContext.projectWithData.project.name)
             assertThat(mailText).contains(testContext.projectWithData.tosUrl)
             assertThat(mailText).contains(testContext.amount.toMailFormat())

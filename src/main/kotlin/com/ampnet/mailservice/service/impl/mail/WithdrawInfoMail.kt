@@ -15,6 +15,6 @@ class WithdrawInfoMail(
     override val templateName = "withdrawTemplate"
     override val titleKey = "withdrawTitle"
 
-    fun setData(burned: Boolean) = apply { data = WithdrawInfo(burned) }
+    fun setTemplateData(burned: Boolean) = apply { templateData = WithdrawInfo(burned) }
 }
 data class WithdrawInfo(val burned: Boolean)

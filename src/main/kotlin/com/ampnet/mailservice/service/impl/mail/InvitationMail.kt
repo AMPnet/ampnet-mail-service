@@ -15,8 +15,8 @@ class InvitationMail(
     override val templateName = "invitationTemplate"
     override val titleKey = "invitationTitle"
 
-    fun setData(organization: String, coop: String) = apply {
-        data = InvitationData(organization, linkResolver.getOrganizationInvitesLink(coop))
+    fun setTemplateData(organization: String, coop: String) = apply {
+        templateData = InvitationData(organization, linkResolver.getOrganizationInvitesLink(coop))
     }
 }
 

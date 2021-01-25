@@ -20,8 +20,10 @@ class ActivatedUserWalletMail(
     override val templateName = "userWalletActivatedTemplate"
     override val titleKey = WALLET_ACTIVATED_TITLE_KEY
 
-    fun setData(activationData: String, coop: String) = apply {
-        data = ActivatedUserWalletData(linkResolver.getWalletActivatedLink(WalletType.USER, coop), activationData)
+    fun setTemplateData(activationData: String, coop: String) = apply {
+        templateData = ActivatedUserWalletData(
+            linkResolver.getWalletActivatedLink(WalletType.USER, coop), activationData
+        )
     }
 }
 
@@ -37,8 +39,8 @@ class ActivatedOrganizationWalletMail(
     override val templateName = "organizationWalletActivatedTemplate"
     override val titleKey = WALLET_ACTIVATED_TITLE_KEY
 
-    fun setData(organization: OrganizationResponse, coop: String) = apply {
-        data = ActivatedOrganizationWalletData(
+    fun setTemplateData(organization: OrganizationResponse, coop: String) = apply {
+        templateData = ActivatedOrganizationWalletData(
             linkResolver.getWalletActivatedLink(
                 WalletType.ORGANIZATION,
                 coop,
@@ -61,8 +63,8 @@ class ActivatedProjectWalletMail(
     override val templateName = "projectWalletActivatedTemplate"
     override val titleKey = WALLET_ACTIVATED_TITLE_KEY
 
-    fun setData(project: ProjectResponse, coop: String) = apply {
-        data = ActivatedProjectWalletData(
+    fun setTemplateData(project: ProjectResponse, coop: String) = apply {
+        templateData = ActivatedProjectWalletData(
             linkResolver.getWalletActivatedLink(
                 WalletType.PROJECT,
                 coop,

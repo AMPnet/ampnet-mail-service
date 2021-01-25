@@ -15,7 +15,7 @@ class DepositRequestMail(
     override val templateName = "depositRequestTemplate"
     override val titleKey = "depositInfoTitle"
 
-    fun setData(amount: Long) = apply { data = AmountData(amount.toMailFormat()) }
+    fun setTemplateData(amount: Long) = apply { templateData = AmountData(amount.toMailFormat()) }
 }
 
 data class AmountData(val amount: String)

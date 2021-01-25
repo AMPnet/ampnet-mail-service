@@ -4,6 +4,7 @@ import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.exception.InternalException
 import com.ampnet.mailservice.service.LinkResolverService
 import com.ampnet.mailservice.service.TranslationService
+import com.ampnet.mailservice.service.pojo.Attachment
 import com.github.mustachejava.Mustache
 import mu.KLogging
 import org.springframework.mail.MailException
@@ -26,7 +27,8 @@ abstract class AbstractMail(
     protected abstract val templateName: String
     protected abstract val titleKey: String
     protected lateinit var language: String
-    protected open var data: Any? = null
+    protected open var attachment: Attachment? = null
+    protected open var templateData: Any? = null
     private val templateTranslations: Map<String, Mustache> by lazy {
         translationService.getTemplateTranslations(templateName)
     }
@@ -68,14 +70,19 @@ abstract class AbstractMail(
     private fun createMailMessage(to: List<String>): List<MimeMessage> =
         to.mapNotNull {
             val mail = mailSender.createMimeMessage()
-            val helper = MimeMessageHelper(mail, "UTF-8")
             try {
+                val helper = if (attachment != null) {
+                    MimeMessageHelper(mail, true, UTF_8_ENCODING)
+                } else {
+                    MimeMessageHelper(mail, UTF_8_ENCODING)
+                }
                 helper.isValidateAddresses = true
                 helper.setFrom(applicationProperties.mail.sender)
                 helper.setTo(it)
                 helper.setSubject(getTitle())
                 helper.setText(fillTemplate(getTemplate()), true)
                 helper.setSentDate(Date())
+                attachment?.let { attachment -> helper.addAttachment(attachment.name) { attachment.file } }
                 mail
             } catch (ex: MessagingException) {
                 logger.warn { "Cannot create mail from: $to" }
@@ -85,7 +92,7 @@ abstract class AbstractMail(
 
     private fun fillTemplate(template: Mustache): String {
         val writer = StringWriter()
-        template.execute(writer, data).flush()
+        template.execute(writer, templateData).flush()
         return writer.toString()
     }
 
@@ -101,6 +108,7 @@ abstract class AbstractMail(
 }
 
 const val EN_LANGUAGE = "en"
+const val UTF_8_ENCODING = "UTF-8"
 const val FROM_CENTS_TO_EUROS = 100.0
 const val TWO_DECIMAL_FORMAT = "%.2f"
 fun Long.toMailFormat(): String = TWO_DECIMAL_FORMAT.format(this / FROM_CENTS_TO_EUROS)
