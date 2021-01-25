@@ -20,14 +20,13 @@ class FileServiceImpl(private val restTemplate: RestTemplate) : FileService {
 
     @Throws(ResourceNotFoundException::class)
     override fun getTermsOfService(url: String): InputStream {
+        termsOfService[url]?.let { return it }
         try {
-            termsOfService[url]?.let { return it }
             val responseEntity =
                 restTemplate.exchange<Resource>(url, HttpMethod.GET, HttpEntity.EMPTY)
-            readInputStream(responseEntity, url).also {
-                this.termsOfService[url] = it
-                return it
-            }
+            val inputStream = readInputStream(responseEntity, url)
+            termsOfService[url] = inputStream
+            return inputStream
         } catch (ex: RestClientException) {
             throw ResourceNotFoundException("Error while reading response from $url", ex)
         }
