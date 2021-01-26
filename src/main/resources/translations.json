@@ -40,9 +40,9 @@
     "el":"<p>Το νέο πορτοφόλι του χαρτοφυλακίου επενδύσεων μόλις δημιουργήθηκε στην πλατφόρμα crowdfunding που διαχειρίζεσαι!</p>\n<p>Πάρακαλώ πήγαινε στο <a href=\"{{& link}}\">{{& link}}</a> για ελέγξεις και να εγκρίνεις το πορτοφόλι του χαρτοφυλακίου επενδύσεων.</p>\n"
   },
   "projectFullyFundedTemplate":{
-    "en":"<p>Hey: {{firstName}},</p>\n<p>Your project {{projectName}} has been funded completely!</p>\n<p>Go to <a href=\"{{& link}}\">{{& link}}</a> to access the funds.</p>",
-    "es":"<p>Hola: {{firstName}},</p>\n <p>Su proyecto {{projectName}} ha sido financiado en su totalidad!</p>\n <p>Diríjase a <a href=\"{{& link}}\">{{& link}}</a> para acceder a los fondos.</p>",
-    "el":"<p>Γειά σου: {{firstName}},</p>\n<p>Το έργο σου με τίτλο {{projectName}} χρηματοδοτήθηκε πλήρως!</p>\n<p>Πήγαινε στο <a href=\"{{& link}}\">{{& link}}</a> για να έχεις πρόσβαση στα χρήματα.</p>\n"
+    "en":"<p>Hey {{firstName}},</p>\n<p>Your project {{projectName}} has been funded completely!</p>\n<p>Go to <a href=\"{{& link}}\">{{& link}}</a> to access the funds.</p>",
+    "es":"<p>Hola {{firstName}},</p>\n <p>Su proyecto {{projectName}} ha sido financiado en su totalidad!</p>\n <p>Diríjase a <a href=\"{{& link}}\">{{& link}}</a> para acceder a los fondos.</p>",
+    "el":"<p>Γειά σου {{firstName}},</p>\n<p>Το έργο σου με τίτλο {{projectName}} χρηματοδοτήθηκε πλήρως!</p>\n<p>Πήγαινε στο <a href=\"{{& link}}\">{{& link}}</a> για να έχεις πρόσβαση στα χρήματα.</p>\n"
   },
   "projectWalletActivatedTemplate":{
     "en":"<p>Your {{projectName}} Project has just been approved and is ready for receiving investments!</p>\n<p>Manage your project and track the funding status <a href=\"{{& link}}\">{{& link}}</a></p>",
