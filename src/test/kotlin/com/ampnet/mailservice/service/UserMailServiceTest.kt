@@ -451,7 +451,53 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(mimeMessageParser.hasAttachments()).isTrue()
             val mailText = mimeMessageParser.htmlContent
             assertThat(mailText).contains(testContext.projectWithData.project.name)
-            assertThat(mailText).contains(testContext.projectWithData.tosUrl)
+            assertThat(mailText).contains(testContext.amount.toMailFormat())
+        }
+    }
+
+    @Test
+    fun mustSendSuccessfullyInvestedWithoutAttachmentIfTosIsBlank() {
+        suppose("Wallet service returns wallets for project and user") {
+            testContext.walletFrom = generateWalletResponse(UUID.randomUUID().toString())
+            testContext.walletTo = generateWalletResponse(UUID.randomUUID().toString())
+            Mockito.`when`(
+                walletService.getWalletsByHash(
+                    setOf(testContext.walletFrom.hash, testContext.walletTo.hash)
+                )
+            ).thenReturn(listOf(testContext.walletFrom, testContext.walletTo))
+        }
+        suppose("Project service returns project without tos") {
+            testContext.project = generateProjectResponse(UUID.randomUUID().toString())
+            testContext.projectWithData = ProjectWithDataResponse.newBuilder()
+                .setProject(testContext.project)
+                .build()
+            Mockito.`when`(projectService.getProjectWithData(UUID.fromString(testContext.walletTo.owner)))
+                .thenReturn(testContext.projectWithData)
+        }
+        suppose("User service returns user") {
+            testContext.user = generateUserResponse(testContext.receiverMail)
+            Mockito.`when`(userService.getUsers(listOf(testContext.walletFrom.owner)))
+                .thenReturn(listOf(testContext.user))
+        }
+        suppose("Service sent mail for successful funding") {
+            val request = SuccessfullyInvestedRequest.newBuilder()
+                .setWalletHashFrom(testContext.walletFrom.hash)
+                .setWalletHashTo(testContext.walletTo.hash)
+                .setAmount(testContext.amount.toString())
+                .build()
+            service.sendSuccessfullyInvested(request)
+        }
+
+        verify("The mail is sent to right receiver with right data and has no attachment") {
+            val mailList = wiser.messages
+            val userMail = mailList.first()
+            assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
+            assertThat(userMail.mimeMessage.subject).isEqualTo(investmentSubject)
+            val mimeMessageParser = MimeMessageParser(userMail.mimeMessage).parse()
+            assertThat(mimeMessageParser.hasAttachments()).isFalse()
+            val mailText = mimeMessageParser.htmlContent
+            assertThat(mailText).contains(testContext.projectWithData.project.name)
             assertThat(mailText).contains(testContext.amount.toMailFormat())
         }
     }
