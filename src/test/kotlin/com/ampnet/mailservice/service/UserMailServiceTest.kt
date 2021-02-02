@@ -451,6 +451,7 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(mimeMessageParser.hasAttachments()).isTrue()
             val mailText = mimeMessageParser.htmlContent
             assertThat(mailText).contains(testContext.projectWithData.project.name)
+            assertThat(mailText).contains("Investment is completed under conditions provided in the attached file.")
             assertThat(mailText).contains(testContext.amount.toMailFormat())
         }
     }

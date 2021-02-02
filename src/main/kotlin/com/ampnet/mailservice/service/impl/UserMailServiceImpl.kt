@@ -155,10 +155,12 @@ class UserMailServiceImpl(
         val wallets = walletService.getWalletsByHash(setOf(request.walletHashFrom, request.walletHashTo))
         val user = getUser(getOwnerByHash(wallets, request.walletHashFrom))
         val project = projectService.getProjectWithData(UUID.fromString(getOwnerByHash(wallets, request.walletHashTo)))
-        val mail = successfullyInvestedMail.setTemplateData(project, request.amount.toLong())
-        if (project.tosUrl.isNotBlank()) {
+        val mail = if (project.tosUrl.isNotBlank()) {
             val termsOfService = Attachment("Terms_of_service.pdf", fileService.getTermsOfService(project.tosUrl))
-            mail.addAttachment(termsOfService)
+            successfullyInvestedMail.setTemplateData(project, request.amount.toLong(), true)
+                .addAttachment(termsOfService)
+        } else {
+            successfullyInvestedMail.setTemplateData(project, request.amount.toLong(), false)
         }
         mail.setLanguage(user.language).sendTo(user.email)
     }
