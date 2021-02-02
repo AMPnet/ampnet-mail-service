@@ -79,10 +79,8 @@
     "es":"{{#burned}}\n  <p>Su retirada ha sido autorizada y sus fondos se han transferido a su cuenta bancaria.</p>\n {{/burned}}\n {{^burned}}\n  <p>Su solicitud de retirada ha sido rechazada. Para más información, contacte con soporte.</p>\n {{/burned}}",
     "el":"{{#burned}}\n    <p>Η ανάληψή σου έχει εγκριθεί και τα χρήματά έχουν μεταφερθεί στον τραπεζικό σου λογαριασμό.</p>\n{{/burned}}\n{{^burned}}\n    <p>Το αίτημα ανάληψης απορρίφθηκε. Για περισσότερες πληροφορίες επικοινώνησε μαζί μας.</p>\n{{/burned}}\n"
   },
-  "investmentTemplate":{
-    "en":"<p>You have successfully invested amount: €{{amount}} in project {{projectName}}.</p>\n{{#link}}\n<p>Investment in completed under conditions: <a href=\"{{& link}}\">{{& link}}</a></p>\n{{/link}}",
-    "es":"",
-    "el":""
+  "investmentTemplate": {
+    "en": "<p>You have successfully invested amount: €{{amount}} in project {{projectName}}.</p>\n{{#withTos}}<p>Investment is completed under conditions provided in the attached file.</p>\n{{/withTos}}"
   },
   "walletActivatedTitle":{
     "en":"Wallet activated",
