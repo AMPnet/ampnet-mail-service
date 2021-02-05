@@ -15,7 +15,7 @@ class JsonConfig {
     @Bean
     fun objectMapper(): ObjectMapper {
         val mapper = ObjectMapper()
-        mapper.propertyNamingStrategy = PropertyNamingStrategy.LOWER_CAMEL_CASE
+        mapper.propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
         mapper.registerModule(JavaTimeModule())
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         mapper.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false)
