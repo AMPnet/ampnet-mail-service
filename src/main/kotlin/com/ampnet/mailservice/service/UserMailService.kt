@@ -1,21 +1,21 @@
 package com.ampnet.mailservice.service
 
-import com.ampnet.mailservice.enums.WalletType
+import com.ampnet.mailservice.amqp.walletservice.WalletTypeAmqp
 import com.ampnet.mailservice.proto.MailConfirmationRequest
 import com.ampnet.mailservice.proto.OrganizationInvitationRequest
 import com.ampnet.mailservice.proto.ResetPasswordRequest
 import com.ampnet.mailservice.proto.SuccessfullyInvestedRequest
-import com.ampnet.userservice.proto.UserResponse
+import java.util.UUID
 
 interface UserMailService {
     fun sendConfirmationMail(request: MailConfirmationRequest)
     fun sendResetPasswordMail(request: ResetPasswordRequest)
     fun sendOrganizationInvitationMail(request: OrganizationInvitationRequest)
-    fun sendDepositRequestMail(user: UserResponse, amount: Long)
-    fun sendDepositInfoMail(user: UserResponse, minted: Boolean)
-    fun sendWithdrawRequestMail(user: UserResponse, amount: Long)
-    fun sendWithdrawInfoMail(user: UserResponse, burned: Boolean)
-    fun sendWalletActivatedMail(walletOwner: String, walletType: WalletType, activationData: String)
+    fun sendDepositRequestMail(user: UUID, amount: Long)
+    fun sendDepositInfoMail(user: UUID, minted: Boolean)
+    fun sendWithdrawRequestMail(user: UUID, amount: Long)
+    fun sendWithdrawInfoMail(user: UUID, burned: Boolean)
+    fun sendWalletActivatedMail(walletOwner: UUID, walletType: WalletTypeAmqp, activationData: String)
     fun sendProjectFullyFundedMail(walletHash: String)
     fun sendSuccessfullyInvested(request: SuccessfullyInvestedRequest)
 }

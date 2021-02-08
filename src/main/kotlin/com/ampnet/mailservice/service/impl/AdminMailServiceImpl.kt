@@ -1,7 +1,9 @@
 package com.ampnet.mailservice.service.impl
 
+import com.ampnet.mailservice.amqp.walletservice.WalletTypeAmqp
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.enums.WalletType
+import com.ampnet.mailservice.exception.ResourceNotFoundException
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.service.AdminMailService
 import com.ampnet.mailservice.service.LinkResolverService
@@ -11,6 +13,7 @@ import com.ampnet.mailservice.service.impl.mail.WithdrawTokenIssuerMail
 import com.ampnet.userservice.proto.UserResponse
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class AdminMailServiceImpl(
@@ -45,17 +48,24 @@ class AdminMailServiceImpl(
         )
     }
 
-    override fun sendWithdrawRequestMail(user: UserResponse, amount: Long) =
-        userService.getTokenIssuers(user.coop).forEach {
-            withdrawTokenIssuerMail.setTemplateData(user, amount).setLanguage(user.language).sendTo(it.email)
+    override fun sendWithdrawRequestMail(user: UUID, amount: Long) {
+        val userResponse = getUser(user)
+        userService.getTokenIssuers(userResponse.coop).forEach {
+            withdrawTokenIssuerMail.setTemplateData(userResponse, amount).setLanguage(userResponse.language)
+                .sendTo(it.email)
         }
+    }
 
-    override fun sendNewWalletNotificationMail(walletType: WalletType, coop: String, activationData: String) =
+    override fun sendNewWalletNotificationMail(walletType: WalletTypeAmqp, coop: String, activationData: String) =
         userService.getPlatformManagers(coop).forEach {
             when (walletType) {
-                WalletType.USER -> newUserWalletMail
-                WalletType.PROJECT -> newProjectWalletMail
-                WalletType.ORGANIZATION -> newOrganizationWalletMail
+                WalletTypeAmqp.USER -> newUserWalletMail
+                WalletTypeAmqp.PROJECT -> newProjectWalletMail
+                WalletTypeAmqp.ORGANIZATION -> newOrganizationWalletMail
             }.setTemplateData(activationData, coop).setLanguage(it.language).sendTo(it.email)
         }
+
+    private fun getUser(userUuid: UUID): UserResponse =
+        userService.getUsers(listOf(userUuid.toString())).firstOrNull()
+            ?: throw ResourceNotFoundException("Missing user: $userUuid")
 }

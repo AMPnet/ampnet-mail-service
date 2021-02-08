@@ -1,9 +1,9 @@
 package com.ampnet.mailservice.service
 
-import com.ampnet.mailservice.enums.WalletType
-import com.ampnet.userservice.proto.UserResponse
+import com.ampnet.mailservice.amqp.walletservice.WalletTypeAmqp
+import java.util.UUID
 
 interface AdminMailService {
-    fun sendWithdrawRequestMail(user: UserResponse, amount: Long)
-    fun sendNewWalletNotificationMail(walletType: WalletType, coop: String, activationData: String)
+    fun sendWithdrawRequestMail(user: UUID, amount: Long)
+    fun sendNewWalletNotificationMail(walletType: WalletTypeAmqp, coop: String, activationData: String)
 }
