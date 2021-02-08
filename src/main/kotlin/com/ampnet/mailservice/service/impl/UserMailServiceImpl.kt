@@ -1,14 +1,14 @@
 package com.ampnet.mailservice.service.impl
 
+import com.ampnet.mailservice.amqp.projectservice.MailOrgInvitationMessage
+import com.ampnet.mailservice.amqp.userservice.MailConfirmationMessage
+import com.ampnet.mailservice.amqp.userservice.MailResetPasswordMessage
 import com.ampnet.mailservice.amqp.walletservice.WalletTypeAmqp
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.exception.ResourceNotFoundException
 import com.ampnet.mailservice.grpc.projectservice.ProjectService
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.grpc.walletservice.WalletService
-import com.ampnet.mailservice.proto.MailConfirmationRequest
-import com.ampnet.mailservice.proto.OrganizationInvitationRequest
-import com.ampnet.mailservice.proto.ResetPasswordRequest
 import com.ampnet.mailservice.proto.SuccessfullyInvestedRequest
 import com.ampnet.mailservice.service.FileService
 import com.ampnet.mailservice.service.LinkResolverService
@@ -90,21 +90,23 @@ class UserMailServiceImpl(
         SuccessfullyInvestedMail(linkResolverService, mailSender, applicationProperties, translationService)
     }
 
-    override fun sendConfirmationMail(request: MailConfirmationRequest) =
+    override fun sendConfirmationMail(request: MailConfirmationMessage) =
         confirmationMail.setTemplateData(request.token, request.coop).setLanguage(request.language)
             .sendTo(request.email)
 
-    override fun sendResetPasswordMail(request: ResetPasswordRequest) =
+    override fun sendResetPasswordMail(request: MailResetPasswordMessage) =
         resetPasswordMail.setTemplateData(request.token, request.coop).setLanguage(request.language)
             .sendTo(request.email)
 
-    override fun sendOrganizationInvitationMail(request: OrganizationInvitationRequest) =
-        invitationMail.setTemplateData(request.organization, request.coop).setLanguage(request.language)
-            .sendTo(request.emailsList.toList()) { failedMails ->
+    override fun sendOrganizationInvitationMail(request: MailOrgInvitationMessage) {
+        val senderResponse = getUser(request.sender)
+        invitationMail.setTemplateData(request.organizationName, request.coop).setLanguage(senderResponse.language)
+            .sendTo(request.emails.toList()) { failedMails ->
                 val filedMailRecipients = failedMails.map { it.allRecipients.toString() }
-                failedDeliveryMail.setTemplateData(filedMailRecipients).setLanguage(request.language)
-                    .setLanguage(request.language).sendTo(request.senderEmail)
+                failedDeliveryMail.setTemplateData(filedMailRecipients).setLanguage(senderResponse.language)
+                    .sendTo(senderResponse.email)
             }
+    }
 
     override fun sendDepositRequestMail(user: UUID, amount: Long) {
         val userResponse = getUser(user)

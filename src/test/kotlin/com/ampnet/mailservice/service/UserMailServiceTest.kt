@@ -1,9 +1,9 @@
 package com.ampnet.mailservice.service
 
+import com.ampnet.mailservice.amqp.projectservice.MailOrgInvitationMessage
+import com.ampnet.mailservice.amqp.userservice.MailConfirmationMessage
+import com.ampnet.mailservice.amqp.userservice.MailResetPasswordMessage
 import com.ampnet.mailservice.amqp.walletservice.WalletTypeAmqp
-import com.ampnet.mailservice.proto.MailConfirmationRequest
-import com.ampnet.mailservice.proto.OrganizationInvitationRequest
-import com.ampnet.mailservice.proto.ResetPasswordRequest
 import com.ampnet.mailservice.proto.SuccessfullyInvestedRequest
 import com.ampnet.mailservice.service.impl.UserMailServiceImpl
 import com.ampnet.mailservice.service.impl.mail.toMailFormat
@@ -28,12 +28,7 @@ class UserMailServiceTest : MailServiceTestBase() {
     @Test
     fun mustSetCorrectSendConfirmationMail() {
         suppose("Service sent the mail") {
-            val request = MailConfirmationRequest.newBuilder()
-                .setEmail(testContext.receiverMail)
-                .setLanguage("")
-                .setToken(testContext.token)
-                .setCoop(testContext.coop)
-                .build()
+            val request = MailConfirmationMessage(testContext.receiverMail, testContext.token, testContext.coop, "")
             service.sendConfirmationMail(request)
         }
 
@@ -54,11 +49,7 @@ class UserMailServiceTest : MailServiceTestBase() {
     @Test
     fun mustSetCorrectSendResetPasswordMail() {
         suppose("Service sent reset password mail") {
-            val request = ResetPasswordRequest.newBuilder()
-                .setEmail(testContext.receiverMail)
-                .setToken(testContext.token)
-                .setCoop(testContext.coop)
-                .build()
+            val request = MailResetPasswordMessage(testContext.receiverMail, testContext.token, testContext.coop, "")
             service.sendResetPasswordMail(request)
         }
 
@@ -79,12 +70,7 @@ class UserMailServiceTest : MailServiceTestBase() {
     @Test
     fun mustSetCorrectSendResetPasswordMailOnGreek() {
         suppose("Service sent reset password mail") {
-            val request = ResetPasswordRequest.newBuilder()
-                .setEmail(testContext.receiverMail)
-                .setToken(testContext.token)
-                .setCoop(testContext.coop)
-                .setLanguage("el")
-                .build()
+            val request = MailResetPasswordMessage(testContext.receiverMail, testContext.token, testContext.coop, "el")
             service.sendResetPasswordMail(request)
         }
 
@@ -106,13 +92,18 @@ class UserMailServiceTest : MailServiceTestBase() {
 
     @Test
     fun mustSetCorrectOrganizationInvitationMail() {
+        suppose("User service will return sender user response") {
+            testContext.user = generateUserResponse("sender@email.com")
+            Mockito.`when`(userService.getUsers(listOf(testContext.user.uuid)))
+                .thenReturn(listOf(testContext.user))
+        }
         suppose("Service sends organizationInvitation e-mails") {
-            val request = OrganizationInvitationRequest.newBuilder()
-                .addAllEmails(testContext.receiverEmails)
-                .setSenderEmail("sender@email.com")
-                .setOrganization(testContext.organizationName)
-                .setCoop(testContext.coop)
-                .build()
+            val request = MailOrgInvitationMessage(
+                testContext.receiverEmails,
+                testContext.organizationName,
+                UUID.fromString(testContext.user.uuid),
+                testContext.coop
+            )
             service.sendOrganizationInvitationMail(request)
         }
 
@@ -378,15 +369,20 @@ class UserMailServiceTest : MailServiceTestBase() {
 
     @Test
     fun mustNotSendOrganizationInvitationMailIfRecipientEmailIsIncorrect() {
+        suppose("User service will return sender user response") {
+            testContext.user = generateUserResponse("sender@email.com")
+            Mockito.`when`(userService.getUsers(listOf(testContext.user.uuid)))
+                .thenReturn(listOf(testContext.user))
+        }
         suppose("Service sends organizationInvitation to incorrect and correct email") {
             val correctEmail = "test@email.com"
             val incorrectEmail = "fff5555"
-            val request = OrganizationInvitationRequest.newBuilder()
-                .addAllEmails(listOf(correctEmail, incorrectEmail))
-                .setSenderEmail("sender@email.com")
-                .setOrganization(testContext.organizationName)
-                .setCoop(testContext.coop)
-                .build()
+            val request = MailOrgInvitationMessage(
+                listOf(correctEmail, incorrectEmail),
+                testContext.organizationName,
+                UUID.fromString(testContext.user.uuid),
+                testContext.coop
+            )
             service.sendOrganizationInvitationMail(request)
         }
 

@@ -13,7 +13,7 @@ import com.ampnet.mailservice.service.impl.mail.WithdrawTokenIssuerMail
 import com.ampnet.userservice.proto.UserResponse
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.UUID
 
 @Service
 class AdminMailServiceImpl(

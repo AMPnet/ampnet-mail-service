@@ -1,16 +1,16 @@
 package com.ampnet.mailservice.service
 
+import com.ampnet.mailservice.amqp.projectservice.MailOrgInvitationMessage
+import com.ampnet.mailservice.amqp.userservice.MailConfirmationMessage
+import com.ampnet.mailservice.amqp.userservice.MailResetPasswordMessage
 import com.ampnet.mailservice.amqp.walletservice.WalletTypeAmqp
-import com.ampnet.mailservice.proto.MailConfirmationRequest
-import com.ampnet.mailservice.proto.OrganizationInvitationRequest
-import com.ampnet.mailservice.proto.ResetPasswordRequest
 import com.ampnet.mailservice.proto.SuccessfullyInvestedRequest
 import java.util.UUID
 
 interface UserMailService {
-    fun sendConfirmationMail(request: MailConfirmationRequest)
-    fun sendResetPasswordMail(request: ResetPasswordRequest)
-    fun sendOrganizationInvitationMail(request: OrganizationInvitationRequest)
+    fun sendConfirmationMail(request: MailConfirmationMessage)
+    fun sendResetPasswordMail(request: MailResetPasswordMessage)
+    fun sendOrganizationInvitationMail(request: MailOrgInvitationMessage)
     fun sendDepositRequestMail(user: UUID, amount: Long)
     fun sendDepositInfoMail(user: UUID, minted: Boolean)
     fun sendWithdrawRequestMail(user: UUID, amount: Long)

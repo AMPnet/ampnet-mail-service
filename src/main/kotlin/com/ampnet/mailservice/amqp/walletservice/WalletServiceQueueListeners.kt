@@ -32,7 +32,6 @@ class WalletServiceQueueListeners(
     @Bean
     fun mailWalletNew(): Queue = Queue(QUEUE_MAIL_WALLET_NEW)
 
-
     @RabbitListener(queues = [QUEUE_USER_MAIL_CONFIRMATION])
     fun handleDeposit(message: DepositInfoRequest) =
         userMailService.sendDepositInfoMail(message.user, message.minted)

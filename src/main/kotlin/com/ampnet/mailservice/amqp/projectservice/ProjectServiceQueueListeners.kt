@@ -1,11 +1,11 @@
 package com.ampnet.mailservice.amqp.projectservice
 
-import com.ampnet.mailservice.proto.OrganizationInvitationRequest
 import com.ampnet.mailservice.service.UserMailService
 import org.springframework.amqp.core.Queue
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Component
+import java.util.UUID
 
 @Component
 class ProjectServiceQueueListeners(private val userMailService: UserMailService) {
@@ -15,21 +15,15 @@ class ProjectServiceQueueListeners(private val userMailService: UserMailService)
 
     @RabbitListener(queues = [QUEUE_MAIL_ORG_INVITATION])
     fun handleMailOrgInvitation(message: MailOrgInvitationMessage) {
-        val request = OrganizationInvitationRequest.newBuilder()
-            .addAllEmails(message.emails)
-            .setOrganization(message.organization)
-            .setSenderEmail(message.senderEmail)
-            .setCoop(message.coop)
-            .build()
-        userMailService.sendOrganizationInvitationMail(request)
+        userMailService.sendOrganizationInvitationMail(message)
     }
-
-    data class MailOrgInvitationMessage(
-        val emails: List<String>,
-        val organization: String,
-        val senderEmail: String,
-        val coop: String
-    )
 }
+
+data class MailOrgInvitationMessage(
+    val emails: List<String>,
+    val organizationName: String,
+    val sender: UUID,
+    val coop: String
+)
 
 const val QUEUE_MAIL_ORG_INVITATION = "mail.project.org-invitation"

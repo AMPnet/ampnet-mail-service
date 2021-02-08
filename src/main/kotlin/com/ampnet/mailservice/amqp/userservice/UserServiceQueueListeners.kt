@@ -1,7 +1,5 @@
 package com.ampnet.mailservice.amqp.userservice
 
-import com.ampnet.mailservice.proto.MailConfirmationRequest
-import com.ampnet.mailservice.proto.ResetPasswordRequest
 import com.ampnet.mailservice.service.UserMailService
 import org.springframework.amqp.core.Queue
 import org.springframework.amqp.rabbit.annotation.RabbitListener
@@ -18,26 +16,12 @@ class UserServiceQueueListeners(private val userMailService: UserMailService) {
     fun mailResetPasswordQueue(): Queue = Queue(QUEUE_USER_RESET_PASSWORD)
 
     @RabbitListener(queues = [QUEUE_USER_MAIL_CONFIRMATION])
-    fun handleMailConfirmation(message: MailConfirmationMessage) {
-        val request = MailConfirmationRequest.newBuilder()
-            .setEmail(message.email)
-            .setToken(message.token)
-            .setCoop(message.coop)
-            .setLanguage(message.language)
-            .build()
-        userMailService.sendConfirmationMail(request)
-    }
+    fun handleMailConfirmation(message: MailConfirmationMessage) =
+        userMailService.sendConfirmationMail(message)
 
     @RabbitListener(queues = [QUEUE_USER_RESET_PASSWORD])
-    fun handleMailResetPassword(message: MailResetPasswordMessage) {
-        val request = ResetPasswordRequest.newBuilder()
-            .setEmail(message.email)
-            .setToken(message.token)
-            .setCoop(message.coop)
-            .setLanguage(message.language)
-            .build()
-        userMailService.sendResetPasswordMail(request)
-    }
+    fun handleMailResetPassword(message: MailResetPasswordMessage) =
+        userMailService.sendResetPasswordMail(message)
 }
 
 const val QUEUE_USER_MAIL_CONFIRMATION = "mail.user.confirmation"
