@@ -1,15 +1,14 @@
 package com.ampnet.mailservice.amqp.walletservice
 
-import com.ampnet.mailservice.amqp.userservice.QUEUE_USER_MAIL_CONFIRMATION
 import com.ampnet.mailservice.service.AdminMailService
 import com.ampnet.mailservice.service.UserMailService
 import mu.KLogging
 import org.springframework.amqp.core.Queue
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.context.annotation.Bean
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
+@Component
 class WalletServiceQueueListeners(
     private val userMailService: UserMailService,
     private val adminMailService: AdminMailService
@@ -32,27 +31,36 @@ class WalletServiceQueueListeners(
     @Bean
     fun mailWalletNew(): Queue = Queue(QUEUE_MAIL_WALLET_NEW)
 
-    @RabbitListener(queues = [QUEUE_USER_MAIL_CONFIRMATION])
-    fun handleDeposit(message: DepositInfoRequest) =
+    @RabbitListener(queues = [QUEUE_MAIL_DEPOSIT])
+    fun handleDeposit(message: DepositInfoRequest) {
+        logger.debug { "Received message: $message" }
         userMailService.sendDepositInfoMail(message.user, message.minted)
+    }
 
     @RabbitListener(queues = [QUEUE_MAIL_WITHDRAW])
     fun handleWithdraw(message: WithdrawRequest) {
+        logger.debug { "Received message: $message" }
         userMailService.sendWithdrawRequestMail(message.user, message.amount)
         adminMailService.sendWithdrawRequestMail(message.user, message.amount)
     }
 
     @RabbitListener(queues = [QUEUE_MAIL_WITHDRAW_INFO])
-    fun handleWithdraw(message: WithdrawInfoRequest) =
+    fun handleWithdraw(message: WithdrawInfoRequest) {
+        logger.debug { "Received message: $message" }
         userMailService.sendWithdrawInfoMail(message.user, message.burned)
+    }
 
     @RabbitListener(queues = [QUEUE_MAIL_WALLET_ACTIVATED])
-    fun handleWalletActivated(message: WalletActivatedRequest) =
+    fun handleWalletActivated(message: WalletActivatedRequest) {
+        logger.debug { "Received message: $message" }
         userMailService.sendWalletActivatedMail(message.walletOwner, message.type, message.activationData)
+    }
 
     @RabbitListener(queues = [QUEUE_MAIL_WALLET_NEW])
-    fun handleNewWallet(message: NewWalletRequest) =
+    fun handleNewWallet(message: NewWalletRequest) {
+        logger.debug { "Received message: $message" }
         adminMailService.sendNewWalletNotificationMail(message.type, message.coop, message.activationData)
+    }
 }
 
 const val QUEUE_MAIL_DEPOSIT = "mail.wallet.deposit"
