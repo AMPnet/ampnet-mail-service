@@ -13,7 +13,6 @@ import org.apache.commons.mail.util.MimeMessageParser
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import java.io.ByteArrayInputStream
 import java.util.UUID
 
 class UserMailServiceTest : MailServiceTestBase() {
@@ -429,7 +428,7 @@ class UserMailServiceTest : MailServiceTestBase() {
                 .thenReturn(listOf(testContext.user))
         }
         suppose("File service returns input stream") {
-            val termsOfService = ByteArrayInputStream("terms_of_service.pdf".toByteArray())
+            val termsOfService = "terms_of_service.pdf".toByteArray()
             Mockito.`when`(fileService.getTermsOfService(testContext.tosUrl)).thenReturn(termsOfService)
         }
         suppose("Service sent mail for successful funding") {
