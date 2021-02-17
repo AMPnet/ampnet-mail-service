@@ -14,6 +14,8 @@ import org.apache.commons.mail.util.MimeMessageParser
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import java.util.UUID
 
 class UserMailServiceTest : MailServiceTestBase() {
@@ -451,7 +453,7 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(mimeMessageParser.hasAttachments()).isTrue
             val mailText = mimeMessageParser.htmlContent
             val attachment = mimeMessageParser.findAttachmentByName(TERMS_OF_SERVICE)
-            verifyPdfFormat(attachment.inputStream.readAllBytes())
+            verifyPdfFormat(getFileContent(attachment.inputStream))
             assertThat(mailText).contains(testContext.projectWithData.project.name)
             assertThat(mailText).contains("Investment is completed under conditions provided in the attached file.")
             assertThat(mailText).contains(testContext.amount.toMailFormat())
@@ -498,10 +500,18 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(userMail.mimeMessage.subject).isEqualTo(investmentSubject)
             val mimeMessageParser = MimeMessageParser(userMail.mimeMessage).parse()
-            assertThat(mimeMessageParser.hasAttachments()).isFalse()
+            assertThat(mimeMessageParser.hasAttachments()).isFalse
             val mailText = mimeMessageParser.htmlContent
             assertThat(mailText).contains(testContext.projectWithData.project.name)
             assertThat(mailText).contains(testContext.amount.toMailFormat())
         }
+    }
+
+    private fun getFileContent(inputStream: InputStream): ByteArray {
+        val outputStream = ByteArrayOutputStream()
+        inputStream.copyTo(outputStream)
+        inputStream.close()
+        outputStream.close()
+        return outputStream.toByteArray()
     }
 }
