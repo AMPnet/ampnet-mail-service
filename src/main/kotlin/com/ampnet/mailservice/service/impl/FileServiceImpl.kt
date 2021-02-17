@@ -25,12 +25,12 @@ class FileServiceImpl : FileService {
     private fun getFileContent(url: String): ByteArray {
         try {
             val connection = getURLFromString(url).openConnection() as HttpURLConnection
-            val inputStream = connection.inputStream
-            val outputStream = ByteArrayOutputStream()
-            inputStream.copyTo(outputStream)
-            inputStream.close()
-            outputStream.close()
-            return outputStream.toByteArray()
+            connection.inputStream.use { input ->
+                ByteArrayOutputStream().use { output ->
+                    input.copyTo(output)
+                    return output.toByteArray()
+                }
+            }
         } catch (ex: IOException) {
             throw ResourceNotFoundException("Error while reading resource from $url", ex)
         }
