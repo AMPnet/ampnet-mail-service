@@ -22,3 +22,5 @@ data class Attachment(
         return result
     }
 }
+
+const val TERMS_OF_SERVICE = "Terms_of_service.pdf"

@@ -29,6 +29,7 @@ import com.ampnet.mailservice.service.impl.mail.SuccessfullyInvestedMail
 import com.ampnet.mailservice.service.impl.mail.WithdrawInfoMail
 import com.ampnet.mailservice.service.impl.mail.WithdrawRequestMail
 import com.ampnet.mailservice.service.pojo.Attachment
+import com.ampnet.mailservice.service.pojo.TERMS_OF_SERVICE
 import com.ampnet.userservice.proto.UserResponse
 import com.ampnet.walletservice.proto.WalletResponse
 import org.springframework.mail.javamail.JavaMailSender
@@ -156,7 +157,7 @@ class UserMailServiceImpl(
         val user = getUser(getOwnerByHash(wallets, request.walletHashFrom))
         val project = projectService.getProjectWithData(UUID.fromString(getOwnerByHash(wallets, request.walletHashTo)))
         val mail = if (project.tosUrl.isNotBlank()) {
-            val termsOfService = Attachment("Terms_of_service.pdf", fileService.getTermsOfService(project.tosUrl))
+            val termsOfService = Attachment(TERMS_OF_SERVICE, fileService.getTermsOfService(project.tosUrl))
             successfullyInvestedMail.setTemplateData(project, request.amount.toLong(), true)
                 .addAttachment(termsOfService)
         } else {

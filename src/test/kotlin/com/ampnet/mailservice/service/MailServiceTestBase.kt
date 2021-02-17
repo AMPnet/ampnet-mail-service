@@ -10,6 +10,8 @@ import com.ampnet.projectservice.proto.ProjectResponse
 import com.ampnet.projectservice.proto.ProjectWithDataResponse
 import com.ampnet.userservice.proto.UserResponse
 import com.ampnet.walletservice.proto.WalletResponse
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.fail
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
@@ -134,5 +136,43 @@ abstract class MailServiceTestBase : TestBase() {
         lateinit var wallet: WalletResponse
         lateinit var walletFrom: WalletResponse
         lateinit var walletTo: WalletResponse
+    }
+
+    protected fun verifyPdfFormat(data: ByteArray) {
+        assertThat(data.isNotEmpty()).isTrue
+        assertThat(data.size).isGreaterThan(4)
+
+        // header
+        assertThat(data[0]).isEqualTo(0x25) // %
+        assertThat(data[1]).isEqualTo(0x50) // P
+        assertThat(data[2]).isEqualTo(0x44) // D
+        assertThat(data[3]).isEqualTo(0x46) // F
+        assertThat(data[4]).isEqualTo(0x2D) // -
+
+        // version is 1.3
+        if (data[5].compareTo(0x31) == 0 && data[6].compareTo(0x2E) == 0 && data[7].compareTo(0x33) == 0) {
+            // file terminator
+            assertThat(data[data.size - 7]).isEqualTo(0x25) // %
+            assertThat(data[data.size - 6]).isEqualTo(0x25) // %
+            assertThat(data[data.size - 5]).isEqualTo(0x45) // E
+            assertThat(data[data.size - 4]).isEqualTo(0x4F) // O
+            assertThat(data[data.size - 3]).isEqualTo(0x46) // F
+            assertThat(data[data.size - 2]).isEqualTo(0x20) // SPACE
+            assertThat(data[data.size - 1]).isEqualTo(0x0A) // EOL
+            return
+        }
+
+        // version is 1.4
+        if (data[5].compareTo(0x31) == 0 && data[6].compareTo(0x2E) == 0 && data[7].compareTo(0x34) == 0) {
+            // file terminator
+            assertThat(data[data.size - 6]).isEqualTo(0x25) // %
+            assertThat(data[data.size - 5]).isEqualTo(0x25) // %
+            assertThat(data[data.size - 4]).isEqualTo(0x45) // E
+            assertThat(data[data.size - 3]).isEqualTo(0x4F) // O
+            assertThat(data[data.size - 2]).isEqualTo(0x46) // F
+            assertThat(data[data.size - 1]).isEqualTo(0x0A) // EOL
+            return
+        }
+        fail<String>("Unsupported file format")
     }
 }

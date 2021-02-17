@@ -9,10 +9,8 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import org.springframework.web.client.RestTemplate
 
 @Disabled("Not for automated testing")
 @Import(RestTemplateConfig::class)
@@ -22,17 +20,14 @@ class FileServiceTest : TestBase() {
     private val pdfUrl = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
     private val invalidUrl = "https://www.w3.org/invalid.pdf"
 
-    @Autowired
-    private lateinit var restTemplate: RestTemplate
-
     private val fileService by lazy {
-        FileServiceImpl(restTemplate)
+        FileServiceImpl()
     }
 
     @Test
     fun mustGetInputStream() {
         val inputStream = fileService.getTermsOfService(pdfUrl)
-        assertThat(inputStream).isNotNull()
+        assertThat(inputStream).isNotNull
     }
 
     @Test
