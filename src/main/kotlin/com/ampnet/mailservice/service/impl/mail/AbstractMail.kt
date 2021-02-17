@@ -7,6 +7,7 @@ import com.ampnet.mailservice.service.TranslationService
 import com.ampnet.mailservice.service.pojo.Attachment
 import com.github.mustachejava.Mustache
 import mu.KLogging
+import org.springframework.core.io.ByteArrayResource
 import org.springframework.mail.MailException
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
@@ -82,7 +83,9 @@ abstract class AbstractMail(
                 helper.setSubject(getTitle())
                 helper.setText(fillTemplate(getTemplate()), true)
                 helper.setSentDate(Date())
-                attachment?.let { attachment -> helper.addAttachment(attachment.name) { attachment.file } }
+                attachment?.let { attachment ->
+                    helper.addAttachment(attachment.name, ByteArrayResource(attachment.file))
+                }
                 mail
             } catch (ex: MessagingException) {
                 logger.warn { "Cannot create mail from: $to" }
