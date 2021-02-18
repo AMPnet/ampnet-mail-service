@@ -1,10 +1,10 @@
 package com.ampnet.mailservice.service
 
+import com.ampnet.mailservice.amqp.blockchainservice.SuccessfullyInvestedMessage
 import com.ampnet.mailservice.amqp.projectservice.MailOrgInvitationMessage
 import com.ampnet.mailservice.amqp.userservice.MailConfirmationMessage
 import com.ampnet.mailservice.amqp.userservice.MailResetPasswordMessage
 import com.ampnet.mailservice.amqp.walletservice.WalletTypeAmqp
-import com.ampnet.mailservice.proto.SuccessfullyInvestedRequest
 import com.ampnet.mailservice.service.impl.UserMailServiceImpl
 import com.ampnet.mailservice.service.impl.mail.toMailFormat
 import com.ampnet.projectservice.proto.ProjectWithDataResponse
@@ -457,12 +457,10 @@ class UserMailServiceTest : MailServiceTestBase() {
             Mockito.`when`(fileService.getTermsOfService(testContext.tosUrl)).thenReturn(termsOfService)
         }
         suppose("Service sent mail for successful funding") {
-            val request = SuccessfullyInvestedRequest.newBuilder()
-                .setWalletHashFrom(testContext.walletFrom.hash)
-                .setWalletHashTo(testContext.walletTo.hash)
-                .setAmount(testContext.amount.toString())
-                .build()
-            service.sendSuccessfullyInvested(request)
+            val message = SuccessfullyInvestedMessage(
+                testContext.walletFrom.hash, testContext.walletTo.hash, testContext.amount.toString()
+            )
+            service.sendSuccessfullyInvested(message)
         }
 
         verify("The mail is sent to right receiver and has correct investment data") {
@@ -505,12 +503,10 @@ class UserMailServiceTest : MailServiceTestBase() {
                 .thenReturn(listOf(testContext.user))
         }
         suppose("Service sent mail for successful funding") {
-            val request = SuccessfullyInvestedRequest.newBuilder()
-                .setWalletHashFrom(testContext.walletFrom.hash)
-                .setWalletHashTo(testContext.walletTo.hash)
-                .setAmount(testContext.amount.toString())
-                .build()
-            service.sendSuccessfullyInvested(request)
+            val message = SuccessfullyInvestedMessage(
+                testContext.walletFrom.hash, testContext.walletTo.hash, testContext.amount.toString()
+            )
+            service.sendSuccessfullyInvested(message)
         }
 
         verify("The mail is sent to right receiver with right data and has no attachment") {
