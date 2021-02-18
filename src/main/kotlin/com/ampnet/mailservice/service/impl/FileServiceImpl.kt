@@ -19,8 +19,8 @@ class FileServiceImpl : FileService {
 
     @Throws(ResourceNotFoundException::class)
     override fun getTermsOfService(url: String): ByteArray {
-        logger.info("Trying to get terms Of service from url: $url")
-        logger.info("Terms of service stored in local memory: $termsOfService")
+        logger.debug("Trying to get terms Of service from url: $url")
+        logger.debug("Terms of service stored in local memory: $termsOfService")
         termsOfService[url]?.let { return it }
         val byteArray = getFileContent(url)
         termsOfService[url] = byteArray

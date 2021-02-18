@@ -159,14 +159,14 @@ class UserMailServiceImpl(
         val wallets = walletService.getWalletsByHash(setOf(request.walletHashFrom, request.walletHashTo))
         val user = getUser(getOwnerByHash(wallets, request.walletHashFrom))
         val project = projectService.getProjectWithData(UUID.fromString(getOwnerByHash(wallets, request.walletHashTo)))
-        logger.info("${project.project.uuid} has terms of service: ${project.tosUrl}")
+        logger.debug("${project.project.uuid} has terms of service: ${project.tosUrl}")
         val mail = if (project.tosUrl.isNotBlank()) {
-            logger.info("There should be an attachment ${project.tosUrl}")
+            logger.debug("There should be an attachment ${project.tosUrl}")
             val termsOfService = Attachment(TERMS_OF_SERVICE, fileService.getTermsOfService(project.tosUrl))
             successfullyInvestedMail.setTemplateData(project, request.amount.toLong(), true)
                 .addAttachment(termsOfService)
         } else {
-            logger.info("There is no attachment ${project.tosUrl}")
+            logger.debug("There is no attachment ${project.tosUrl}")
             successfullyInvestedMail.setTemplateData(project, request.amount.toLong(), false)
                 .addAttachment(null)
         }
