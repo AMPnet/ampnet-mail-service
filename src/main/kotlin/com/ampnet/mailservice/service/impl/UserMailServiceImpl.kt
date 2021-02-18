@@ -1,5 +1,6 @@
 package com.ampnet.mailservice.service.impl
 
+import com.ampnet.mailservice.amqp.blockchainservice.SuccessfullyInvestedMessage
 import com.ampnet.mailservice.amqp.projectservice.MailOrgInvitationMessage
 import com.ampnet.mailservice.amqp.userservice.MailConfirmationMessage
 import com.ampnet.mailservice.amqp.userservice.MailResetPasswordMessage
@@ -9,7 +10,6 @@ import com.ampnet.mailservice.exception.ResourceNotFoundException
 import com.ampnet.mailservice.grpc.projectservice.ProjectService
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.grpc.walletservice.WalletService
-import com.ampnet.mailservice.proto.SuccessfullyInvestedRequest
 import com.ampnet.mailservice.service.FileService
 import com.ampnet.mailservice.service.LinkResolverService
 import com.ampnet.mailservice.service.TranslationService
@@ -161,10 +161,12 @@ class UserMailServiceImpl(
         projectFullyFundedMail.setTemplateData(user, project).setLanguage(user.language).sendTo(user.email)
     }
 
-    override fun sendSuccessfullyInvested(request: SuccessfullyInvestedRequest) {
-        val wallets = walletService.getWalletsByHash(setOf(request.walletHashFrom, request.walletHashTo))
-        val user = getUser(getOwnerByHash(wallets, request.walletHashFrom))
-        val project = projectService.getProjectWithData(UUID.fromString(getOwnerByHash(wallets, request.walletHashTo)))
+    override fun sendSuccessfullyInvested(request: SuccessfullyInvestedMessage) {
+        val wallets = walletService.getWalletsByHash(setOf(request.userWalletTxHash, request.projectWalletTxHash))
+        val user = getUser(getOwnerByHash(wallets, request.userWalletTxHash))
+        val project = projectService.getProjectWithData(
+            UUID.fromString(getOwnerByHash(wallets, request.projectWalletTxHash))
+        )
         val mail = if (project.tosUrl.isNotBlank()) {
             val termsOfService = Attachment("Terms_of_service.pdf", fileService.getTermsOfService(project.tosUrl))
             successfullyInvestedMail.setTemplateData(project, request.amount.toLong(), true)
