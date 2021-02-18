@@ -17,11 +17,11 @@ class SuccessfullyInvestedMail(
     override val templateName = "investmentTemplate"
     override val titleKey = "investmentTitle"
 
-    fun setTemplateData(project: ProjectWithDataResponse, amount: Long, withTos: Boolean) = apply {
-        templateData = InvestmentData(project.project.name, amount.toMailFormat(), withTos)
+    fun setTemplateData(project: ProjectWithDataResponse, amount: Long, attachment: Attachment?) = apply {
+        this.attachment = attachment
+        templateData = if (attachment != null) InvestmentData(project.project.name, amount.toMailFormat(), true)
+        else InvestmentData(project.project.name, amount.toMailFormat(), false)
     }
-
-    fun addAttachment(attachment: Attachment?) = apply { this.attachment = attachment }
 }
 
 data class InvestmentData(val projectName: String, val amount: String, val withTos: Boolean)

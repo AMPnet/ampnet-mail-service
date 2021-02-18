@@ -163,12 +163,10 @@ class UserMailServiceImpl(
         val mail = if (project.tosUrl.isNotBlank()) {
             logger.debug("There should be an attachment ${project.tosUrl}")
             val termsOfService = Attachment(TERMS_OF_SERVICE, fileService.getTermsOfService(project.tosUrl))
-            successfullyInvestedMail.setTemplateData(project, request.amount.toLong(), true)
-                .addAttachment(termsOfService)
+            successfullyInvestedMail.setTemplateData(project, request.amount.toLong(), termsOfService)
         } else {
             logger.debug("There is no attachment ${project.tosUrl}")
-            successfullyInvestedMail.setTemplateData(project, request.amount.toLong(), false)
-                .addAttachment(null)
+            successfullyInvestedMail.setTemplateData(project, request.amount.toLong(), null)
         }
         mail.setLanguage(user.language).sendTo(user.email)
     }
