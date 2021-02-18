@@ -19,8 +19,7 @@ class SuccessfullyInvestedMail(
 
     fun setTemplateData(project: ProjectWithDataResponse, amount: Long, attachment: Attachment?) = apply {
         this.attachment = attachment
-        templateData = if (attachment != null) InvestmentData(project.project.name, amount.toMailFormat(), true)
-        else InvestmentData(project.project.name, amount.toMailFormat(), false)
+        templateData = InvestmentData(project.project.name, amount.toMailFormat(), attachment != null)
     }
 }
 

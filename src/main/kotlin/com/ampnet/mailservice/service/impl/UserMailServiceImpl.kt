@@ -160,15 +160,16 @@ class UserMailServiceImpl(
         val user = getUser(getOwnerByHash(wallets, request.walletHashFrom))
         val project = projectService.getProjectWithData(UUID.fromString(getOwnerByHash(wallets, request.walletHashTo)))
         logger.debug("${project.project.uuid} has terms of service: ${project.tosUrl}")
-        val mail = if (project.tosUrl.isNotBlank()) {
+        val termsOfService = if (project.tosUrl.isNotBlank()) {
             logger.debug("There should be an attachment ${project.tosUrl}")
-            val termsOfService = Attachment(TERMS_OF_SERVICE, fileService.getTermsOfService(project.tosUrl))
-            successfullyInvestedMail.setTemplateData(project, request.amount.toLong(), termsOfService)
+            Attachment(TERMS_OF_SERVICE, fileService.getTermsOfService(project.tosUrl))
         } else {
             logger.debug("There is no attachment ${project.tosUrl}")
-            successfullyInvestedMail.setTemplateData(project, request.amount.toLong(), null)
+            null
         }
-        mail.setLanguage(user.language).sendTo(user.email)
+        successfullyInvestedMail.setTemplateData(project, request.amount.toLong(), termsOfService)
+            .setLanguage(user.language)
+            .sendTo(user.email)
     }
 
     private fun getOwnerByHash(wallets: List<WalletResponse>, hash: String): String =
