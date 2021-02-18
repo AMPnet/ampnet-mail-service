@@ -8,14 +8,19 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
+import mu.KLogging
 
 @Service
 class FileServiceImpl : FileService {
+
+    companion object : KLogging()
 
     private val termsOfService: MutableMap<String, ByteArray> = mutableMapOf()
 
     @Throws(ResourceNotFoundException::class)
     override fun getTermsOfService(url: String): ByteArray {
+        logger.info("Trying to get terms Of service from url: $url")
+        logger.info("Terms of service stored in local memory: $termsOfService")
         termsOfService[url]?.let { return it }
         val byteArray = getFileContent(url)
         termsOfService[url] = byteArray

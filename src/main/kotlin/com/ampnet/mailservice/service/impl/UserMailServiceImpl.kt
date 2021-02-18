@@ -35,6 +35,7 @@ import com.ampnet.walletservice.proto.WalletResponse
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
 import java.util.UUID
+import mu.KLogging
 
 @Service
 @Suppress("TooManyFunctions", "LongParameterList")
@@ -48,6 +49,8 @@ class UserMailServiceImpl(
     private val walletService: WalletService,
     private val fileService: FileService
 ) : UserMailService {
+
+    companion object : KLogging()
 
     private val confirmationMail: ConfirmationMail by lazy {
         ConfirmationMail(linkResolverService, mailSender, applicationProperties, translationService)
@@ -156,11 +159,14 @@ class UserMailServiceImpl(
         val wallets = walletService.getWalletsByHash(setOf(request.walletHashFrom, request.walletHashTo))
         val user = getUser(getOwnerByHash(wallets, request.walletHashFrom))
         val project = projectService.getProjectWithData(UUID.fromString(getOwnerByHash(wallets, request.walletHashTo)))
+        logger.info("${project.project.uuid} has terms of service: ${project.tosUrl}")
         val mail = if (project.tosUrl.isNotBlank()) {
+            logger.info("There should be an attachment ${project.tosUrl}")
             val termsOfService = Attachment(TERMS_OF_SERVICE, fileService.getTermsOfService(project.tosUrl))
             successfullyInvestedMail.setTemplateData(project, request.amount.toLong(), true)
                 .addAttachment(termsOfService)
         } else {
+            logger.info("There is no attachment ${project.tosUrl}")
             successfullyInvestedMail.setTemplateData(project, request.amount.toLong(), false)
         }
         mail.setLanguage(user.language).sendTo(user.email)
