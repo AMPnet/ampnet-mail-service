@@ -21,7 +21,7 @@ class SuccessfullyInvestedMail(
         templateData = InvestmentData(project.project.name, amount.toMailFormat(), withTos)
     }
 
-    fun addAttachment(attachment: Attachment) = apply { this.attachment = attachment }
+    fun addAttachment(attachment: Attachment?) = apply { this.attachment = attachment }
 }
 
 data class InvestmentData(val projectName: String, val amount: String, val withTos: Boolean)

@@ -32,10 +32,10 @@ import com.ampnet.mailservice.service.pojo.Attachment
 import com.ampnet.mailservice.service.pojo.TERMS_OF_SERVICE
 import com.ampnet.userservice.proto.UserResponse
 import com.ampnet.walletservice.proto.WalletResponse
+import mu.KLogging
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
 import java.util.UUID
-import mu.KLogging
 
 @Service
 @Suppress("TooManyFunctions", "LongParameterList")
@@ -168,6 +168,7 @@ class UserMailServiceImpl(
         } else {
             logger.info("There is no attachment ${project.tosUrl}")
             successfullyInvestedMail.setTemplateData(project, request.amount.toLong(), false)
+                .addAttachment(null)
         }
         mail.setLanguage(user.language).sendTo(user.email)
     }

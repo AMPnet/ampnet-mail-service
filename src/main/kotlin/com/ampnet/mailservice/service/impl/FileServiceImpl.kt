@@ -2,13 +2,13 @@ package com.ampnet.mailservice.service.impl
 
 import com.ampnet.mailservice.exception.ResourceNotFoundException
 import com.ampnet.mailservice.service.FileService
+import mu.KLogging
 import org.springframework.stereotype.Service
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
-import mu.KLogging
 
 @Service
 class FileServiceImpl : FileService {
