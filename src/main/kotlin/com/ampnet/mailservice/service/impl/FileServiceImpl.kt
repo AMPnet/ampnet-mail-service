@@ -19,9 +19,10 @@ class FileServiceImpl : FileService {
 
     @Throws(ResourceNotFoundException::class)
     override fun getTermsOfService(url: String): ByteArray {
-        logger.debug("Trying to get terms Of service from url: $url")
-        logger.debug("Terms of service stored in local memory: $termsOfService")
-        termsOfService[url]?.let { return it }
+        termsOfService[url]?.let {
+            logger.debug { "Terms of service is already downloaded from url: $url" }
+            return it
+        }
         val byteArray = getFileContent(url)
         termsOfService[url] = byteArray
         return byteArray
@@ -29,6 +30,7 @@ class FileServiceImpl : FileService {
 
     private fun getFileContent(url: String): ByteArray {
         try {
+            logger.debug { "Downloading terms of service from url: $url" }
             val connection = getURLFromString(url).openConnection() as HttpURLConnection
             connection.inputStream.use { input ->
                 ByteArrayOutputStream().use { output ->
