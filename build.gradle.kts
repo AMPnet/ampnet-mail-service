@@ -41,7 +41,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("io.github.microutils:kotlin-logging:2.0.4")
-    implementation("net.devh:grpc-spring-boot-starter:2.10.1.RELEASE")
+    implementation("net.devh:grpc-client-spring-boot-starter:2.10.1.RELEASE")
     implementation("com.github.spullara.mustache.java:compiler:0.9.7")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
