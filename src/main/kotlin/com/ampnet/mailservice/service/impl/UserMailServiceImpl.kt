@@ -165,10 +165,12 @@ class UserMailServiceImpl(
         projectFullyFundedMail.setTemplateData(user, project).setLanguage(user.language).sendTo(user.email)
     }
 
-    override fun sendSuccessfullyInvested(request: SuccessfullyInvestedRequest) {
-        val wallets = walletService.getWalletsByHash(setOf(request.walletHashFrom, request.walletHashTo))
-        val user = getUser(getOwnerByHash(wallets, request.walletHashFrom))
-        val project = projectService.getProjectWithData(UUID.fromString(getOwnerByHash(wallets, request.walletHashTo)))
+    override fun sendSuccessfullyInvested(request: SuccessfullyInvestedMessage) {
+        val wallets = walletService.getWalletsByHash(setOf(request.userWalletTxHash, request.projectWalletTxHash))
+        val user = getUser(getOwnerByHash(wallets, request.userWalletTxHash))
+        val project = projectService.getProjectWithData(
+            UUID.fromString(getOwnerByHash(wallets, request.projectWalletTxHash))
+        )
         logger.debug("${project.project.uuid} has terms of service: ${project.tosUrl}")
         val termsOfService = if (project.tosUrl.isNotBlank()) {
             logger.debug("There should be an attachment ${project.tosUrl}")
