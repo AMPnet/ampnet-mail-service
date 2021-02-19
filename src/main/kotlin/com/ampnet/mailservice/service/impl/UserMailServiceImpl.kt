@@ -29,8 +29,10 @@ import com.ampnet.mailservice.service.impl.mail.SuccessfullyInvestedMail
 import com.ampnet.mailservice.service.impl.mail.WithdrawInfoMail
 import com.ampnet.mailservice.service.impl.mail.WithdrawRequestMail
 import com.ampnet.mailservice.service.pojo.Attachment
+import com.ampnet.mailservice.service.pojo.TERMS_OF_SERVICE
 import com.ampnet.userservice.proto.UserResponse
 import com.ampnet.walletservice.proto.WalletResponse
+import mu.KLogging
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -47,6 +49,8 @@ class UserMailServiceImpl(
     private val walletService: WalletService,
     private val fileService: FileService
 ) : UserMailService {
+
+    companion object : KLogging()
 
     private val confirmationMail: ConfirmationMail by lazy {
         ConfirmationMail(linkResolverService, mailSender, applicationProperties, translationService)
@@ -161,20 +165,21 @@ class UserMailServiceImpl(
         projectFullyFundedMail.setTemplateData(user, project).setLanguage(user.language).sendTo(user.email)
     }
 
-    override fun sendSuccessfullyInvested(request: SuccessfullyInvestedMessage) {
-        val wallets = walletService.getWalletsByHash(setOf(request.userWalletTxHash, request.projectWalletTxHash))
-        val user = getUser(getOwnerByHash(wallets, request.userWalletTxHash))
-        val project = projectService.getProjectWithData(
-            UUID.fromString(getOwnerByHash(wallets, request.projectWalletTxHash))
-        )
-        val mail = if (project.tosUrl.isNotBlank()) {
-            val termsOfService = Attachment("Terms_of_service.pdf", fileService.getTermsOfService(project.tosUrl))
-            successfullyInvestedMail.setTemplateData(project, request.amount.toLong(), true)
-                .addAttachment(termsOfService)
+    override fun sendSuccessfullyInvested(request: SuccessfullyInvestedRequest) {
+        val wallets = walletService.getWalletsByHash(setOf(request.walletHashFrom, request.walletHashTo))
+        val user = getUser(getOwnerByHash(wallets, request.walletHashFrom))
+        val project = projectService.getProjectWithData(UUID.fromString(getOwnerByHash(wallets, request.walletHashTo)))
+        logger.debug("${project.project.uuid} has terms of service: ${project.tosUrl}")
+        val termsOfService = if (project.tosUrl.isNotBlank()) {
+            logger.debug("There should be an attachment ${project.tosUrl}")
+            Attachment(TERMS_OF_SERVICE, fileService.getTermsOfService(project.tosUrl))
         } else {
-            successfullyInvestedMail.setTemplateData(project, request.amount.toLong(), false)
+            logger.debug("There is no attachment ${project.tosUrl}")
+            null
         }
-        mail.setLanguage(user.language).sendTo(user.email)
+        successfullyInvestedMail.setTemplateData(project, request.amount.toLong(), termsOfService)
+            .setLanguage(user.language)
+            .sendTo(user.email)
     }
 
     private fun getOwnerByHash(wallets: List<WalletResponse>, hash: String): String =

@@ -7,13 +7,15 @@ import com.ampnet.mailservice.amqp.userservice.MailResetPasswordMessage
 import com.ampnet.mailservice.amqp.walletservice.WalletTypeAmqp
 import com.ampnet.mailservice.service.impl.UserMailServiceImpl
 import com.ampnet.mailservice.service.impl.mail.toMailFormat
+import com.ampnet.mailservice.service.pojo.TERMS_OF_SERVICE
 import com.ampnet.projectservice.proto.ProjectWithDataResponse
 import com.ampnet.userservice.proto.UserResponse
 import org.apache.commons.mail.util.MimeMessageParser
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import java.util.UUID
 
 class UserMailServiceTest : MailServiceTestBase() {
@@ -452,8 +454,8 @@ class UserMailServiceTest : MailServiceTestBase() {
             Mockito.`when`(userService.getUsers(listOf(testContext.walletFrom.owner)))
                 .thenReturn(listOf(testContext.user))
         }
-        suppose("File service returns input stream") {
-            val termsOfService = ByteArrayInputStream("terms_of_service.pdf".toByteArray())
+        suppose("File service returns pdf file") {
+            val termsOfService = javaClass.classLoader.getResource("test.pdf")?.readBytes()
             Mockito.`when`(fileService.getTermsOfService(testContext.tosUrl)).thenReturn(termsOfService)
         }
         suppose("Service sent mail for successful funding") {
@@ -470,8 +472,10 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(userMail.mimeMessage.subject).isEqualTo(investmentSubject)
             val mimeMessageParser = MimeMessageParser(userMail.mimeMessage).parse()
-            assertThat(mimeMessageParser.hasAttachments()).isTrue()
+            assertThat(mimeMessageParser.hasAttachments()).isTrue
             val mailText = mimeMessageParser.htmlContent
+            val attachment = mimeMessageParser.findAttachmentByName(TERMS_OF_SERVICE)
+            verifyPdfFormat(getFileContent(attachment.inputStream))
             assertThat(mailText).contains(testContext.projectWithData.project.name)
             assertThat(mailText).contains("Investment is completed under conditions provided in the attached file.")
             assertThat(mailText).contains(testContext.amount.toMailFormat())
@@ -516,10 +520,18 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(userMail.mimeMessage.subject).isEqualTo(investmentSubject)
             val mimeMessageParser = MimeMessageParser(userMail.mimeMessage).parse()
-            assertThat(mimeMessageParser.hasAttachments()).isFalse()
+            assertThat(mimeMessageParser.hasAttachments()).isFalse
             val mailText = mimeMessageParser.htmlContent
             assertThat(mailText).contains(testContext.projectWithData.project.name)
             assertThat(mailText).contains(testContext.amount.toMailFormat())
         }
+    }
+
+    private fun getFileContent(inputStream: InputStream): ByteArray {
+        val outputStream = ByteArrayOutputStream()
+        inputStream.copyTo(outputStream)
+        inputStream.close()
+        outputStream.close()
+        return outputStream.toByteArray()
     }
 }
