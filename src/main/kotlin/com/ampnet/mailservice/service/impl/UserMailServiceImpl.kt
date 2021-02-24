@@ -1,15 +1,15 @@
 package com.ampnet.mailservice.service.impl
 
+import com.ampnet.mailservice.amqp.blockchainservice.SuccessfullyInvestedMessage
+import com.ampnet.mailservice.amqp.projectservice.MailOrgInvitationMessage
+import com.ampnet.mailservice.amqp.userservice.MailConfirmationMessage
+import com.ampnet.mailservice.amqp.userservice.MailResetPasswordMessage
+import com.ampnet.mailservice.amqp.walletservice.WalletTypeAmqp
 import com.ampnet.mailservice.config.ApplicationProperties
-import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.exception.ResourceNotFoundException
 import com.ampnet.mailservice.grpc.projectservice.ProjectService
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.grpc.walletservice.WalletService
-import com.ampnet.mailservice.proto.MailConfirmationRequest
-import com.ampnet.mailservice.proto.OrganizationInvitationRequest
-import com.ampnet.mailservice.proto.ResetPasswordRequest
-import com.ampnet.mailservice.proto.SuccessfullyInvestedRequest
 import com.ampnet.mailservice.service.FileService
 import com.ampnet.mailservice.service.LinkResolverService
 import com.ampnet.mailservice.service.TranslationService
@@ -94,53 +94,63 @@ class UserMailServiceImpl(
         SuccessfullyInvestedMail(linkResolverService, mailSender, applicationProperties, translationService)
     }
 
-    override fun sendConfirmationMail(request: MailConfirmationRequest) =
+    override fun sendConfirmationMail(request: MailConfirmationMessage) =
         confirmationMail.setTemplateData(request.token, request.coop).setLanguage(request.language)
             .sendTo(request.email)
 
-    override fun sendResetPasswordMail(request: ResetPasswordRequest) =
+    override fun sendResetPasswordMail(request: MailResetPasswordMessage) =
         resetPasswordMail.setTemplateData(request.token, request.coop).setLanguage(request.language)
             .sendTo(request.email)
 
-    override fun sendOrganizationInvitationMail(request: OrganizationInvitationRequest) =
-        invitationMail.setTemplateData(request.organization, request.coop).setLanguage(request.language)
-            .sendTo(request.emailsList.toList()) { failedMails ->
+    override fun sendOrganizationInvitationMail(request: MailOrgInvitationMessage) {
+        val senderResponse = getUser(request.sender)
+        invitationMail.setTemplateData(request.organizationName, request.coop).setLanguage(senderResponse.language)
+            .sendTo(request.emails.toList()) { failedMails ->
                 val filedMailRecipients = failedMails.map { it.allRecipients.toString() }
-                failedDeliveryMail.setTemplateData(filedMailRecipients).setLanguage(request.language)
-                    .setLanguage(request.language).sendTo(request.senderEmail)
+                failedDeliveryMail.setTemplateData(filedMailRecipients).setLanguage(senderResponse.language)
+                    .sendTo(senderResponse.email)
             }
+    }
 
-    override fun sendDepositRequestMail(user: UserResponse, amount: Long) =
-        depositRequestMail.setTemplateData(amount).setLanguage(user.language).sendTo(user.email)
+    override fun sendDepositRequestMail(user: UUID, amount: Long) {
+        val userResponse = getUser(user)
+        depositRequestMail.setTemplateData(amount).setLanguage(userResponse.language).sendTo(userResponse.email)
+    }
 
-    override fun sendDepositInfoMail(user: UserResponse, minted: Boolean) =
-        depositMail.setTemplateData(minted).setLanguage(user.language).sendTo(user.email)
+    override fun sendDepositInfoMail(user: UUID, minted: Boolean) {
+        val userResponse = getUser(user)
+        depositMail.setTemplateData(minted).setLanguage(userResponse.language).sendTo(userResponse.email)
+    }
 
-    override fun sendWithdrawRequestMail(user: UserResponse, amount: Long) =
-        withdrawRequestMail.setTemplateData(amount).setLanguage(user.language).sendTo(user.email)
+    override fun sendWithdrawRequestMail(user: UUID, amount: Long) {
+        val userResponse = getUser(user)
+        withdrawRequestMail.setTemplateData(amount).setLanguage(userResponse.language).sendTo(userResponse.email)
+    }
 
-    override fun sendWithdrawInfoMail(user: UserResponse, burned: Boolean) =
-        withdrawInfoMail.setTemplateData(burned).setLanguage(user.language).sendTo(user.email)
+    override fun sendWithdrawInfoMail(user: UUID, burned: Boolean) {
+        val userResponse = getUser(user)
+        withdrawInfoMail.setTemplateData(burned).setLanguage(userResponse.language).sendTo(userResponse.email)
+    }
 
-    override fun sendWalletActivatedMail(walletOwner: String, walletType: WalletType, activationData: String) {
+    override fun sendWalletActivatedMail(walletOwner: UUID, walletType: WalletTypeAmqp, activationData: String) {
         val (mail: AbstractMail, user: UserResponse) = when (walletType) {
-            WalletType.USER -> {
+            WalletTypeAmqp.USER -> {
                 val user = getUser(walletOwner)
                 Pair(
                     activatedUserWalletMail.setTemplateData(activationData, user.coop).setLanguage(user.language),
                     user
                 )
             }
-            WalletType.ORGANIZATION -> {
-                val organization = projectService.getOrganization(UUID.fromString(walletOwner))
+            WalletTypeAmqp.ORGANIZATION -> {
+                val organization = projectService.getOrganization(walletOwner)
                 val user = getUser(organization.createdByUser)
                 Pair(
                     activatedOrganizationWalletMail.setTemplateData(organization, user.coop).setLanguage(user.language),
                     user
                 )
             }
-            WalletType.PROJECT -> {
-                val project = projectService.getProject(UUID.fromString(walletOwner))
+            WalletTypeAmqp.PROJECT -> {
+                val project = projectService.getProject(walletOwner)
                 val user = getUser(project.createdByUser)
                 Pair(activatedProjectWalletMail.setTemplateData(project, user.coop).setLanguage(user.language), user)
             }
@@ -155,10 +165,12 @@ class UserMailServiceImpl(
         projectFullyFundedMail.setTemplateData(user, project).setLanguage(user.language).sendTo(user.email)
     }
 
-    override fun sendSuccessfullyInvested(request: SuccessfullyInvestedRequest) {
-        val wallets = walletService.getWalletsByHash(setOf(request.walletHashFrom, request.walletHashTo))
-        val user = getUser(getOwnerByHash(wallets, request.walletHashFrom))
-        val project = projectService.getProjectWithData(UUID.fromString(getOwnerByHash(wallets, request.walletHashTo)))
+    override fun sendSuccessfullyInvested(request: SuccessfullyInvestedMessage) {
+        val wallets = walletService.getWalletsByHash(setOf(request.userWalletTxHash, request.projectWalletTxHash))
+        val user = getUser(getOwnerByHash(wallets, request.userWalletTxHash))
+        val project = projectService.getProjectWithData(
+            UUID.fromString(getOwnerByHash(wallets, request.projectWalletTxHash))
+        )
         logger.debug("${project.project.uuid} has terms of service: ${project.tosUrl}")
         val termsOfService = if (project.tosUrl.isNotBlank()) {
             logger.debug("There should be an attachment ${project.tosUrl}")
@@ -175,6 +187,8 @@ class UserMailServiceImpl(
     private fun getOwnerByHash(wallets: List<WalletResponse>, hash: String): String =
         wallets.firstOrNull { it.hash == hash }?.owner
             ?: throw ResourceNotFoundException("Missing owner for wallet hash: $hash")
+
+    private fun getUser(userUuid: UUID): UserResponse = getUser(userUuid.toString())
 
     private fun getUser(userUuid: String): UserResponse =
         userService.getUsers(listOf(userUuid)).firstOrNull()

@@ -22,7 +22,7 @@ plugins {
 }
 
 group = "com.ampnet"
-version = "0.5.10"
+version = "0.6.0"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
@@ -34,13 +34,14 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-amqp")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("io.github.microutils:kotlin-logging:2.0.4")
-    implementation("net.devh:grpc-spring-boot-starter:2.10.1.RELEASE")
+    implementation("net.devh:grpc-client-spring-boot-starter:2.10.1.RELEASE")
     implementation("com.github.spullara.mustache.java:compiler:0.9.7")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")

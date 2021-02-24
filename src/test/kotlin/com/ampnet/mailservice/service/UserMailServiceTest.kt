@@ -1,10 +1,10 @@
 package com.ampnet.mailservice.service
 
-import com.ampnet.mailservice.enums.WalletType
-import com.ampnet.mailservice.proto.MailConfirmationRequest
-import com.ampnet.mailservice.proto.OrganizationInvitationRequest
-import com.ampnet.mailservice.proto.ResetPasswordRequest
-import com.ampnet.mailservice.proto.SuccessfullyInvestedRequest
+import com.ampnet.mailservice.amqp.blockchainservice.SuccessfullyInvestedMessage
+import com.ampnet.mailservice.amqp.projectservice.MailOrgInvitationMessage
+import com.ampnet.mailservice.amqp.userservice.MailConfirmationMessage
+import com.ampnet.mailservice.amqp.userservice.MailResetPasswordMessage
+import com.ampnet.mailservice.amqp.walletservice.WalletTypeAmqp
 import com.ampnet.mailservice.service.impl.UserMailServiceImpl
 import com.ampnet.mailservice.service.impl.mail.toMailFormat
 import com.ampnet.mailservice.service.pojo.TERMS_OF_SERVICE
@@ -30,12 +30,7 @@ class UserMailServiceTest : MailServiceTestBase() {
     @Test
     fun mustSetCorrectSendConfirmationMail() {
         suppose("Service sent the mail") {
-            val request = MailConfirmationRequest.newBuilder()
-                .setEmail(testContext.receiverMail)
-                .setLanguage("")
-                .setToken(testContext.token)
-                .setCoop(testContext.coop)
-                .build()
+            val request = MailConfirmationMessage(testContext.receiverMail, testContext.token, testContext.coop, "")
             service.sendConfirmationMail(request)
         }
 
@@ -56,11 +51,7 @@ class UserMailServiceTest : MailServiceTestBase() {
     @Test
     fun mustSetCorrectSendResetPasswordMail() {
         suppose("Service sent reset password mail") {
-            val request = ResetPasswordRequest.newBuilder()
-                .setEmail(testContext.receiverMail)
-                .setToken(testContext.token)
-                .setCoop(testContext.coop)
-                .build()
+            val request = MailResetPasswordMessage(testContext.receiverMail, testContext.token, testContext.coop, "")
             service.sendResetPasswordMail(request)
         }
 
@@ -81,12 +72,7 @@ class UserMailServiceTest : MailServiceTestBase() {
     @Test
     fun mustSetCorrectSendResetPasswordMailOnGreek() {
         suppose("Service sent reset password mail") {
-            val request = ResetPasswordRequest.newBuilder()
-                .setEmail(testContext.receiverMail)
-                .setToken(testContext.token)
-                .setCoop(testContext.coop)
-                .setLanguage("el")
-                .build()
+            val request = MailResetPasswordMessage(testContext.receiverMail, testContext.token, testContext.coop, "el")
             service.sendResetPasswordMail(request)
         }
 
@@ -108,13 +94,18 @@ class UserMailServiceTest : MailServiceTestBase() {
 
     @Test
     fun mustSetCorrectOrganizationInvitationMail() {
+        suppose("User service will return sender user response") {
+            testContext.user = generateUserResponse("sender@email.com")
+            Mockito.`when`(userService.getUsers(listOf(testContext.user.uuid)))
+                .thenReturn(listOf(testContext.user))
+        }
         suppose("Service sends organizationInvitation e-mails") {
-            val request = OrganizationInvitationRequest.newBuilder()
-                .addAllEmails(testContext.receiverEmails)
-                .setSenderEmail("sender@email.com")
-                .setOrganization(testContext.organizationName)
-                .setCoop(testContext.coop)
-                .build()
+            val request = MailOrgInvitationMessage(
+                testContext.receiverEmails,
+                testContext.organizationName,
+                UUID.fromString(testContext.user.uuid),
+                testContext.coop
+            )
             service.sendOrganizationInvitationMail(request)
         }
 
@@ -139,9 +130,13 @@ class UserMailServiceTest : MailServiceTestBase() {
 
     @Test
     fun mustSetCorrectDepositRequestMail() {
+        suppose("User service will return user response") {
+            testContext.user = generateUserResponse(testContext.receiverMail)
+            Mockito.`when`(userService.getUsers(listOf(testContext.user.uuid)))
+                .thenReturn(listOf(testContext.user))
+        }
         suppose("Service send deposit request mail") {
-            val user = generateUserResponse(testContext.receiverMail)
-            service.sendDepositRequestMail(user, testContext.amount)
+            service.sendDepositRequestMail(UUID.fromString(testContext.user.uuid), testContext.amount)
         }
 
         verify("The mail is sent to right receiver and has correct data") {
@@ -159,9 +154,13 @@ class UserMailServiceTest : MailServiceTestBase() {
 
     @Test
     fun mustSetCorrectPositiveDepositInfoMail() {
+        suppose("User service will return user response") {
+            testContext.user = generateUserResponse(testContext.receiverMail)
+            Mockito.`when`(userService.getUsers(listOf(testContext.user.uuid)))
+                .thenReturn(listOf(testContext.user))
+        }
         suppose("Service send Deposit info mail") {
-            val user = generateUserResponse(testContext.receiverMail)
-            service.sendDepositInfoMail(user, true)
+            service.sendDepositInfoMail(UUID.fromString(testContext.user.uuid), true)
         }
 
         verify("The mail is sent to right receiver and has correct data") {
@@ -179,9 +178,13 @@ class UserMailServiceTest : MailServiceTestBase() {
 
     @Test
     fun mustSetCorrectNegativeDepositInfoMail() {
+        suppose("User service will return user response") {
+            testContext.user = generateUserResponse(testContext.receiverMail)
+            Mockito.`when`(userService.getUsers(listOf(testContext.user.uuid)))
+                .thenReturn(listOf(testContext.user))
+        }
         suppose("Service send Deposit info mail") {
-            val user = generateUserResponse(testContext.receiverMail)
-            service.sendDepositInfoMail(user, false)
+            service.sendDepositInfoMail(UUID.fromString(testContext.user.uuid), false)
         }
 
         verify("The mail is sent to right receiver and has correct data") {
@@ -208,9 +211,13 @@ class UserMailServiceTest : MailServiceTestBase() {
             Mockito.`when`(userService.getTokenIssuers(coop))
                 .thenReturn(listOf(tokenIssuer))
         }
+        suppose("User service will return user response") {
+            testContext.user = generateUserResponse(testContext.receiverMail)
+            Mockito.`when`(userService.getUsers(listOf(testContext.user.uuid)))
+                .thenReturn(listOf(testContext.user))
+        }
         suppose("Service send withdraw request mail to user and token issuers") {
-            val user = generateUserResponse(testContext.receiverMail)
-            service.sendWithdrawRequestMail(user, testContext.amount)
+            service.sendWithdrawRequestMail(UUID.fromString(testContext.user.uuid), testContext.amount)
         }
 
         verify("The mail is sent to user and has correct data") {
@@ -226,9 +233,13 @@ class UserMailServiceTest : MailServiceTestBase() {
 
     @Test
     fun mustSetCorrectPositiveWithdrawInfoMail() {
+        suppose("User service will return user response") {
+            testContext.user = generateUserResponse(testContext.receiverMail)
+            Mockito.`when`(userService.getUsers(listOf(testContext.user.uuid)))
+                .thenReturn(listOf(testContext.user))
+        }
         suppose("Service send Deposit info mail") {
-            val user = generateUserResponse(testContext.receiverMail)
-            service.sendWithdrawInfoMail(user, true)
+            service.sendWithdrawInfoMail(UUID.fromString(testContext.user.uuid), true)
         }
 
         verify("The mail is sent to right receiver and has correct data") {
@@ -246,9 +257,13 @@ class UserMailServiceTest : MailServiceTestBase() {
 
     @Test
     fun mustSetCorrectNegativeWithdrawInfoMail() {
+        suppose("User service will return user response") {
+            testContext.user = generateUserResponse(testContext.receiverMail)
+            Mockito.`when`(userService.getUsers(listOf(testContext.user.uuid)))
+                .thenReturn(listOf(testContext.user))
+        }
         suppose("Service send Deposit info mail") {
-            val user = generateUserResponse(testContext.receiverMail)
-            service.sendWithdrawInfoMail(user, false)
+            service.sendWithdrawInfoMail(UUID.fromString(testContext.user.uuid), false)
         }
 
         verify("The mail is sent to right receiver and has correct data") {
@@ -270,7 +285,7 @@ class UserMailServiceTest : MailServiceTestBase() {
             testContext.user = generateUserResponse(testContext.receiverMail)
             Mockito.`when`(userService.getUsers(listOf(testContext.user.uuid.toString())))
                 .thenReturn(listOf(testContext.user))
-            service.sendWalletActivatedMail(testContext.user.uuid, WalletType.USER, activationData)
+            service.sendWalletActivatedMail(UUID.fromString(testContext.user.uuid), WalletTypeAmqp.USER, activationData)
         }
 
         verify("The mail is sent to right receiver and has correct data") {
@@ -301,7 +316,9 @@ class UserMailServiceTest : MailServiceTestBase() {
                 .thenReturn(listOf(testContext.user))
         }
         suppose("Service sent mail for project wallet activated") {
-            service.sendWalletActivatedMail(testContext.walletOwner, WalletType.PROJECT, activationData)
+            service.sendWalletActivatedMail(
+                UUID.fromString(testContext.walletOwner), WalletTypeAmqp.PROJECT, activationData
+            )
         }
 
         verify("The mail is sent to right receiver and has correct data") {
@@ -333,7 +350,9 @@ class UserMailServiceTest : MailServiceTestBase() {
                 .thenReturn(listOf(testContext.user))
         }
         suppose("Service sent mail for organization wallet activated") {
-            service.sendWalletActivatedMail(testContext.walletOwner, WalletType.ORGANIZATION, activationData)
+            service.sendWalletActivatedMail(
+                UUID.fromString(testContext.walletOwner), WalletTypeAmqp.ORGANIZATION, activationData
+            )
         }
 
         verify("The mail is sent to right receiver and has correct data") {
@@ -352,15 +371,20 @@ class UserMailServiceTest : MailServiceTestBase() {
 
     @Test
     fun mustNotSendOrganizationInvitationMailIfRecipientEmailIsIncorrect() {
+        suppose("User service will return sender user response") {
+            testContext.user = generateUserResponse("sender@email.com")
+            Mockito.`when`(userService.getUsers(listOf(testContext.user.uuid)))
+                .thenReturn(listOf(testContext.user))
+        }
         suppose("Service sends organizationInvitation to incorrect and correct email") {
             val correctEmail = "test@email.com"
             val incorrectEmail = "fff5555"
-            val request = OrganizationInvitationRequest.newBuilder()
-                .addAllEmails(listOf(correctEmail, incorrectEmail))
-                .setSenderEmail("sender@email.com")
-                .setOrganization(testContext.organizationName)
-                .setCoop(testContext.coop)
-                .build()
+            val request = MailOrgInvitationMessage(
+                listOf(correctEmail, incorrectEmail),
+                testContext.organizationName,
+                UUID.fromString(testContext.user.uuid),
+                testContext.coop
+            )
             service.sendOrganizationInvitationMail(request)
         }
 
@@ -435,12 +459,10 @@ class UserMailServiceTest : MailServiceTestBase() {
             Mockito.`when`(fileService.getTermsOfService(testContext.tosUrl)).thenReturn(termsOfService)
         }
         suppose("Service sent mail for successful funding") {
-            val request = SuccessfullyInvestedRequest.newBuilder()
-                .setWalletHashFrom(testContext.walletFrom.hash)
-                .setWalletHashTo(testContext.walletTo.hash)
-                .setAmount(testContext.amount.toString())
-                .build()
-            service.sendSuccessfullyInvested(request)
+            val message = SuccessfullyInvestedMessage(
+                testContext.walletFrom.hash, testContext.walletTo.hash, testContext.amount.toString()
+            )
+            service.sendSuccessfullyInvested(message)
         }
 
         verify("The mail is sent to right receiver and has correct investment data") {
@@ -485,12 +507,10 @@ class UserMailServiceTest : MailServiceTestBase() {
                 .thenReturn(listOf(testContext.user))
         }
         suppose("Service sent mail for successful funding") {
-            val request = SuccessfullyInvestedRequest.newBuilder()
-                .setWalletHashFrom(testContext.walletFrom.hash)
-                .setWalletHashTo(testContext.walletTo.hash)
-                .setAmount(testContext.amount.toString())
-                .build()
-            service.sendSuccessfullyInvested(request)
+            val message = SuccessfullyInvestedMessage(
+                testContext.walletFrom.hash, testContext.walletTo.hash, testContext.amount.toString()
+            )
+            service.sendSuccessfullyInvested(message)
         }
 
         verify("The mail is sent to right receiver with right data and has no attachment") {

@@ -1,6 +1,6 @@
 package com.ampnet.mailservice.service
 
-import com.ampnet.mailservice.enums.WalletType
+import com.ampnet.mailservice.amqp.walletservice.WalletTypeAmqp
 import com.ampnet.mailservice.service.impl.AdminMailServiceImpl
 import com.ampnet.mailservice.service.impl.mail.toMailFormat
 import com.ampnet.userservice.proto.UserResponse
@@ -28,9 +28,13 @@ class AdminMailServiceTest : MailServiceTestBase() {
             Mockito.`when`(userService.getTokenIssuers(coop))
                 .thenReturn(listOf(tokenIssuer))
         }
+        suppose("User service returns user response") {
+            testContext.user = generateUserResponse("user@mail.com")
+            Mockito.`when`(userService.getUsers(listOf(testContext.user.uuid)))
+                .thenReturn(listOf(testContext.user))
+        }
         suppose("Service send withdraw request mail to user and token issuers") {
-            val user = generateUserResponse(testContext.receiverMail)
-            service.sendWithdrawRequestMail(user, testContext.amount)
+            service.sendWithdrawRequestMail(UUID.fromString(testContext.user.uuid), testContext.amount)
         }
 
         verify("The mail is sent to token issuer and has correct data") {
@@ -59,7 +63,7 @@ class AdminMailServiceTest : MailServiceTestBase() {
                 .build()
             Mockito.`when`(userService.getPlatformManagers(coop))
                 .thenReturn(listOf(platformManager))
-            service.sendNewWalletNotificationMail(WalletType.ORGANIZATION, coop, activationData)
+            service.sendNewWalletNotificationMail(WalletTypeAmqp.ORGANIZATION, coop, activationData)
         }
 
         verify("The mail is sent to right receiver and has correct data") {
@@ -85,8 +89,8 @@ class AdminMailServiceTest : MailServiceTestBase() {
                 .build()
             Mockito.`when`(userService.getPlatformManagers(coop))
                 .thenReturn(listOf(platformManager))
-            service.sendNewWalletNotificationMail(WalletType.USER, coop, activationData)
-            service.sendNewWalletNotificationMail(WalletType.PROJECT, coop, activationData)
+            service.sendNewWalletNotificationMail(WalletTypeAmqp.USER, coop, activationData)
+            service.sendNewWalletNotificationMail(WalletTypeAmqp.PROJECT, coop, activationData)
         }
 
         verify("Both mails are sent to right receivers and have confirmation link") {
