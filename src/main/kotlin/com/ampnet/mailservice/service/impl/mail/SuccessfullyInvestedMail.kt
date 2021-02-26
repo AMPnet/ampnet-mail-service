@@ -3,8 +3,7 @@ package com.ampnet.mailservice.service.impl.mail
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.service.LinkResolverService
 import com.ampnet.mailservice.service.TranslationService
-import com.ampnet.mailservice.service.pojo.Attachment
-import com.ampnet.projectservice.proto.ProjectWithDataResponse
+import com.ampnet.mailservice.service.pojo.SuccessfullyInvestedTemplateData
 import org.springframework.mail.javamail.JavaMailSender
 
 class SuccessfullyInvestedMail(
@@ -17,10 +16,23 @@ class SuccessfullyInvestedMail(
     override val templateName = "investmentTemplate"
     override val titleKey = "investmentTitle"
 
-    fun setTemplateData(project: ProjectWithDataResponse, amount: Long, attachment: Attachment?) = apply {
-        this.attachment = attachment
-        templateData = InvestmentData(project.project.name, amount.toMailFormat(), attachment != null)
+    fun setTemplateData(data: SuccessfullyInvestedTemplateData) = apply {
+        this.attachment = data.attachment
+        val project = data.project.project
+        templateData = InvestmentData(
+            project.name,
+            project.description,
+            data.amount.toMailFormat(),
+            data.coopName,
+            attachment != null
+        )
     }
 }
 
-data class InvestmentData(val projectName: String, val amount: String, val withTos: Boolean)
+data class InvestmentData(
+    val projectName: String,
+    val projectDescription: String,
+    val amount: String,
+    val coopName: String,
+    val withTos: Boolean
+)

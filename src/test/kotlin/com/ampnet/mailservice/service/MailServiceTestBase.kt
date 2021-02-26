@@ -8,7 +8,9 @@ import com.ampnet.mailservice.grpc.walletservice.WalletService
 import com.ampnet.projectservice.proto.OrganizationResponse
 import com.ampnet.projectservice.proto.ProjectResponse
 import com.ampnet.projectservice.proto.ProjectWithDataResponse
+import com.ampnet.userservice.proto.CoopResponse
 import com.ampnet.userservice.proto.UserResponse
+import com.ampnet.userservice.proto.UserWithInfoResponse
 import com.ampnet.walletservice.proto.WalletResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
@@ -93,7 +95,18 @@ abstract class MailServiceTestBase : TestBase() {
             .setFirstName("First")
             .setLastName("Last")
             .setCoop(coop)
-            // .setLanguage("el")
+//            .setLanguage("el")
+            .build()
+
+    protected fun generateUserWithInfoResponse(email: String): UserWithInfoResponse =
+        UserWithInfoResponse.newBuilder()
+            .setUser(generateUserResponse(email))
+            .setCoop(generateCoopResponse())
+            .build()
+
+    protected fun generateCoopResponse(): CoopResponse =
+        CoopResponse.newBuilder()
+            .setName(coop)
             .build()
 
     protected fun generateProjectResponse(createdBy: String): ProjectResponse =
@@ -132,6 +145,7 @@ abstract class MailServiceTestBase : TestBase() {
         lateinit var projectWithData: ProjectWithDataResponse
         lateinit var organization: OrganizationResponse
         lateinit var user: UserResponse
+        lateinit var userWithInfo: UserWithInfoResponse
         lateinit var walletHash: String
         lateinit var wallet: WalletResponse
         lateinit var walletFrom: WalletResponse

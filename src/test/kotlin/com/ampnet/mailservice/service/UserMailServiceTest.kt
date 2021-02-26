@@ -449,10 +449,10 @@ class UserMailServiceTest : MailServiceTestBase() {
             Mockito.`when`(projectService.getProjectWithData(UUID.fromString(testContext.walletTo.owner)))
                 .thenReturn(testContext.projectWithData)
         }
-        suppose("User service returns user") {
-            testContext.user = generateUserResponse(testContext.receiverMail)
-            Mockito.`when`(userService.getUsers(listOf(testContext.walletFrom.owner)))
-                .thenReturn(listOf(testContext.user))
+        suppose("User service returns user with info") {
+            testContext.userWithInfo = generateUserWithInfoResponse(testContext.receiverMail)
+            Mockito.`when`(userService.getUserWithInfo(testContext.walletFrom.owner))
+                .thenReturn(testContext.userWithInfo)
         }
         suppose("File service returns pdf file") {
             val termsOfService = javaClass.classLoader.getResource("test.pdf")?.readBytes()
@@ -477,7 +477,14 @@ class UserMailServiceTest : MailServiceTestBase() {
             val attachment = mimeMessageParser.findAttachmentByName(TERMS_OF_SERVICE)
             verifyPdfFormat(getFileContent(attachment.inputStream))
             assertThat(mailText).contains(testContext.projectWithData.project.name)
-            assertThat(mailText).contains("Investment is completed under conditions provided in the attached file.")
+            assertThat(mailText).contains(testContext.projectWithData.project.description)
+            assertThat(mailText).contains(testContext.userWithInfo.coop.name)
+            assertThat(mailText).contains(
+                "When the target is reached and the final contracts completed " +
+                    "your investment will be finalized under the conditions contained in the attached document. " +
+                    "This is a copy of the project listing that was on the platform at the time you decided " +
+                    "to invest in the project."
+            )
             assertThat(mailText).contains(testContext.amount.toMailFormat())
         }
     }
@@ -501,10 +508,10 @@ class UserMailServiceTest : MailServiceTestBase() {
             Mockito.`when`(projectService.getProjectWithData(UUID.fromString(testContext.walletTo.owner)))
                 .thenReturn(testContext.projectWithData)
         }
-        suppose("User service returns user") {
-            testContext.user = generateUserResponse(testContext.receiverMail)
-            Mockito.`when`(userService.getUsers(listOf(testContext.walletFrom.owner)))
-                .thenReturn(listOf(testContext.user))
+        suppose("User service returns user with info") {
+            testContext.userWithInfo = generateUserWithInfoResponse(testContext.receiverMail)
+            Mockito.`when`(userService.getUserWithInfo(testContext.walletFrom.owner))
+                .thenReturn(testContext.userWithInfo)
         }
         suppose("Service sent mail for successful funding") {
             val message = SuccessfullyInvestedMessage(
@@ -523,6 +530,8 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(mimeMessageParser.hasAttachments()).isFalse
             val mailText = mimeMessageParser.htmlContent
             assertThat(mailText).contains(testContext.projectWithData.project.name)
+            assertThat(mailText).contains(testContext.projectWithData.project.description)
+            assertThat(mailText).contains(testContext.userWithInfo.coop.name)
             assertThat(mailText).contains(testContext.amount.toMailFormat())
         }
     }

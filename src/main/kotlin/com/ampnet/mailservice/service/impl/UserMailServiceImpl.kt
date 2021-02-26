@@ -29,6 +29,7 @@ import com.ampnet.mailservice.service.impl.mail.SuccessfullyInvestedMail
 import com.ampnet.mailservice.service.impl.mail.WithdrawInfoMail
 import com.ampnet.mailservice.service.impl.mail.WithdrawRequestMail
 import com.ampnet.mailservice.service.pojo.Attachment
+import com.ampnet.mailservice.service.pojo.SuccessfullyInvestedTemplateData
 import com.ampnet.mailservice.service.pojo.TERMS_OF_SERVICE
 import com.ampnet.userservice.proto.UserResponse
 import com.ampnet.walletservice.proto.WalletResponse
@@ -167,7 +168,7 @@ class UserMailServiceImpl(
 
     override fun sendSuccessfullyInvested(request: SuccessfullyInvestedMessage) {
         val wallets = walletService.getWalletsByHash(setOf(request.userWalletTxHash, request.projectWalletTxHash))
-        val user = getUser(getOwnerByHash(wallets, request.userWalletTxHash))
+        val user = userService.getUserWithInfo(getOwnerByHash(wallets, request.userWalletTxHash))
         val project = projectService.getProjectWithData(
             UUID.fromString(getOwnerByHash(wallets, request.projectWalletTxHash))
         )
@@ -179,9 +180,12 @@ class UserMailServiceImpl(
             logger.debug("There is no attachment ${project.tosUrl}")
             null
         }
-        successfullyInvestedMail.setTemplateData(project, request.amount.toLong(), termsOfService)
-            .setLanguage(user.language)
-            .sendTo(user.email)
+        successfullyInvestedMail
+            .setTemplateData(
+                SuccessfullyInvestedTemplateData(project, request.amount.toLong(), user.coop.name, termsOfService)
+            )
+            .setLanguage(user.user.language)
+            .sendTo(user.user.email)
     }
 
     private fun getOwnerByHash(wallets: List<WalletResponse>, hash: String): String =

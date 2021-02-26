@@ -10,6 +10,11 @@ message GetUsersRequest {
     repeated string uuids = 1;
 }
 
+message GetUsersByEmailRequest {
+    repeated string emails = 1;
+    string coop = 2;
+}
+
 message UserResponse {
     string uuid = 1;
     string first_name = 2;
@@ -38,17 +43,26 @@ message SetRoleRequest {
 
 message UserWithInfoResponse {
     UserResponse user = 1;
-    uint64 createdAt = 3;
+    uint64 createdAt = 2;
+    CoopResponse coop = 3;
 }
 
 message CoopRequest {
     string coop = 1;
 }
 
+message CoopResponse {
+    string coop = 1;
+    string name = 2;
+    string hostname = 3;
+    string logo = 4;
+}
+
 service UserService {
-    rpc GetUsers(GetUsersRequest) returns (UsersResponse);
-    rpc SetUserRole(SetRoleRequest) returns (UserResponse);
-    rpc GetPlatformManagers(CoopRequest) returns (UsersResponse);
-    rpc GetTokenIssuers(CoopRequest) returns (UsersResponse);
-    rpc GetUserWithInfo(GetUserRequest) returns (UserWithInfoResponse);
+    rpc GetUsers (GetUsersRequest) returns (UsersResponse);
+    rpc SetUserRole (SetRoleRequest) returns (UserResponse);
+    rpc GetPlatformManagers (CoopRequest) returns (UsersResponse);
+    rpc GetTokenIssuers (CoopRequest) returns (UsersResponse);
+    rpc GetUserWithInfo (GetUserRequest) returns (UserWithInfoResponse);
+    rpc GetUsersByEmail (GetUsersByEmailRequest) returns (UsersResponse);
 }
