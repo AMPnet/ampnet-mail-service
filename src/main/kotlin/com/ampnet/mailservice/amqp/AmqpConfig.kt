@@ -28,7 +28,7 @@ class AmqpConfig(private val objectMapper: ObjectMapper) {
     ): SimpleRabbitListenerContainerFactory =
         SimpleRabbitListenerContainerFactory().apply {
             configurer.configure(this, connectionFactory)
-            this.setErrorHandler(errorHandler())
+            setErrorHandler(errorHandler())
         }
 
     @Bean

@@ -5,6 +5,6 @@ import com.ampnet.mailservice.exception.ResourceNotFoundException
 import org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler.DefaultExceptionStrategy
 
 class ExceptionStrategy : DefaultExceptionStrategy() {
-    override fun isFatal(t: Throwable): Boolean =
-        t.cause !is InternalException || t.cause !is ResourceNotFoundException
+    override fun isFatal(t: Throwable): Boolean = super.isFatal(t) ||
+        t.cause is InternalException || t.cause is ResourceNotFoundException
 }
