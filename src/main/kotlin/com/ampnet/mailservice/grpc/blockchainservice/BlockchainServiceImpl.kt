@@ -37,7 +37,7 @@ class BlockchainServiceImpl(
             response.balance.toLongOrNull()
         } catch (ex: StatusRuntimeException) {
             logger.warn("Could not get balance for wallet: $hash", ex)
-            throw GrpcException("Could not get balance for wallet: $hash", ex)
+            null
         }
     }
 
