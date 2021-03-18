@@ -20,6 +20,7 @@ class MailProperties {
     var manageWithdrawalsPath: String = "dash/manage_withdrawals"
     var walletActivatedPath: String = "dash/wallet"
     var manageProjectPath: String = "manage_project"
+    var overviewPath: String = "overview"
     var enabled: Boolean = false
 }
 
@@ -28,4 +29,5 @@ class GrpcProperties {
     var userServiceTimeout: Long = 10000
     var projectServiceTimeout: Long = 10000
     var walletServiceTimeout: Long = 10000
+    var blockchainServiceTimeout: Long = 10000
 }

@@ -2,6 +2,7 @@ package com.ampnet.mailservice.service
 
 import com.ampnet.mailservice.TestBase
 import com.ampnet.mailservice.config.ApplicationProperties
+import com.ampnet.mailservice.grpc.blockchainservice.BlockchainService
 import com.ampnet.mailservice.grpc.projectservice.ProjectService
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.grpc.walletservice.WalletService
@@ -56,6 +57,9 @@ abstract class MailServiceTestBase : TestBase() {
 
     @MockBean
     protected lateinit var walletService: WalletService
+
+    @MockBean
+    protected lateinit var blockchainService: BlockchainService
 
     protected lateinit var wiser: Wiser
     protected var defaultMailPort: Int = 0
@@ -114,6 +118,7 @@ abstract class MailServiceTestBase : TestBase() {
             .setUuid(UUID.randomUUID().toString())
             .setCreatedByUser(createdBy)
             .setName("Duimane Investement")
+            .setExpectedFunding(1000L)
             .setOrganizationUuid(UUID.randomUUID().toString())
             .build()
 

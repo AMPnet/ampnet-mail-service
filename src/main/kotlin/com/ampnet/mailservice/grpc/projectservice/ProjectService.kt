@@ -11,4 +11,5 @@ interface ProjectService {
     fun getProjectWithData(uuid: UUID): ProjectWithDataResponse
     fun getOrganizations(uuids: Iterable<UUID>): List<OrganizationResponse>
     fun getProjects(uuids: Iterable<UUID>): List<ProjectResponse>
+    fun getActiveProjects(coop: String): List<ProjectResponse>
 }

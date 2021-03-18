@@ -4,10 +4,9 @@
     "es":"",
     "el":"<p>Ζήτησε να καταθέσεις το εξής ποσό: {{amount}}€.</p>\n\n<p>Θα ενημερωθείς μόλις επεξεργαστούμε το αίτημα σου.</p>\n"
   },
-  "depositTemplate":{
-    "en":"{{#minted}}\n    <p>Your deposit has been approved and your funds are ready.</p>\n{{/minted}}\n{{^minted}}\n    <p>Your deposit request has been rejected. Try to create new deposit request or contact support for more information.</p>\n{{/minted}}",
-    "es":"{{#minted}}\n  <p>Su depósito ha sido autorizado y sus fondos están disponibles.</p>\n {{/minted}}\n {{^minted}}\n  <p>Su solicitud de depósito ha sido rechazada. Intente crear una nueva solicitud de depósito o contacte con soporte para más información.</p>\n {{/minted}}",
-    "el":"{{#minted}}\n    <p>Η κατάθεσή σου έχει εγκριθεί και το κεφάλαιό σου είναι έτοιμο.</p>\n{{/minted}}\n{{^minted}}\n    <p>Το αίτημά σου απορρίθφηκε. Κάνε ένα νέο αίτημα κατάθεσης ή επικοινώνησε μαζί μας για περισσότερες πληροφορίες.</p>\n{{/minted}}\n"
+  "depositTemplate": {
+    "en": "{{#minted}}\n<p>Welcome to {{coop}}, we are very pleased you have joined us. Your deposit has been approved and funds are ready.</p>\n{{#hasProjectWhichCanReceiveInvestment}}\n<p>Why wait?</p>\n<p>{{link}} at our amazing projects, businesses and ideas. They need your support! \nStart investing ethically, socially and safely today.</p>\n{{/hasProjectWhichCanReceiveInvestment}}\n<p>From the {{coop}} team.</p>\n{{/minted}}\n{{^minted}}\n<p>Your deposit request has been rejected. Try to create new deposit request or contact support for more information.</p>\n{{/minted}}",
+    "el": "{{#minted}}\n<p>Καλωσόρισες στην {{coop}}. Χαιρόμαστε πολύ που ολοκληρώθηκε η εγγραφή σου. Η κατάθεσή σου έχει εγκριθεί και τα χρήματά σου είναι στο εικονικό σου πορτοφόλι.</p>\n{{#hasProjectWhichCanReceiveInvestment}}\n<p>Μην περιμένεις άλλο!</p>\n<p>{{link}} στα έργα και τις πρωτοποριακές ιδέες που φιλοξενούμε. Χρειάζονται την βοήθειά σου! \nΞεκίνησε σήμερα να επενδύεις υπεύθυνα και με ασφάλεια.</p>\n{{/hasProjectWhichCanReceiveInvestment}}\n<p>Απο την ομάδα της {{coop}}.</p>\n{{/minted}}\n{{^minted}}\n<p>Your deposit request has been rejected. Try to create new deposit request or contact support for more information.</p>\n{{/minted}}"
   },
   "failedDeliveryMessageTemplate":{
     "en":"<p>Mail delivery to the following address(es) failed: {{failedRecipients}}.</p>",
