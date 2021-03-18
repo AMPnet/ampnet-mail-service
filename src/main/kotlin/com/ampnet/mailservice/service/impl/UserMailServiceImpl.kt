@@ -7,6 +7,7 @@ import com.ampnet.mailservice.amqp.userservice.MailResetPasswordMessage
 import com.ampnet.mailservice.amqp.walletservice.WalletTypeAmqp
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.exception.ResourceNotFoundException
+import com.ampnet.mailservice.grpc.blockchainservice.BlockchainService
 import com.ampnet.mailservice.grpc.projectservice.ProjectService
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.grpc.walletservice.WalletService
@@ -48,7 +49,8 @@ class UserMailServiceImpl(
     private val userService: UserService,
     private val projectService: ProjectService,
     private val walletService: WalletService,
-    private val fileService: FileService
+    private val fileService: FileService,
+    private val blockchainService: BlockchainService
 ) : UserMailService {
 
     companion object : KLogging()
@@ -120,7 +122,10 @@ class UserMailServiceImpl(
 
     override fun sendDepositInfoMail(user: UUID, minted: Boolean) {
         val userResponse = getUser(user)
-        depositMail.setTemplateData(minted).setLanguage(userResponse.language).sendTo(userResponse.email)
+        val hasProjectWhichCanReceiveInvestment = if (minted.not()) false
+        else hasProjectWhichCanReceiveInvestment(userResponse.coop)
+        depositMail.setTemplateData(userResponse.coop, minted, hasProjectWhichCanReceiveInvestment)
+            .setLanguage(userResponse.language).sendTo(userResponse.email)
     }
 
     override fun sendWithdrawRequestMail(user: UUID, amount: Long) {
@@ -197,4 +202,19 @@ class UserMailServiceImpl(
     private fun getUser(userUuid: String): UserResponse =
         userService.getUsers(listOf(userUuid)).firstOrNull()
             ?: throw ResourceNotFoundException("Missing user: $userUuid")
+
+    private fun hasProjectWhichCanReceiveInvestment(coop: String): Boolean {
+        val projects = projectService.getActiveProjects(coop)
+            .associateBy { UUID.fromString(it.uuid) }
+        val wallets = walletService.getWalletsByOwner(projects.keys.toList())
+        wallets.forEach { wallet ->
+            val projectBalance = blockchainService.getBalance(wallet.hash)
+            val expectedFunding = projects[UUID.fromString(wallet.owner)]?.expectedFunding
+            if (projectBalance.isLessThan(expectedFunding)) return true
+        }
+        return false
+    }
 }
+
+fun Long?.isLessThan(other: Long?) =
+    this != null && other != null && this < other

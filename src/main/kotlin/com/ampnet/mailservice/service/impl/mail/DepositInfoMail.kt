@@ -15,7 +15,21 @@ class DepositInfoMail(
     override val templateName = "depositTemplate"
     override val titleKey = "depositInfoTitle"
 
-    fun setTemplateData(minted: Boolean) = apply { templateData = DepositInfo(minted) }
+    fun setTemplateData(
+        coop: String,
+        minted: Boolean,
+        hasProjectWhichCanReceiveInvestment: Boolean
+    ) = apply {
+        templateData = DepositInfo(
+            coop, minted, hasProjectWhichCanReceiveInvestment,
+            linkResolver.getProjectOffersLink(coop)
+        )
+    }
 }
 
-data class DepositInfo(val minted: Boolean)
+data class DepositInfo(
+    val coop: String,
+    val minted: Boolean,
+    val hasProjectWhichCanReceiveInvestment: Boolean,
+    val link: String
+)

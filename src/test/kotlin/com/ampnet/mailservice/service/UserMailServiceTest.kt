@@ -23,7 +23,7 @@ class UserMailServiceTest : MailServiceTestBase() {
     private val service: UserMailService by lazy {
         UserMailServiceImpl(
             mailSender, applicationProperties, linkResolverService, translationService,
-            userService, projectService, walletService, fileService
+            userService, projectService, walletService, fileService, blockchainService
         )
     }
 
@@ -159,6 +159,20 @@ class UserMailServiceTest : MailServiceTestBase() {
             Mockito.`when`(userService.getUsers(listOf(testContext.user.uuid)))
                 .thenReturn(listOf(testContext.user))
         }
+        suppose("Project service returns active project") {
+            testContext.project = generateProjectResponse("some user")
+            Mockito.`when`(projectService.getActiveProjects(coop))
+                .thenReturn(listOf(testContext.project))
+        }
+        suppose("Wallet service will returns project wallet") {
+            testContext.wallet = generateWalletResponse(testContext.project.uuid)
+            Mockito.`when`(walletService.getWalletsByOwner(listOf(UUID.fromString(testContext.wallet.owner))))
+                .thenReturn(listOf(testContext.wallet))
+        }
+        suppose("Blockchain service will returns project wallet balance") {
+            Mockito.`when`(blockchainService.getBalance(testContext.wallet.hash))
+                .thenReturn(testContext.project.expectedFunding / 2)
+        }
         suppose("Service send Deposit info mail") {
             service.sendDepositInfoMail(UUID.fromString(testContext.user.uuid), true)
         }
@@ -173,6 +187,52 @@ class UserMailServiceTest : MailServiceTestBase() {
 
             val mailText = mail.mimeMessage.content.toString()
             assertThat(mailText).contains("approved")
+            assertThat(mailText).contains("Why wait?")
+            val projectOffersLink = applicationProperties.mail.baseUrl + "/" +
+                testContext.user.coop + "/" + applicationProperties.mail.overviewPath
+            assertThat(mailText).contains(projectOffersLink)
+        }
+    }
+
+    @Test
+    fun mustSetCorrectPositiveDepositInfoMailWithoutProjectWhichCanReceiveInvestment() {
+        suppose("User service will return user response") {
+            testContext.user = generateUserResponse(testContext.receiverMail)
+            Mockito.`when`(userService.getUsers(listOf(testContext.user.uuid)))
+                .thenReturn(listOf(testContext.user))
+        }
+        suppose("Project service returns active project") {
+            testContext.project = generateProjectResponse("some user")
+            Mockito.`when`(projectService.getActiveProjects(coop))
+                .thenReturn(listOf(testContext.project))
+        }
+        suppose("Wallet service will returns project wallet") {
+            testContext.wallet = generateWalletResponse(testContext.project.uuid)
+            Mockito.`when`(walletService.getWalletsByOwner(listOf(UUID.fromString(testContext.wallet.owner))))
+                .thenReturn(listOf(testContext.wallet))
+        }
+        suppose("Blockchain service will returns project wallet balance") {
+            Mockito.`when`(blockchainService.getBalance(testContext.wallet.hash))
+                .thenReturn(testContext.project.expectedFunding)
+        }
+        suppose("Service send Deposit info mail") {
+            service.sendDepositInfoMail(UUID.fromString(testContext.user.uuid), true)
+        }
+
+        verify("The mail is sent to right receiver and has correct data") {
+            val mailList = wiser.messages
+            assertThat(mailList).hasSize(1)
+            val mail = mailList.first()
+            assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
+            assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
+            assertThat(mail.mimeMessage.subject).isEqualTo(depositSubject)
+
+            val mailText = mail.mimeMessage.content.toString()
+            assertThat(mailText).contains("approved")
+            assertThat(mailText).doesNotContain("Why wait?")
+            val projectOffersLink = applicationProperties.mail.baseUrl + "/" +
+                testContext.user.coop + "/" + applicationProperties.mail.overviewPath
+            assertThat(mailText).doesNotContain(projectOffersLink)
         }
     }
 
@@ -196,6 +256,9 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(mail.mimeMessage.subject).isEqualTo(depositSubject)
 
             val mailText = mail.mimeMessage.content.toString()
+            val projectOffersLink = applicationProperties.mail.baseUrl + "/" +
+                testContext.user.coop + "/" + applicationProperties.mail.overviewPath
+            assertThat(mailText).doesNotContain(projectOffersLink)
             assertThat(mailText).contains("rejected")
         }
     }

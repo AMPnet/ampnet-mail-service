@@ -17,6 +17,7 @@ class LinkResolverServiceImpl(applicationProperties: ApplicationProperties) : Li
     private val manageOrganizationPath = applicationProperties.mail.manageOrganizationPath
     private val manageProjectPath = applicationProperties.mail.manageProjectPath
     private val manageWithdrawalsPath = applicationProperties.mail.manageWithdrawalsPath
+    private val overviewPath = applicationProperties.mail.overviewPath
 
     override fun getOrganizationInvitesLink(coop: String) =
         "$baseUrl/$coop/$manageOrganizationPath".removeDoubleSlashes()
@@ -55,6 +56,9 @@ class LinkResolverServiceImpl(applicationProperties: ApplicationProperties) : Li
 
     override fun getProjectFullyFundedLink(coop: String, organizationUUid: String, projectUuid: String) =
         "$baseUrl/$coop/$manageOrganizationPath/$organizationUUid/$manageProjectPath/$projectUuid".removeDoubleSlashes()
+
+    override fun getProjectOffersLink(coop: String): String =
+        "$baseUrl/$coop/$overviewPath".removeDoubleSlashes()
 
     private fun String.removeDoubleSlashes() = this.replace("(?<!(http:)|(https:))//+".toRegex(), "/")
 }

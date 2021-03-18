@@ -3,6 +3,7 @@ package com.ampnet.mailservice.grpc.projectservice
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.exception.GrpcException
 import com.ampnet.mailservice.exception.ResourceNotFoundException
+import com.ampnet.projectservice.proto.CoopRequest
 import com.ampnet.projectservice.proto.GetByUuid
 import com.ampnet.projectservice.proto.GetByUuids
 import com.ampnet.projectservice.proto.OrganizationResponse
@@ -80,9 +81,22 @@ class ProjectServiceImpl(
                 .build()
             val response = serviceWithTimeout().getProjects(request).projectsList
             logger.debug { "Fetched projects: ${response.map { it.uuid }}" }
-            return response.map { it }
+            return response
         } catch (ex: StatusRuntimeException) {
             throw GrpcException("Failed to fetch projects. ${ex.localizedMessage}", ex)
+        }
+    }
+
+    override fun getActiveProjects(coop: String): List<ProjectResponse> {
+        logger.debug { "Fetching active projects by coop: $coop" }
+        try {
+            val request = CoopRequest.newBuilder()
+                .setCoop(coop).build()
+            val response = serviceWithTimeout().getActiveProjects(request).projectsList
+            logger.debug { "Fetched active projects: ${response.map { it.uuid }}" }
+            return response
+        } catch (ex: StatusRuntimeException) {
+            throw GrpcException("Failed to fetch active projects. ${ex.localizedMessage}", ex)
         }
     }
 

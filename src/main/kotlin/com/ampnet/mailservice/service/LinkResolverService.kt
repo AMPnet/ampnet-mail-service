@@ -19,4 +19,5 @@ interface LinkResolverService {
         organizationUUid: String,
         projectUuid: String
     ): String
+    fun getProjectOffersLink(coop: String): String
 }
