@@ -63,7 +63,7 @@ abstract class AbstractMail(
             logger.info { "Successfully sent email to: ${mail.allRecipients.joinToString()}" }
             true
         } catch (ex: MailException) {
-            logger.warn { "Cannot send email to: ${mail.allRecipients.joinToString()}" }
+            logger.warn(ex) { "Cannot send email to: ${mail.allRecipients.joinToString()}" }
             false
         }
     }
@@ -88,7 +88,7 @@ abstract class AbstractMail(
                 }
                 mail
             } catch (ex: MessagingException) {
-                logger.warn { "Cannot create mail from: $to" }
+                logger.warn(ex) { "Cannot create mail from: $to" }
                 null
             }
         }
