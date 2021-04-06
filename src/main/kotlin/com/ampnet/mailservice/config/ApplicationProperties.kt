@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration
 class ApplicationProperties {
     val mail: MailProperties = MailProperties()
     val grpc: GrpcProperties = GrpcProperties()
+    val cms: HeadlessCmsProperties = HeadlessCmsProperties()
 }
 
 class MailProperties {
@@ -30,4 +31,8 @@ class GrpcProperties {
     var projectServiceTimeout: Long = 10000
     var walletServiceTimeout: Long = 10000
     var blockchainServiceTimeout: Long = 10000
+}
+
+class HeadlessCmsProperties {
+    lateinit var baseUrl: String
 }

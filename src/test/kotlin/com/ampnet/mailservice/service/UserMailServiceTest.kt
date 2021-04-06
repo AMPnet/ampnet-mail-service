@@ -5,6 +5,7 @@ import com.ampnet.mailservice.amqp.projectservice.MailOrgInvitationMessage
 import com.ampnet.mailservice.amqp.userservice.MailConfirmationMessage
 import com.ampnet.mailservice.amqp.userservice.MailResetPasswordMessage
 import com.ampnet.mailservice.amqp.walletservice.WalletTypeAmqp
+import com.ampnet.mailservice.enums.MailType
 import com.ampnet.mailservice.service.impl.UserMailServiceImpl
 import com.ampnet.mailservice.service.impl.mail.toMailFormat
 import com.ampnet.mailservice.service.pojo.TERMS_OF_SERVICE
@@ -22,7 +23,7 @@ class UserMailServiceTest : MailServiceTestBase() {
 
     private val service: UserMailService by lazy {
         UserMailServiceImpl(
-            mailSender, applicationProperties, linkResolverService, translationService,
+            mailSender, applicationProperties, linkResolverService, headlessCmsService,
             userService, projectService, walletService, fileService, blockchainService
         )
     }
@@ -30,6 +31,7 @@ class UserMailServiceTest : MailServiceTestBase() {
     @Test
     fun mustSetCorrectSendConfirmationMail() {
         suppose("Service sent the mail") {
+            mockHeadlessCmsServiceResponse(MailType.MAIL_CONFIRMATION_MAIL)
             val request = MailConfirmationMessage(testContext.receiverMail, testContext.token, testContext.coop, "")
             service.sendConfirmationMail(request)
         }
@@ -40,7 +42,6 @@ class UserMailServiceTest : MailServiceTestBase() {
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(mail.mimeMessage.subject).isEqualTo(confirmationMailSubject)
 
             val confirmationLink = applicationProperties.mail.baseUrl + "/" + testContext.coop + "/" +
                 "${applicationProperties.mail.confirmationPath}?token=${testContext.token}"
@@ -51,6 +52,7 @@ class UserMailServiceTest : MailServiceTestBase() {
     @Test
     fun mustSetCorrectSendResetPasswordMail() {
         suppose("Service sent reset password mail") {
+            mockHeadlessCmsServiceResponse(MailType.RESET_PASSWORD_MAIL)
             val request = MailResetPasswordMessage(testContext.receiverMail, testContext.token, testContext.coop, "")
             service.sendResetPasswordMail(request)
         }
@@ -61,34 +63,10 @@ class UserMailServiceTest : MailServiceTestBase() {
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(mail.mimeMessage.subject).isEqualTo(resetPasswordSubject)
 
             val resetPasswordLink = applicationProperties.mail.baseUrl + "/" + testContext.coop + "/" +
                 "${applicationProperties.mail.resetPasswordPath}?token=${testContext.token}"
             assertThat(mail.mimeMessage.content.toString()).contains(resetPasswordLink)
-        }
-    }
-
-    @Test
-    fun mustSetCorrectSendResetPasswordMailOnGreek() {
-        suppose("Service sent reset password mail") {
-            val request = MailResetPasswordMessage(testContext.receiverMail, testContext.token, testContext.coop, "el")
-            service.sendResetPasswordMail(request)
-        }
-
-        verify("The mail is on Greek and sent to right receiver with reset password link") {
-            val mailList = wiser.messages
-            assertThat(mailList).hasSize(1)
-            val mail = mailList.first()
-            assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
-            assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(mail.mimeMessage.subject).isEqualTo("Επαναφορά κωδικού πρόσβασης")
-
-            val content = mail.mimeMessage.content.toString()
-            val resetPasswordLink = applicationProperties.mail.baseUrl + "/" + testContext.coop + "/" +
-                "${applicationProperties.mail.resetPasswordPath}?token=${testContext.token}"
-            assertThat(content).contains(resetPasswordLink)
-            assertThat(content).contains("Εάν δεν ζήτησες αλλαγή κωδικού")
         }
     }
 
@@ -100,6 +78,7 @@ class UserMailServiceTest : MailServiceTestBase() {
                 .thenReturn(listOf(testContext.user))
         }
         suppose("Service sends organizationInvitation e-mails") {
+            mockHeadlessCmsServiceResponse(MailType.INVITATION_MAIL)
             val request = MailOrgInvitationMessage(
                 testContext.receiverEmails,
                 testContext.organizationName,
@@ -116,7 +95,6 @@ class UserMailServiceTest : MailServiceTestBase() {
             val secondMail = mailList.last()
             assertThat(firstMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(firstMail.envelopeReceiver).isEqualTo(testContext.receiverEmails.first())
-            assertThat(firstMail.mimeMessage.subject).isEqualTo(invitationMailSubject)
             assertThat(secondMail.envelopeReceiver).isEqualTo(testContext.receiverEmails.last())
 
             val mailText = firstMail.mimeMessage.content.toString()
@@ -136,6 +114,7 @@ class UserMailServiceTest : MailServiceTestBase() {
                 .thenReturn(listOf(testContext.user))
         }
         suppose("Service send deposit request mail") {
+            mockHeadlessCmsServiceResponse(MailType.DEPOSIT_REQUEST_MAIL)
             service.sendDepositRequestMail(UUID.fromString(testContext.user.uuid), testContext.amount)
         }
 
@@ -145,7 +124,6 @@ class UserMailServiceTest : MailServiceTestBase() {
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(mail.mimeMessage.subject).isEqualTo(depositSubject)
 
             val mailText = mail.mimeMessage.content.toString()
             assertThat(mailText).contains(testContext.amount.toMailFormat())
@@ -164,16 +142,17 @@ class UserMailServiceTest : MailServiceTestBase() {
             Mockito.`when`(projectService.getActiveProjects(coop))
                 .thenReturn(listOf(testContext.project))
         }
-        suppose("Wallet service will returns project wallet") {
+        suppose("Wallet service returns project wallet") {
             testContext.wallet = generateWalletResponse(testContext.project.uuid)
             Mockito.`when`(walletService.getWalletsByOwner(listOf(UUID.fromString(testContext.wallet.owner))))
                 .thenReturn(listOf(testContext.wallet))
         }
-        suppose("Blockchain service will returns project wallet balance") {
+        suppose("Blockchain service returns project wallet balance") {
             Mockito.`when`(blockchainService.getBalance(testContext.wallet.hash))
                 .thenReturn(testContext.project.expectedFunding / 2)
         }
         suppose("Service send Deposit info mail") {
+            mockHeadlessCmsServiceResponse(MailType.DEPOSIT_INFO_MAIL)
             service.sendDepositInfoMail(UUID.fromString(testContext.user.uuid), true)
         }
 
@@ -183,11 +162,8 @@ class UserMailServiceTest : MailServiceTestBase() {
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(mail.mimeMessage.subject).isEqualTo(depositSubject)
 
             val mailText = mail.mimeMessage.content.toString()
-            assertThat(mailText).contains("approved")
-            assertThat(mailText).contains("Why wait?")
             val projectOffersLink = applicationProperties.mail.baseUrl + "/" +
                 testContext.user.coop + "/" + applicationProperties.mail.overviewPath
             assertThat(mailText).contains(projectOffersLink)
@@ -216,6 +192,7 @@ class UserMailServiceTest : MailServiceTestBase() {
                 .thenReturn(testContext.project.expectedFunding)
         }
         suppose("Service send Deposit info mail") {
+            mockHeadlessCmsServiceResponse(MailType.DEPOSIT_INFO_NO_PROJECT_TO_INVEST_MAIL)
             service.sendDepositInfoMail(UUID.fromString(testContext.user.uuid), true)
         }
 
@@ -225,11 +202,8 @@ class UserMailServiceTest : MailServiceTestBase() {
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(mail.mimeMessage.subject).isEqualTo(depositSubject)
 
             val mailText = mail.mimeMessage.content.toString()
-            assertThat(mailText).contains("approved")
-            assertThat(mailText).doesNotContain("Why wait?")
             val projectOffersLink = applicationProperties.mail.baseUrl + "/" +
                 testContext.user.coop + "/" + applicationProperties.mail.overviewPath
             assertThat(mailText).doesNotContain(projectOffersLink)
@@ -244,6 +218,7 @@ class UserMailServiceTest : MailServiceTestBase() {
                 .thenReturn(listOf(testContext.user))
         }
         suppose("Service send Deposit info mail") {
+            mockHeadlessCmsServiceResponse(MailType.DEPOSIT_FAILED_INFO_MAIL)
             service.sendDepositInfoMail(UUID.fromString(testContext.user.uuid), false)
         }
 
@@ -253,13 +228,11 @@ class UserMailServiceTest : MailServiceTestBase() {
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(mail.mimeMessage.subject).isEqualTo(depositSubject)
 
             val mailText = mail.mimeMessage.content.toString()
             val projectOffersLink = applicationProperties.mail.baseUrl + "/" +
                 testContext.user.coop + "/" + applicationProperties.mail.overviewPath
             assertThat(mailText).doesNotContain(projectOffersLink)
-            assertThat(mailText).contains("rejected")
         }
     }
 
@@ -280,6 +253,7 @@ class UserMailServiceTest : MailServiceTestBase() {
                 .thenReturn(listOf(testContext.user))
         }
         suppose("Service send withdraw request mail to user and token issuers") {
+            mockHeadlessCmsServiceResponse(MailType.WITHDRAW_REQUEST_MAIL)
             service.sendWithdrawRequestMail(UUID.fromString(testContext.user.uuid), testContext.amount)
         }
 
@@ -290,7 +264,6 @@ class UserMailServiceTest : MailServiceTestBase() {
 
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(userMail.mimeMessage.subject).isEqualTo(withdrawSubject)
         }
     }
 
@@ -302,6 +275,7 @@ class UserMailServiceTest : MailServiceTestBase() {
                 .thenReturn(listOf(testContext.user))
         }
         suppose("Service send Deposit info mail") {
+            mockHeadlessCmsServiceResponse(MailType.WITHDRAW_INFO_MAIL)
             service.sendWithdrawInfoMail(UUID.fromString(testContext.user.uuid), true)
         }
 
@@ -311,10 +285,6 @@ class UserMailServiceTest : MailServiceTestBase() {
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(mail.mimeMessage.subject).isEqualTo(withdrawSubject)
-
-            val mailText = mail.mimeMessage.content.toString()
-            assertThat(mailText).contains("approved")
         }
     }
 
@@ -326,6 +296,7 @@ class UserMailServiceTest : MailServiceTestBase() {
                 .thenReturn(listOf(testContext.user))
         }
         suppose("Service send Deposit info mail") {
+            mockHeadlessCmsServiceResponse(MailType.WITHDRAW_FAILED_INFO_MAIL)
             service.sendWithdrawInfoMail(UUID.fromString(testContext.user.uuid), false)
         }
 
@@ -335,10 +306,6 @@ class UserMailServiceTest : MailServiceTestBase() {
             val mail = mailList.first()
             assertThat(mail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(mail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(mail.mimeMessage.subject).isEqualTo(withdrawSubject)
-
-            val mailText = mail.mimeMessage.content.toString()
-            assertThat(mailText).contains("rejected")
         }
     }
 
@@ -348,6 +315,7 @@ class UserMailServiceTest : MailServiceTestBase() {
             testContext.user = generateUserResponse(testContext.receiverMail)
             Mockito.`when`(userService.getUsers(listOf(testContext.user.uuid.toString())))
                 .thenReturn(listOf(testContext.user))
+            mockHeadlessCmsServiceResponse(MailType.ACTIVATED_USER_WALLET_MAIL)
             service.sendWalletActivatedMail(UUID.fromString(testContext.user.uuid), WalletTypeAmqp.USER, activationData)
         }
 
@@ -356,7 +324,6 @@ class UserMailServiceTest : MailServiceTestBase() {
             val userMail = mailList.first()
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(userMail.mimeMessage.subject).isEqualTo(walletActivatedSubject)
             val confirmationUserLink = applicationProperties.mail.baseUrl + "/" +
                 testContext.user.coop + "/" + applicationProperties.mail.walletActivatedPath
             val mailText = userMail.mimeMessage.content.toString()
@@ -379,6 +346,7 @@ class UserMailServiceTest : MailServiceTestBase() {
                 .thenReturn(listOf(testContext.user))
         }
         suppose("Service sent mail for project wallet activated") {
+            mockHeadlessCmsServiceResponse(MailType.ACTIVATED_PROJECT_WALLET_MAIL)
             service.sendWalletActivatedMail(
                 UUID.fromString(testContext.walletOwner), WalletTypeAmqp.PROJECT, activationData
             )
@@ -389,7 +357,6 @@ class UserMailServiceTest : MailServiceTestBase() {
             val userMail = mailList.first()
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(userMail.mimeMessage.subject).isEqualTo(walletActivatedSubject)
             val confirmationUserLink = applicationProperties.mail.baseUrl + "/" + testContext.user.coop + "/" +
                 applicationProperties.mail.manageOrganizationPath + "/" + testContext.project.organizationUuid +
                 "/" + applicationProperties.mail.manageProjectPath + "/" + testContext.project.uuid
@@ -413,6 +380,7 @@ class UserMailServiceTest : MailServiceTestBase() {
                 .thenReturn(listOf(testContext.user))
         }
         suppose("Service sent mail for organization wallet activated") {
+            mockHeadlessCmsServiceResponse(MailType.ACTIVATED_ORGANIZATION_WALLET_MAIL)
             service.sendWalletActivatedMail(
                 UUID.fromString(testContext.walletOwner), WalletTypeAmqp.ORGANIZATION, activationData
             )
@@ -423,7 +391,6 @@ class UserMailServiceTest : MailServiceTestBase() {
             val userMail = mailList.first()
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(userMail.mimeMessage.subject).isEqualTo(walletActivatedSubject)
             val confirmationUserLink = applicationProperties.mail.baseUrl + "/" + testContext.user.coop + "/" +
                 applicationProperties.mail.manageOrganizationPath + "/" + testContext.organization.uuid
             val mailText = userMail.mimeMessage.content.toString()
@@ -440,6 +407,7 @@ class UserMailServiceTest : MailServiceTestBase() {
                 .thenReturn(listOf(testContext.user))
         }
         suppose("Service sends organizationInvitation to incorrect and correct email") {
+            mockHeadlessCmsServiceResponse(MailType.INVITATION_MAIL)
             val correctEmail = "test@email.com"
             val incorrectEmail = "fff5555"
             val request = MailOrgInvitationMessage(
@@ -475,6 +443,7 @@ class UserMailServiceTest : MailServiceTestBase() {
                 .thenReturn(listOf(testContext.user))
         }
         suppose("Service sent mail for project fully funded") {
+            mockHeadlessCmsServiceResponse(MailType.PROJECT_FULLY_FUNDED_MAIL)
             service.sendProjectFullyFundedMail(testContext.walletHash)
         }
 
@@ -483,7 +452,6 @@ class UserMailServiceTest : MailServiceTestBase() {
             val userMail = mailList.first()
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(userMail.mimeMessage.subject).isEqualTo(projectFullyFundedSubject)
             val projectFullyFundedLink = applicationProperties.mail.baseUrl + "/" + testContext.user.coop + "/" +
                 applicationProperties.mail.manageOrganizationPath + "/" + testContext.project.organizationUuid + "/" +
                 applicationProperties.mail.manageProjectPath + "/" + testContext.project.uuid
@@ -522,6 +490,7 @@ class UserMailServiceTest : MailServiceTestBase() {
             Mockito.`when`(fileService.getTermsOfService(testContext.tosUrl)).thenReturn(termsOfService)
         }
         suppose("Service sent mail for successful funding") {
+            mockHeadlessCmsServiceResponse(MailType.SUCCESSFULLY_INVESTED_MAIL, coop)
             val message = SuccessfullyInvestedMessage(
                 testContext.walletFrom.hash, testContext.walletTo.hash, testContext.amount.toString()
             )
@@ -533,7 +502,6 @@ class UserMailServiceTest : MailServiceTestBase() {
             val userMail = mailList.first()
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(userMail.mimeMessage.subject).isEqualTo(investmentSubject)
             val mimeMessageParser = MimeMessageParser(userMail.mimeMessage).parse()
             assertThat(mimeMessageParser.hasAttachments()).isTrue
             val mailText = mimeMessageParser.htmlContent
@@ -542,12 +510,6 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(mailText).contains(testContext.projectWithData.project.name)
             assertThat(mailText).contains(testContext.projectWithData.project.description)
             assertThat(mailText).contains(testContext.userWithInfo.coop.name)
-            assertThat(mailText).contains(
-                "When the target is reached and the final contracts completed " +
-                    "your investment will be finalized under the conditions contained in the attached document. " +
-                    "This is a copy of the project listing that was on the platform at the time you decided " +
-                    "to invest in the project."
-            )
             assertThat(mailText).contains(testContext.amount.toMailFormat())
         }
     }
@@ -577,6 +539,7 @@ class UserMailServiceTest : MailServiceTestBase() {
                 .thenReturn(testContext.userWithInfo)
         }
         suppose("Service sent mail for successful funding") {
+            mockHeadlessCmsServiceResponse(MailType.SUCCESSFULLY_INVESTED_WITHOUT_TOS_MAIL, coop)
             val message = SuccessfullyInvestedMessage(
                 testContext.walletFrom.hash, testContext.walletTo.hash, testContext.amount.toString()
             )
@@ -588,7 +551,6 @@ class UserMailServiceTest : MailServiceTestBase() {
             val userMail = mailList.first()
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
-            assertThat(userMail.mimeMessage.subject).isEqualTo(investmentSubject)
             val mimeMessageParser = MimeMessageParser(userMail.mimeMessage).parse()
             assertThat(mimeMessageParser.hasAttachments()).isFalse
             val mailText = mimeMessageParser.htmlContent

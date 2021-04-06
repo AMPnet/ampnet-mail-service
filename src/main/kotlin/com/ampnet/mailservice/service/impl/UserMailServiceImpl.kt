@@ -6,14 +6,15 @@ import com.ampnet.mailservice.amqp.userservice.MailConfirmationMessage
 import com.ampnet.mailservice.amqp.userservice.MailResetPasswordMessage
 import com.ampnet.mailservice.amqp.walletservice.WalletTypeAmqp
 import com.ampnet.mailservice.config.ApplicationProperties
+import com.ampnet.mailservice.enums.MailType
 import com.ampnet.mailservice.exception.ResourceNotFoundException
 import com.ampnet.mailservice.grpc.blockchainservice.BlockchainService
 import com.ampnet.mailservice.grpc.projectservice.ProjectService
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.grpc.walletservice.WalletService
 import com.ampnet.mailservice.service.FileService
+import com.ampnet.mailservice.service.HeadlessCmsService
 import com.ampnet.mailservice.service.LinkResolverService
-import com.ampnet.mailservice.service.TranslationService
 import com.ampnet.mailservice.service.UserMailService
 import com.ampnet.mailservice.service.impl.mail.AbstractMail
 import com.ampnet.mailservice.service.impl.mail.ActivatedOrganizationWalletMail
@@ -45,7 +46,7 @@ class UserMailServiceImpl(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
     linkResolverService: LinkResolverService,
-    translationService: TranslationService,
+    headlessCmsService: HeadlessCmsService,
     private val userService: UserService,
     private val projectService: ProjectService,
     private val walletService: WalletService,
@@ -56,45 +57,78 @@ class UserMailServiceImpl(
     companion object : KLogging()
 
     private val confirmationMail: ConfirmationMail by lazy {
-        ConfirmationMail(linkResolverService, mailSender, applicationProperties, translationService)
+        ConfirmationMail(linkResolverService, mailSender, applicationProperties, headlessCmsService)
     }
     private val resetPasswordMail: ResetPasswordMail by lazy {
-        ResetPasswordMail(linkResolverService, mailSender, applicationProperties, translationService)
+        ResetPasswordMail(linkResolverService, mailSender, applicationProperties, headlessCmsService)
     }
     private val invitationMail: InvitationMail by lazy {
-        InvitationMail(linkResolverService, mailSender, applicationProperties, translationService)
+        InvitationMail(linkResolverService, mailSender, applicationProperties, headlessCmsService)
     }
     private val depositRequestMail: DepositRequestMail by lazy {
-        DepositRequestMail(linkResolverService, mailSender, applicationProperties, translationService)
+        DepositRequestMail(linkResolverService, mailSender, applicationProperties, headlessCmsService)
     }
     private val depositMail: DepositInfoMail by lazy {
-        DepositInfoMail(linkResolverService, mailSender, applicationProperties, translationService)
+        DepositInfoMail(
+            MailType.DEPOSIT_INFO_MAIL, linkResolverService, mailSender,
+            applicationProperties, headlessCmsService
+        )
+    }
+    private val depositInfoFailedMail: DepositInfoMail by lazy {
+        DepositInfoMail(
+            MailType.DEPOSIT_FAILED_INFO_MAIL, linkResolverService,
+            mailSender, applicationProperties, headlessCmsService
+        )
+    }
+    private val depositNoProjectInvestmentMail: DepositInfoMail by lazy {
+        DepositInfoMail(
+            MailType.DEPOSIT_INFO_NO_PROJECT_TO_INVEST_MAIL, linkResolverService,
+            mailSender, applicationProperties, headlessCmsService
+        )
     }
     private val withdrawRequestMail: WithdrawRequestMail by lazy {
-        WithdrawRequestMail(linkResolverService, mailSender, applicationProperties, translationService)
+        WithdrawRequestMail(linkResolverService, mailSender, applicationProperties, headlessCmsService)
     }
     private val withdrawInfoMail: WithdrawInfoMail by lazy {
-        WithdrawInfoMail(linkResolverService, mailSender, applicationProperties, translationService)
+        WithdrawInfoMail(
+            MailType.WITHDRAW_INFO_MAIL, linkResolverService, mailSender,
+            applicationProperties, headlessCmsService
+        )
+    }
+    private val withdrawFailedInfoMail: WithdrawInfoMail by lazy {
+        WithdrawInfoMail(
+            MailType.WITHDRAW_FAILED_INFO_MAIL, linkResolverService,
+            mailSender, applicationProperties, headlessCmsService
+        )
     }
     private val activatedUserWalletMail: ActivatedUserWalletMail by lazy {
-        ActivatedUserWalletMail(linkResolverService, mailSender, applicationProperties, translationService)
+        ActivatedUserWalletMail(linkResolverService, mailSender, applicationProperties, headlessCmsService)
     }
     private val activatedOrganizationWalletMail: ActivatedOrganizationWalletMail by lazy {
         ActivatedOrganizationWalletMail(
-            linkResolverService, mailSender, applicationProperties, translationService
+            linkResolverService, mailSender, applicationProperties, headlessCmsService
         )
     }
     private val activatedProjectWalletMail: ActivatedProjectWalletMail by lazy {
-        ActivatedProjectWalletMail(linkResolverService, mailSender, applicationProperties, translationService)
+        ActivatedProjectWalletMail(linkResolverService, mailSender, applicationProperties, headlessCmsService)
     }
     private val failedDeliveryMail: FailedDeliveryMail by lazy {
-        FailedDeliveryMail(linkResolverService, mailSender, applicationProperties, translationService)
+        FailedDeliveryMail(linkResolverService, mailSender, applicationProperties, headlessCmsService)
     }
     private val projectFullyFundedMail: ProjectFullyFundedMail by lazy {
-        ProjectFullyFundedMail(linkResolverService, mailSender, applicationProperties, translationService)
+        ProjectFullyFundedMail(linkResolverService, mailSender, applicationProperties, headlessCmsService)
     }
     private val successfullyInvestedMail: SuccessfullyInvestedMail by lazy {
-        SuccessfullyInvestedMail(linkResolverService, mailSender, applicationProperties, translationService)
+        SuccessfullyInvestedMail(
+            MailType.SUCCESSFULLY_INVESTED_MAIL, linkResolverService,
+            mailSender, applicationProperties, headlessCmsService
+        )
+    }
+    private val successfullyInvestedWithoutTosMail: SuccessfullyInvestedMail by lazy {
+        SuccessfullyInvestedMail(
+            MailType.SUCCESSFULLY_INVESTED_WITHOUT_TOS_MAIL, linkResolverService,
+            mailSender, applicationProperties, headlessCmsService
+        )
     }
 
     override fun sendConfirmationMail(request: MailConfirmationMessage) =
@@ -110,32 +144,40 @@ class UserMailServiceImpl(
         invitationMail.setTemplateData(request.organizationName, request.coop).setLanguage(senderResponse.language)
             .sendTo(request.emails.toList()) { failedMails ->
                 val filedMailRecipients = failedMails.map { it.allRecipients.toString() }
-                failedDeliveryMail.setTemplateData(filedMailRecipients).setLanguage(senderResponse.language)
-                    .sendTo(senderResponse.email)
+                failedDeliveryMail.setTemplateData(filedMailRecipients).setCoop(request.coop)
+                    .setLanguage(senderResponse.language).sendTo(senderResponse.email)
             }
     }
 
     override fun sendDepositRequestMail(user: UUID, amount: Long) {
         val userResponse = getUser(user)
-        depositRequestMail.setTemplateData(amount).setLanguage(userResponse.language).sendTo(userResponse.email)
+        depositRequestMail.setTemplateData(amount).setCoop(userResponse.coop)
+            .setLanguage(userResponse.language).sendTo(userResponse.email)
     }
 
     override fun sendDepositInfoMail(user: UUID, minted: Boolean) {
         val userResponse = getUser(user)
         val hasProjectWhichCanReceiveInvestment = if (minted.not()) false
         else hasProjectWhichCanReceiveInvestment(userResponse.coop)
-        depositMail.setTemplateData(userResponse.coop, minted, hasProjectWhichCanReceiveInvestment)
+        when {
+            (minted && hasProjectWhichCanReceiveInvestment) -> depositMail
+            (minted && hasProjectWhichCanReceiveInvestment.not()) -> depositNoProjectInvestmentMail
+            else -> depositInfoFailedMail
+        }.setTemplateData(userResponse.coop)
             .setLanguage(userResponse.language).sendTo(userResponse.email)
     }
 
     override fun sendWithdrawRequestMail(user: UUID, amount: Long) {
         val userResponse = getUser(user)
-        withdrawRequestMail.setTemplateData(amount).setLanguage(userResponse.language).sendTo(userResponse.email)
+        withdrawRequestMail.setTemplateData(amount).setCoop(userResponse.coop)
+            .setLanguage(userResponse.language).sendTo(userResponse.email)
     }
 
     override fun sendWithdrawInfoMail(user: UUID, burned: Boolean) {
         val userResponse = getUser(user)
-        withdrawInfoMail.setTemplateData(burned).setLanguage(userResponse.language).sendTo(userResponse.email)
+        val mail = if (burned) withdrawInfoMail.setCoop(userResponse.coop)
+        else withdrawFailedInfoMail
+        mail.setCoop(userResponse.coop).setLanguage(userResponse.language).sendTo(userResponse.email)
     }
 
     override fun sendWalletActivatedMail(walletOwner: UUID, walletType: WalletTypeAmqp, activationData: String) {
@@ -172,7 +214,11 @@ class UserMailServiceImpl(
     }
 
     override fun sendSuccessfullyInvested(request: SuccessfullyInvestedMessage) {
-        val wallets = walletService.getWalletsByHash(setOf(request.userWalletTxHash, request.projectWalletTxHash))
+        val wallets = walletService.getWalletsByHash(
+            setOf(
+                request.userWalletTxHash, request.projectWalletTxHash
+            )
+        )
         val user = userService.getUserWithInfo(getOwnerByHash(wallets, request.userWalletTxHash))
         val project = projectService.getProjectWithData(
             UUID.fromString(getOwnerByHash(wallets, request.projectWalletTxHash))
@@ -185,10 +231,11 @@ class UserMailServiceImpl(
             logger.debug("There is no attachment ${project.tosUrl}")
             null
         }
-        successfullyInvestedMail
-            .setTemplateData(
-                SuccessfullyInvestedTemplateData(project, request.amount.toLong(), user.coop.name, termsOfService)
-            )
+        val mail = if (termsOfService == null) successfullyInvestedWithoutTosMail
+        else successfullyInvestedMail
+        mail.setTemplateData(
+            SuccessfullyInvestedTemplateData(project, request.amount.toLong(), user.coop, termsOfService)
+        )
             .setLanguage(user.user.language)
             .sendTo(user.user.email)
     }

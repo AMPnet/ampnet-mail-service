@@ -1,26 +1,25 @@
 package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
+import com.ampnet.mailservice.enums.MailType
 import com.ampnet.mailservice.enums.WalletType
+import com.ampnet.mailservice.service.HeadlessCmsService
 import com.ampnet.mailservice.service.LinkResolverService
-import com.ampnet.mailservice.service.TranslationService
 import com.ampnet.projectservice.proto.OrganizationResponse
 import com.ampnet.projectservice.proto.ProjectResponse
 import org.springframework.mail.javamail.JavaMailSender
-
-const val WALLET_ACTIVATED_TITLE_KEY = "walletActivatedTitle"
 
 class ActivatedUserWalletMail(
     linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    translationService: TranslationService
-) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
+    headlessCmsService: HeadlessCmsService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, headlessCmsService) {
 
-    override val templateName = "userWalletActivatedTemplate"
-    override val titleKey = WALLET_ACTIVATED_TITLE_KEY
+    override val mailType = MailType.ACTIVATED_USER_WALLET_MAIL
 
     fun setTemplateData(activationData: String, coop: String) = apply {
+        this.coop = coop
         templateData = ActivatedUserWalletData(
             linkResolver.getWalletActivatedLink(WalletType.USER, coop), activationData
         )
@@ -33,13 +32,13 @@ class ActivatedOrganizationWalletMail(
     linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    translationService: TranslationService
-) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
+    headlessCmsService: HeadlessCmsService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, headlessCmsService) {
 
-    override val templateName = "organizationWalletActivatedTemplate"
-    override val titleKey = WALLET_ACTIVATED_TITLE_KEY
+    override val mailType = MailType.ACTIVATED_ORGANIZATION_WALLET_MAIL
 
     fun setTemplateData(organization: OrganizationResponse, coop: String) = apply {
+        this.coop = coop
         templateData = ActivatedOrganizationWalletData(
             linkResolver.getWalletActivatedLink(
                 WalletType.ORGANIZATION,
@@ -57,13 +56,13 @@ class ActivatedProjectWalletMail(
     linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    translationService: TranslationService
-) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
+    headlessCmsService: HeadlessCmsService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, headlessCmsService) {
 
-    override val templateName = "projectWalletActivatedTemplate"
-    override val titleKey = WALLET_ACTIVATED_TITLE_KEY
+    override val mailType = MailType.ACTIVATED_PROJECT_WALLET_MAIL
 
     fun setTemplateData(project: ProjectResponse, coop: String) = apply {
+        this.coop = coop
         templateData = ActivatedProjectWalletData(
             linkResolver.getWalletActivatedLink(
                 WalletType.PROJECT,

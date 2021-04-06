@@ -1,21 +1,22 @@
 package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
+import com.ampnet.mailservice.enums.MailType
+import com.ampnet.mailservice.service.HeadlessCmsService
 import com.ampnet.mailservice.service.LinkResolverService
-import com.ampnet.mailservice.service.TranslationService
 import org.springframework.mail.javamail.JavaMailSender
 
 class ConfirmationMail(
     linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    translationService: TranslationService
-) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
+    headlessCmsService: HeadlessCmsService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, headlessCmsService) {
 
-    override val templateName = "mailConfirmationTemplate"
-    override val titleKey = "confirmationTitle"
+    override val mailType = MailType.MAIL_CONFIRMATION_MAIL
 
     fun setTemplateData(token: String, coop: String) = apply {
+        this.coop = coop
         templateData = MailConfirmationData(linkResolver.getConfirmationLink(token, coop))
     }
 }

@@ -1,8 +1,9 @@
 package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
+import com.ampnet.mailservice.enums.MailType
+import com.ampnet.mailservice.service.HeadlessCmsService
 import com.ampnet.mailservice.service.LinkResolverService
-import com.ampnet.mailservice.service.TranslationService
 import com.ampnet.projectservice.proto.ProjectResponse
 import com.ampnet.userservice.proto.UserResponse
 import org.springframework.mail.javamail.JavaMailSender
@@ -11,13 +12,13 @@ class ProjectFullyFundedMail(
     linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    translationService: TranslationService
-) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
+    headlessCmsService: HeadlessCmsService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, headlessCmsService) {
 
-    override val templateName = "projectFullyFundedTemplate"
-    override val titleKey = "projectFullyFundedTitle"
+    override val mailType = MailType.PROJECT_FULLY_FUNDED_MAIL
 
     fun setTemplateData(user: UserResponse, project: ProjectResponse) = apply {
+        this.coop = user.coop
         templateData = ProjectFullyFundedData(user, project, linkResolver)
     }
 }
