@@ -35,13 +35,7 @@ abstract class AbstractMail(
     protected open var templateData: Any? = null
 
     fun setLanguage(language: String) = apply {
-        runCatching {
-            this.language = Lang.valueOf(language.toUpperCase())
-        }.onFailure {
-            logger.warn { "$language is not a valid language" }
-            this.language = Lang.EN
-        }
-
+        this.language = Lang.langOrDefault(language)
     }
 
     fun setCoop(coop: String) = apply { this.coop = coop }

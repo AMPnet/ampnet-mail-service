@@ -35,7 +35,7 @@ class HeadlessCmsServiceImpl(
             return restTemplate.getForObject<MailListResponse>(url).mails.firstOrNull()
                 ?: throw ResourceNotFoundException("Could not find translation for $mailType in $lang for coop:$coop")
         } catch (ex: RestClientException) {
-            throw InternalException("Could not reach headless cms service url: $url")
+            throw InternalException("Could not reach headless cms service url: $url", ex)
         }
     }
 }
