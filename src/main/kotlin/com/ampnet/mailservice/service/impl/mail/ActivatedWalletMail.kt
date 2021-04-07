@@ -3,7 +3,7 @@ package com.ampnet.mailservice.service.impl.mail
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.enums.MailType
 import com.ampnet.mailservice.enums.WalletType
-import com.ampnet.mailservice.service.HeadlessCmsService
+import com.ampnet.mailservice.service.CmsService
 import com.ampnet.mailservice.service.LinkResolverService
 import com.ampnet.projectservice.proto.OrganizationResponse
 import com.ampnet.projectservice.proto.ProjectResponse
@@ -13,8 +13,8 @@ class ActivatedUserWalletMail(
     linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    headlessCmsService: HeadlessCmsService
-) : AbstractMail(linkResolver, mailSender, applicationProperties, headlessCmsService) {
+    cmsService: CmsService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, cmsService) {
 
     override val mailType = MailType.ACTIVATED_USER_WALLET_MAIL
 
@@ -32,8 +32,8 @@ class ActivatedOrganizationWalletMail(
     linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    headlessCmsService: HeadlessCmsService
-) : AbstractMail(linkResolver, mailSender, applicationProperties, headlessCmsService) {
+    cmsService: CmsService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, cmsService) {
 
     override val mailType = MailType.ACTIVATED_ORGANIZATION_WALLET_MAIL
 
@@ -56,8 +56,8 @@ class ActivatedProjectWalletMail(
     linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    headlessCmsService: HeadlessCmsService
-) : AbstractMail(linkResolver, mailSender, applicationProperties, headlessCmsService) {
+    cmsService: CmsService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, cmsService) {
 
     override val mailType = MailType.ACTIVATED_PROJECT_WALLET_MAIL
 

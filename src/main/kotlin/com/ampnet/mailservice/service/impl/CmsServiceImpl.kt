@@ -5,7 +5,7 @@ import com.ampnet.mailservice.enums.Lang
 import com.ampnet.mailservice.enums.MailType
 import com.ampnet.mailservice.exception.InternalException
 import com.ampnet.mailservice.exception.ResourceNotFoundException
-import com.ampnet.mailservice.service.HeadlessCmsService
+import com.ampnet.mailservice.service.CmsService
 import com.ampnet.mailservice.service.pojo.MailListResponse
 import com.ampnet.mailservice.service.pojo.MailResponse
 import mu.KLogging
@@ -16,15 +16,14 @@ import org.springframework.web.client.getForObject
 import org.springframework.web.util.UriComponentsBuilder
 
 @Service
-class HeadlessCmsServiceImpl(
+class CmsServiceImpl(
     private val restTemplate: RestTemplate,
     private val applicationProperties: ApplicationProperties
-) : HeadlessCmsService {
+) : CmsService {
 
     companion object : KLogging()
 
     override fun getMail(coop: String, mailType: MailType, lang: Lang): MailResponse {
-        logger.debug { "Fetching users:" }
         val url = UriComponentsBuilder
             .fromUriString(applicationProperties.cms.baseUrl + "/mail/$coop")
             .queryParam("type", mailType)

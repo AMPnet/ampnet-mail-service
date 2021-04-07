@@ -2,7 +2,7 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.enums.MailType
-import com.ampnet.mailservice.service.HeadlessCmsService
+import com.ampnet.mailservice.service.CmsService
 import com.ampnet.mailservice.service.LinkResolverService
 import com.ampnet.projectservice.proto.ProjectResponse
 import com.ampnet.userservice.proto.UserResponse
@@ -12,8 +12,8 @@ class ProjectFullyFundedMail(
     linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    headlessCmsService: HeadlessCmsService
-) : AbstractMail(linkResolver, mailSender, applicationProperties, headlessCmsService) {
+    cmsService: CmsService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, cmsService) {
 
     override val mailType = MailType.PROJECT_FULLY_FUNDED_MAIL
 

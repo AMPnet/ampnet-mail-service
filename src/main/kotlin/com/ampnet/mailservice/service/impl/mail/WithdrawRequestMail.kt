@@ -2,7 +2,7 @@ package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.enums.MailType
-import com.ampnet.mailservice.service.HeadlessCmsService
+import com.ampnet.mailservice.service.CmsService
 import com.ampnet.mailservice.service.LinkResolverService
 import com.ampnet.userservice.proto.UserResponse
 import org.springframework.mail.javamail.JavaMailSender
@@ -11,8 +11,8 @@ class WithdrawRequestMail(
     linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    headlessCmsService: HeadlessCmsService
-) : AbstractMail(linkResolver, mailSender, applicationProperties, headlessCmsService) {
+    cmsService: CmsService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, cmsService) {
 
     override val mailType = MailType.WITHDRAW_REQUEST_MAIL
 
@@ -23,8 +23,8 @@ class WithdrawTokenIssuerMail(
     linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    headlessCmsService: HeadlessCmsService
-) : AbstractMail(linkResolver, mailSender, applicationProperties, headlessCmsService) {
+    cmsService: CmsService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, cmsService) {
 
     override val mailType = MailType.TOKEN_ISSUER_WITHDRAWAL_REQUEST_MAIL
 

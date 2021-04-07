@@ -6,7 +6,7 @@ import com.ampnet.mailservice.enums.WalletType
 import com.ampnet.mailservice.exception.ResourceNotFoundException
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.service.AdminMailService
-import com.ampnet.mailservice.service.HeadlessCmsService
+import com.ampnet.mailservice.service.CmsService
 import com.ampnet.mailservice.service.LinkResolverService
 import com.ampnet.mailservice.service.impl.mail.NewWalletMail
 import com.ampnet.mailservice.service.impl.mail.WithdrawTokenIssuerMail
@@ -20,31 +20,31 @@ class AdminMailServiceImpl(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
     linkResolverService: LinkResolverService,
-    headlessCmsService: HeadlessCmsService,
+    cmsService: CmsService,
     private val userService: UserService
 ) : AdminMailService {
 
     private val withdrawTokenIssuerMail: WithdrawTokenIssuerMail by lazy {
         WithdrawTokenIssuerMail(
-            linkResolverService, mailSender, applicationProperties, headlessCmsService
+            linkResolverService, mailSender, applicationProperties, cmsService
         )
     }
     private val newUserWalletMail: NewWalletMail by lazy {
         NewWalletMail(
             WalletType.USER, linkResolverService, mailSender, applicationProperties,
-            headlessCmsService
+            cmsService
         )
     }
     private val newOrganizationWalletMail: NewWalletMail by lazy {
         NewWalletMail(
             WalletType.ORGANIZATION, linkResolverService, mailSender, applicationProperties,
-            headlessCmsService
+            cmsService
         )
     }
     private val newProjectWalletMail: NewWalletMail by lazy {
         NewWalletMail(
             WalletType.PROJECT, linkResolverService, mailSender, applicationProperties,
-            headlessCmsService
+            cmsService
         )
     }
 

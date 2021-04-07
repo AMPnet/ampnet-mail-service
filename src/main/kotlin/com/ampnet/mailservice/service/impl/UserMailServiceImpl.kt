@@ -12,8 +12,8 @@ import com.ampnet.mailservice.grpc.blockchainservice.BlockchainService
 import com.ampnet.mailservice.grpc.projectservice.ProjectService
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.grpc.walletservice.WalletService
+import com.ampnet.mailservice.service.CmsService
 import com.ampnet.mailservice.service.FileService
-import com.ampnet.mailservice.service.HeadlessCmsService
 import com.ampnet.mailservice.service.LinkResolverService
 import com.ampnet.mailservice.service.UserMailService
 import com.ampnet.mailservice.service.impl.mail.AbstractMail
@@ -46,7 +46,7 @@ class UserMailServiceImpl(
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
     linkResolverService: LinkResolverService,
-    headlessCmsService: HeadlessCmsService,
+    cmsService: CmsService,
     private val userService: UserService,
     private val projectService: ProjectService,
     private val walletService: WalletService,
@@ -57,77 +57,77 @@ class UserMailServiceImpl(
     companion object : KLogging()
 
     private val confirmationMail: ConfirmationMail by lazy {
-        ConfirmationMail(linkResolverService, mailSender, applicationProperties, headlessCmsService)
+        ConfirmationMail(linkResolverService, mailSender, applicationProperties, cmsService)
     }
     private val resetPasswordMail: ResetPasswordMail by lazy {
-        ResetPasswordMail(linkResolverService, mailSender, applicationProperties, headlessCmsService)
+        ResetPasswordMail(linkResolverService, mailSender, applicationProperties, cmsService)
     }
     private val invitationMail: InvitationMail by lazy {
-        InvitationMail(linkResolverService, mailSender, applicationProperties, headlessCmsService)
+        InvitationMail(linkResolverService, mailSender, applicationProperties, cmsService)
     }
     private val depositRequestMail: DepositRequestMail by lazy {
-        DepositRequestMail(linkResolverService, mailSender, applicationProperties, headlessCmsService)
+        DepositRequestMail(linkResolverService, mailSender, applicationProperties, cmsService)
     }
     private val depositMail: DepositInfoMail by lazy {
         DepositInfoMail(
             MailType.DEPOSIT_INFO_MAIL, linkResolverService, mailSender,
-            applicationProperties, headlessCmsService
+            applicationProperties, cmsService
         )
     }
     private val depositInfoFailedMail: DepositInfoMail by lazy {
         DepositInfoMail(
             MailType.DEPOSIT_FAILED_INFO_MAIL, linkResolverService,
-            mailSender, applicationProperties, headlessCmsService
+            mailSender, applicationProperties, cmsService
         )
     }
     private val depositNoProjectInvestmentMail: DepositInfoMail by lazy {
         DepositInfoMail(
             MailType.DEPOSIT_INFO_NO_PROJECT_TO_INVEST_MAIL, linkResolverService,
-            mailSender, applicationProperties, headlessCmsService
+            mailSender, applicationProperties, cmsService
         )
     }
     private val withdrawRequestMail: WithdrawRequestMail by lazy {
-        WithdrawRequestMail(linkResolverService, mailSender, applicationProperties, headlessCmsService)
+        WithdrawRequestMail(linkResolverService, mailSender, applicationProperties, cmsService)
     }
     private val withdrawInfoMail: WithdrawInfoMail by lazy {
         WithdrawInfoMail(
             MailType.WITHDRAW_INFO_MAIL, linkResolverService, mailSender,
-            applicationProperties, headlessCmsService
+            applicationProperties, cmsService
         )
     }
     private val withdrawFailedInfoMail: WithdrawInfoMail by lazy {
         WithdrawInfoMail(
             MailType.WITHDRAW_FAILED_INFO_MAIL, linkResolverService,
-            mailSender, applicationProperties, headlessCmsService
+            mailSender, applicationProperties, cmsService
         )
     }
     private val activatedUserWalletMail: ActivatedUserWalletMail by lazy {
-        ActivatedUserWalletMail(linkResolverService, mailSender, applicationProperties, headlessCmsService)
+        ActivatedUserWalletMail(linkResolverService, mailSender, applicationProperties, cmsService)
     }
     private val activatedOrganizationWalletMail: ActivatedOrganizationWalletMail by lazy {
         ActivatedOrganizationWalletMail(
-            linkResolverService, mailSender, applicationProperties, headlessCmsService
+            linkResolverService, mailSender, applicationProperties, cmsService
         )
     }
     private val activatedProjectWalletMail: ActivatedProjectWalletMail by lazy {
-        ActivatedProjectWalletMail(linkResolverService, mailSender, applicationProperties, headlessCmsService)
+        ActivatedProjectWalletMail(linkResolverService, mailSender, applicationProperties, cmsService)
     }
     private val failedDeliveryMail: FailedDeliveryMail by lazy {
-        FailedDeliveryMail(linkResolverService, mailSender, applicationProperties, headlessCmsService)
+        FailedDeliveryMail(linkResolverService, mailSender, applicationProperties, cmsService)
     }
     private val projectFullyFundedMail: ProjectFullyFundedMail by lazy {
-        ProjectFullyFundedMail(linkResolverService, mailSender, applicationProperties, headlessCmsService)
+        ProjectFullyFundedMail(linkResolverService, mailSender, applicationProperties, cmsService)
     }
     private val successfullyInvestedMail: SuccessfullyInvestedMail by lazy {
         SuccessfullyInvestedMail(
             MailType.SUCCESSFULLY_INVESTED_MAIL, linkResolverService,
-            mailSender, applicationProperties, headlessCmsService
+            mailSender, applicationProperties, cmsService
         )
     }
     private val successfullyInvestedWithoutTosMail: SuccessfullyInvestedMail by lazy {
         SuccessfullyInvestedMail(
             MailType.SUCCESSFULLY_INVESTED_WITHOUT_TOS_MAIL, linkResolverService,
-            mailSender, applicationProperties, headlessCmsService
+            mailSender, applicationProperties, cmsService
         )
     }
 
@@ -214,11 +214,7 @@ class UserMailServiceImpl(
     }
 
     override fun sendSuccessfullyInvested(request: SuccessfullyInvestedMessage) {
-        val wallets = walletService.getWalletsByHash(
-            setOf(
-                request.userWalletTxHash, request.projectWalletTxHash
-            )
-        )
+        val wallets = walletService.getWalletsByHash(setOf(request.userWalletTxHash, request.projectWalletTxHash))
         val user = userService.getUserWithInfo(getOwnerByHash(wallets, request.userWalletTxHash))
         val project = projectService.getProjectWithData(
             UUID.fromString(getOwnerByHash(wallets, request.projectWalletTxHash))

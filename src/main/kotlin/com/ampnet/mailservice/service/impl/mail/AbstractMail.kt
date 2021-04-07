@@ -3,7 +3,7 @@ package com.ampnet.mailservice.service.impl.mail
 import com.ampnet.mailservice.config.ApplicationProperties
 import com.ampnet.mailservice.enums.Lang
 import com.ampnet.mailservice.enums.MailType
-import com.ampnet.mailservice.service.HeadlessCmsService
+import com.ampnet.mailservice.service.CmsService
 import com.ampnet.mailservice.service.LinkResolverService
 import com.ampnet.mailservice.service.pojo.Attachment
 import com.github.mustachejava.DefaultMustacheFactory
@@ -23,13 +23,13 @@ abstract class AbstractMail(
     protected val linkResolver: LinkResolverService,
     private val mailSender: JavaMailSender,
     private val applicationProperties: ApplicationProperties,
-    private val headlessCmsService: HeadlessCmsService
+    private val cmsService: CmsService
 ) {
 
     companion object : KLogging()
 
     protected abstract val mailType: MailType
-    protected lateinit var language: Lang
+    protected open var language: Lang = Lang.EN
     protected lateinit var coop: String
     protected open var attachment: Attachment? = null
     protected open var templateData: Any? = null
@@ -72,7 +72,7 @@ abstract class AbstractMail(
     }
 
     private fun createMailMessage(to: List<String>): List<MimeMessage> {
-        val mailTranslation = headlessCmsService.getMail(coop, mailType, language)
+        val mailTranslation = cmsService.getMail(coop, mailType, language)
         val template = DefaultMustacheFactory().compile(StringReader(mailTranslation.content), mailType.name)
         return to.mapNotNull {
             val mail = mailSender.createMimeMessage()

@@ -23,7 +23,7 @@ class UserMailServiceTest : MailServiceTestBase() {
 
     private val service: UserMailService by lazy {
         UserMailServiceImpl(
-            mailSender, applicationProperties, linkResolverService, headlessCmsService,
+            mailSender, applicationProperties, linkResolverService, cmsService,
             userService, projectService, walletService, fileService, blockchainService
         )
     }

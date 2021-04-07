@@ -48,7 +48,7 @@ abstract class MailServiceTestBase : TestBase() {
     protected lateinit var applicationProperties: ApplicationProperties
 
     @MockBean
-    protected lateinit var headlessCmsService: HeadlessCmsService
+    protected lateinit var cmsService: CmsService
 
     @MockBean
     protected lateinit var fileService: FileService
@@ -156,7 +156,7 @@ abstract class MailServiceTestBase : TestBase() {
         )
     }
     protected fun mockHeadlessCmsServiceResponse(mailType: MailType, coop: String = testContext.coop) {
-        Mockito.`when`(headlessCmsService.getMail(coop, mailType, defaultLanguage))
+        Mockito.`when`(cmsService.getMail(coop, mailType, defaultLanguage))
             .thenReturn(generateMailResponse(coop, mailType))
     }
 

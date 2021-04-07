@@ -14,7 +14,7 @@ class AdminMailServiceTest : MailServiceTestBase() {
 
     private val service: AdminMailService by lazy {
         AdminMailServiceImpl(
-            mailSender, applicationProperties, linkResolverService, headlessCmsService, userService
+            mailSender, applicationProperties, linkResolverService, cmsService, userService
         )
     }
 
