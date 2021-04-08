@@ -146,12 +146,11 @@ abstract class MailServiceTestBase : TestBase() {
         coop: String,
         type: MailType,
         id: Int? = null,
-        title: String = "mail title",
         lang: Lang = defaultLanguage
     ): MailResponse {
         val requiredFields = type.getRequiredFields().map { it.value }
         return MailResponse(
-            id, coop, title, requiredFields.joinToString(),
+            id, coop, type.name, requiredFields.joinToString(),
             type, requiredFields, lang
         )
     }

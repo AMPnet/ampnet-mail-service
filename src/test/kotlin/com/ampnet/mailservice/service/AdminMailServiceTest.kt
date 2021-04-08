@@ -46,6 +46,7 @@ class AdminMailServiceTest : MailServiceTestBase() {
 
             assertThat(tokenIssuerMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(tokenIssuerMail.envelopeReceiver).isEqualTo(testContext.tokenIssuerMail)
+            assertThat(tokenIssuerMail.mimeMessage.subject).isEqualTo(MailType.TOKEN_ISSUER_WITHDRAWAL_REQUEST_MAIL.name)
             val manageWithdrawalsLink = applicationProperties.mail.baseUrl + "/" + coop + "/" +
                 applicationProperties.mail.manageWithdrawalsPath
 
@@ -73,6 +74,7 @@ class AdminMailServiceTest : MailServiceTestBase() {
             val userMail = mailList.first()
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
+            assertThat(userMail.mimeMessage.subject).isEqualTo(MailType.NEW_ORGANIZATION_WALLET_MAIL.name)
             val confirmationUserLink = applicationProperties.mail.baseUrl + "/" + coop + "/" +
                 applicationProperties.mail.newWalletPath + "/groups"
             val mailText = userMail.mimeMessage.content.toString()
@@ -101,6 +103,7 @@ class AdminMailServiceTest : MailServiceTestBase() {
             val userMail = mailList.first()
             assertThat(userMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
+            assertThat(userMail.mimeMessage.subject).isEqualTo(MailType.NEW_USER_WALLET_MAIL.name)
             val confirmationUserLink = applicationProperties.mail.baseUrl + "/" + coop + "/" +
                 applicationProperties.mail.newWalletPath + "/user"
             val userMailText = userMail.mimeMessage.content.toString()
@@ -110,6 +113,7 @@ class AdminMailServiceTest : MailServiceTestBase() {
             val projectMail = mailList[1]
             assertThat(projectMail.envelopeSender).isEqualTo(applicationProperties.mail.sender)
             assertThat(projectMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
+            assertThat(projectMail.mimeMessage.subject).isEqualTo(MailType.NEW_PROJECT_WALLET_MAIL.name)
             val confirmationProjectLink = applicationProperties.mail.baseUrl + "/" + coop + "/" +
                 applicationProperties.mail.newWalletPath + "/project"
             val projectMailText = projectMail.mimeMessage.content.toString()
