@@ -1,21 +1,22 @@
 package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
+import com.ampnet.mailservice.enums.MailType
+import com.ampnet.mailservice.service.CmsService
 import com.ampnet.mailservice.service.LinkResolverService
-import com.ampnet.mailservice.service.TranslationService
 import org.springframework.mail.javamail.JavaMailSender
 
 class InvitationMail(
     linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    translationService: TranslationService
-) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
+    cmsService: CmsService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, cmsService) {
 
-    override val templateName = "invitationTemplate"
-    override val titleKey = "invitationTitle"
+    override val mailType = MailType.INVITATION_MAIL
 
     fun setTemplateData(organization: String, coop: String) = apply {
+        this.coop = coop
         templateData = InvitationData(organization, linkResolver.getOrganizationInvitesLink(coop))
     }
 }

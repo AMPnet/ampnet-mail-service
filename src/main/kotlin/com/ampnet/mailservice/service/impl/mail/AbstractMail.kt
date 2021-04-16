@@ -1,16 +1,20 @@
 package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
-import com.ampnet.mailservice.exception.InternalException
+import com.ampnet.mailservice.enums.Lang
+import com.ampnet.mailservice.enums.MailType
+import com.ampnet.mailservice.service.CmsService
 import com.ampnet.mailservice.service.LinkResolverService
-import com.ampnet.mailservice.service.TranslationService
 import com.ampnet.mailservice.service.pojo.Attachment
+import com.ampnet.mailservice.service.pojo.MailResponse
+import com.github.mustachejava.DefaultMustacheFactory
 import com.github.mustachejava.Mustache
 import mu.KLogging
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.mail.MailException
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
+import java.io.StringReader
 import java.io.StringWriter
 import java.util.Date
 import javax.mail.MessagingException
@@ -20,29 +24,39 @@ abstract class AbstractMail(
     protected val linkResolver: LinkResolverService,
     private val mailSender: JavaMailSender,
     private val applicationProperties: ApplicationProperties,
-    private val translationService: TranslationService
+    private val cmsService: CmsService
 ) {
 
     companion object : KLogging()
 
-    protected abstract val templateName: String
-    protected abstract val titleKey: String
-    protected lateinit var language: String
+    protected abstract val mailType: MailType
+    protected open var language: Lang = Lang.EN
+    protected lateinit var coop: String
     protected open var attachment: Attachment? = null
     protected open var templateData: Any? = null
-    private val templateTranslations: Map<String, Mustache> by lazy {
-        translationService.getTemplateTranslations(templateName)
-    }
-    private val titleTranslations: Map<String, String> by lazy { translationService.getTitleTranslations(titleKey) }
 
-    fun setLanguage(language: String) = apply { this.language = language }
+    fun setLanguage(language: String) = apply {
+        this.language = Lang.langOrDefault(language)
+    }
+
+    fun setCoop(coop: String) = apply { this.coop = coop }
 
     fun sendTo(to: List<String>, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
-        sendEmails(this.createMailMessage(to), notifySenderOnError)
+        getMailTranslation { mailTranslation ->
+            sendEmails(this.createMailMessage(to, mailTranslation), notifySenderOnError)
+        }
     }
 
     fun sendTo(to: String, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
-        sendEmails(this.createMailMessage(listOf(to)), notifySenderOnError)
+        getMailTranslation { mailTranslation ->
+            sendEmails(this.createMailMessage(listOf(to), mailTranslation), notifySenderOnError)
+        }
+    }
+
+    private fun getMailTranslation(onTranslationFetch: (mail: MailResponse) -> Unit) {
+        cmsService.getMail(coop, mailType, language).subscribe {
+            onTranslationFetch.invoke(it.mails.first())
+        }
     }
 
     private fun sendEmails(mails: List<MimeMessage>, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
@@ -68,8 +82,9 @@ abstract class AbstractMail(
         }
     }
 
-    private fun createMailMessage(to: List<String>): List<MimeMessage> =
-        to.mapNotNull {
+    private fun createMailMessage(to: List<String>, mailTranslation: MailResponse): List<MimeMessage> {
+        val template = DefaultMustacheFactory().compile(StringReader(mailTranslation.content), mailType.name)
+        return to.mapNotNull {
             val mail = mailSender.createMimeMessage()
             try {
                 val helper = if (attachment != null) {
@@ -80,8 +95,8 @@ abstract class AbstractMail(
                 helper.isValidateAddresses = true
                 helper.setFrom(applicationProperties.mail.sender)
                 helper.setTo(it)
-                helper.setSubject(getTitle())
-                helper.setText(fillTemplate(getTemplate()), true)
+                helper.setSubject(mailTranslation.title)
+                helper.setText(fillTemplate(template), true)
                 helper.setSentDate(Date())
                 attachment?.let { attachment ->
                     helper.addAttachment(attachment.name, ByteArrayResource(attachment.file))
@@ -92,25 +107,15 @@ abstract class AbstractMail(
                 null
             }
         }
+    }
 
     private fun fillTemplate(template: Mustache): String {
         val writer = StringWriter()
         template.execute(writer, templateData).flush()
         return writer.toString()
     }
-
-    private fun getTitle(): String {
-        return titleTranslations[language] ?: titleTranslations[EN_LANGUAGE]
-            ?: throw InternalException("Could not find default[en] title")
-    }
-
-    private fun getTemplate(): Mustache {
-        return templateTranslations[language] ?: templateTranslations[EN_LANGUAGE]
-            ?: throw InternalException("Could not find default[en] template")
-    }
 }
 
-const val EN_LANGUAGE = "en"
 const val UTF_8_ENCODING = "UTF-8"
 const val FROM_CENTS_TO_EUROS = 100.0
 const val TWO_DECIMAL_FORMAT = "%.2f"

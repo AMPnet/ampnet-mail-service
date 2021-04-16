@@ -1,19 +1,19 @@
 package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
+import com.ampnet.mailservice.enums.MailType
+import com.ampnet.mailservice.service.CmsService
 import com.ampnet.mailservice.service.LinkResolverService
-import com.ampnet.mailservice.service.TranslationService
 import org.springframework.mail.javamail.JavaMailSender
 
 class FailedDeliveryMail(
     linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    translationService: TranslationService
-) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
+    cmsService: CmsService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, cmsService) {
 
-    override val templateName = "failedDeliveryMessageTemplate"
-    override val titleKey = "failedDeliveryTitle"
+    override val mailType = MailType.FAILED_DELIVERY_MAIL
 
     fun setTemplateData(emails: List<String>) = apply {
         templateData = FailedDeliveryRecipients(emails.joinToString { ", " })

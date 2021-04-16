@@ -5,4 +5,4 @@ class GrpcException(exceptionMessage: String, throwable: Throwable) : Exception(
 class ResourceNotFoundException(exceptionMessage: String, throwable: Throwable? = null) :
     Exception(exceptionMessage, throwable)
 
-class InternalException(exceptionMessage: String) : Exception(exceptionMessage)
+class InternalException(exceptionMessage: String, throwable: Throwable? = null) : Exception(exceptionMessage, throwable)

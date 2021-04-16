@@ -22,7 +22,7 @@ plugins {
 }
 
 group = "com.ampnet"
-version = "0.6.6"
+version = "0.7.0"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
@@ -35,6 +35,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-amqp")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -45,8 +46,13 @@ dependencies {
     implementation("com.github.spullara.mustache.java:compiler:0.9.7")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.subethamail:subethasmtp:3.1.7")
     testImplementation("org.apache.commons:commons-email:1.5")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.9.0") {
+        exclude("com.squareup.okhttp3", "okhttp")
+    }
+    testImplementation("com.squareup.okhttp3:okhttp:4.9.0")
 }
 
 tasks.withType<KotlinCompile> {

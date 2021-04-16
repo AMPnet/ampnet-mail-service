@@ -2,10 +2,14 @@ package com.ampnet.mailservice.service
 
 import com.ampnet.mailservice.TestBase
 import com.ampnet.mailservice.config.ApplicationProperties
+import com.ampnet.mailservice.enums.Lang
+import com.ampnet.mailservice.enums.MailType
 import com.ampnet.mailservice.grpc.blockchainservice.BlockchainService
 import com.ampnet.mailservice.grpc.projectservice.ProjectService
 import com.ampnet.mailservice.grpc.userservice.UserService
 import com.ampnet.mailservice.grpc.walletservice.WalletService
+import com.ampnet.mailservice.service.pojo.MailListResponse
+import com.ampnet.mailservice.service.pojo.MailResponse
 import com.ampnet.projectservice.proto.OrganizationResponse
 import com.ampnet.projectservice.proto.ProjectResponse
 import com.ampnet.projectservice.proto.ProjectWithDataResponse
@@ -18,6 +22,7 @@ import org.assertj.core.api.Assertions.fail
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest
@@ -26,6 +31,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.subethamail.wiser.Wiser
+import reactor.core.publisher.Mono
 import java.util.UUID
 
 @ExtendWith(SpringExtension::class)
@@ -43,8 +49,8 @@ abstract class MailServiceTestBase : TestBase() {
     @Autowired
     protected lateinit var applicationProperties: ApplicationProperties
 
-    @Autowired
-    protected lateinit var translationService: TranslationService
+    @MockBean
+    protected lateinit var cmsService: CmsService
 
     @MockBean
     protected lateinit var fileService: FileService
@@ -66,16 +72,9 @@ abstract class MailServiceTestBase : TestBase() {
     protected val testContext = TestContext()
     protected val coop = "ampnet-test"
     protected val activationData = "activation data"
-    protected val confirmationMailSubject = "Confirm your email"
     protected val resetPasswordSubject = "Reset password"
-    protected val invitationMailSubject = "Invitation"
-    protected val depositSubject = "Deposit"
-    protected val withdrawSubject = "Withdraw"
-    protected val newWalletSubject = "New wallet created"
-    protected val manageWithdrawalsSubject = "New withdrawal request"
-    protected val walletActivatedSubject = "Wallet activated"
-    protected val projectFullyFundedSubject = "Project is fully funded"
     protected val investmentSubject = "Investment"
+    protected val defaultLanguage = Lang.EN
 
     @BeforeEach
     fun init() {
@@ -110,6 +109,7 @@ abstract class MailServiceTestBase : TestBase() {
 
     protected fun generateCoopResponse(): CoopResponse =
         CoopResponse.newBuilder()
+            .setCoop(coop)
             .setName(coop)
             .build()
 
@@ -135,6 +135,23 @@ abstract class MailServiceTestBase : TestBase() {
             .setHash(UUID.randomUUID().toString())
             .setOwner(owner)
             .build()
+
+    private fun generateMailResponse(
+        coop: String,
+        type: MailType,
+        id: Int? = null,
+        lang: Lang = defaultLanguage
+    ): MailResponse {
+        val requiredFields = type.getRequiredFields().map { it.value }
+        return MailResponse(
+            id, coop, type.name, requiredFields.joinToString(),
+            type, requiredFields, lang
+        )
+    }
+    protected fun mockHeadlessCmsServiceResponse(mailType: MailType, coop: String = testContext.coop) {
+        Mockito.`when`(cmsService.getMail(coop, mailType, defaultLanguage))
+            .thenReturn(Mono.just(MailListResponse(listOf(generateMailResponse(coop, mailType)))))
+    }
 
     protected class TestContext {
         val receiverMail = "test@test.com"

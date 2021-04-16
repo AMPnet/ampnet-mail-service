@@ -1,9 +1,10 @@
 package com.ampnet.mailservice.service.impl.mail
 
 import com.ampnet.mailservice.config.ApplicationProperties
+import com.ampnet.mailservice.enums.MailType
 import com.ampnet.mailservice.enums.WalletType
+import com.ampnet.mailservice.service.CmsService
 import com.ampnet.mailservice.service.LinkResolverService
-import com.ampnet.mailservice.service.TranslationService
 import org.springframework.mail.javamail.JavaMailSender
 
 class NewWalletMail(
@@ -11,17 +12,17 @@ class NewWalletMail(
     linkResolver: LinkResolverService,
     mailSender: JavaMailSender,
     applicationProperties: ApplicationProperties,
-    translationService: TranslationService
-) : AbstractMail(linkResolver, mailSender, applicationProperties, translationService) {
+    cmsService: CmsService
+) : AbstractMail(linkResolver, mailSender, applicationProperties, cmsService) {
 
-    override val templateName = when (type) {
-        WalletType.USER -> "userWalletTemplate"
-        WalletType.PROJECT -> "projectWalletTemplate"
-        WalletType.ORGANIZATION -> "organizationWalletTemplate"
+    override val mailType = when (type) {
+        WalletType.USER -> MailType.NEW_USER_WALLET_MAIL
+        WalletType.PROJECT -> MailType.NEW_PROJECT_WALLET_MAIL
+        WalletType.ORGANIZATION -> MailType.NEW_ORGANIZATION_WALLET_MAIL
     }
-    override val titleKey = "newWalletTitle"
 
     fun setTemplateData(activationData: String, coop: String) = apply {
+        this.coop = coop
         templateData = if (type == WalletType.USER)
             NewWalletData(linkResolver.getNewWalletLink(type, coop), activationData)
         else NewWalletData(linkResolver.getNewWalletLink(type, coop))
