@@ -6,6 +6,7 @@ import com.ampnet.mailservice.enums.MailType
 import com.ampnet.mailservice.service.CmsService
 import com.ampnet.mailservice.service.LinkResolverService
 import com.ampnet.mailservice.service.pojo.Attachment
+import com.ampnet.mailservice.service.pojo.MailResponse
 import com.github.mustachejava.DefaultMustacheFactory
 import com.github.mustachejava.Mustache
 import mu.KLogging
@@ -41,11 +42,21 @@ abstract class AbstractMail(
     fun setCoop(coop: String) = apply { this.coop = coop }
 
     fun sendTo(to: List<String>, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
-        sendEmails(this.createMailMessage(to), notifySenderOnError)
+        getMailTranslation { mailTranslation ->
+            sendEmails(this.createMailMessage(to, mailTranslation), notifySenderOnError)
+        }
     }
 
     fun sendTo(to: String, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
-        sendEmails(this.createMailMessage(listOf(to)), notifySenderOnError)
+        getMailTranslation { mailTranslation ->
+            sendEmails(this.createMailMessage(listOf(to), mailTranslation), notifySenderOnError)
+        }
+    }
+
+    private fun getMailTranslation(onTranslationFetch: (mail: MailResponse) -> Unit) {
+        cmsService.getMail(coop, mailType, language).subscribe {
+            onTranslationFetch.invoke(it.mails.first())
+        }
     }
 
     private fun sendEmails(mails: List<MimeMessage>, notifySenderOnError: (List<MimeMessage>) -> Unit = {}) {
@@ -71,8 +82,7 @@ abstract class AbstractMail(
         }
     }
 
-    private fun createMailMessage(to: List<String>): List<MimeMessage> {
-        val mailTranslation = cmsService.getMail(coop, mailType, language)
+    private fun createMailMessage(to: List<String>, mailTranslation: MailResponse): List<MimeMessage> {
         val template = DefaultMustacheFactory().compile(StringReader(mailTranslation.content), mailType.name)
         return to.mapNotNull {
             val mail = mailSender.createMimeMessage()

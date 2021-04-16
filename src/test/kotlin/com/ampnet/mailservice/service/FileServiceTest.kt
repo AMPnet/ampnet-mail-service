@@ -1,7 +1,6 @@
 package com.ampnet.mailservice.service
 
 import com.ampnet.mailservice.TestBase
-import com.ampnet.mailservice.config.RestTemplateConfig
 import com.ampnet.mailservice.exception.ResourceNotFoundException
 import com.ampnet.mailservice.service.impl.FileServiceImpl
 import org.assertj.core.api.Assertions.assertThat
@@ -9,11 +8,9 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.context.annotation.Import
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @Disabled("Not for automated testing")
-@Import(RestTemplateConfig::class)
 @ExtendWith(SpringExtension::class)
 class FileServiceTest : TestBase() {
 
