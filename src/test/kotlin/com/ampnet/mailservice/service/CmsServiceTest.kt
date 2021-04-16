@@ -28,24 +28,22 @@ import reactor.test.StepVerifier
 @Import(ApplicationProperties::class, ObjectMapper::class)
 class CmsServiceTest : TestBase() {
 
-    private lateinit var mockWebServer: MockWebServer
-
     @Autowired
     private lateinit var applicationProperties: ApplicationProperties
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
-    private lateinit var webClient: WebClient
-
+    private val webClient = WebClient.create()
+    private val mockWebServer = MockWebServer()
     private val testContext = TestContext()
     private val coop = "ampnet-test"
     private val defaultLanguage = Lang.EN
 
     @BeforeEach
     fun setUp() {
-        mockWebServer = MockWebServer()
         mockWebServer.start()
+        applicationProperties.cms.baseUrl = String.format("http://localhost:%s", mockWebServer.port)
     }
 
     @AfterEach
@@ -54,14 +52,12 @@ class CmsServiceTest : TestBase() {
     }
 
     private val cmsService: CmsServiceImpl by lazy {
-        webClient = WebClient.create()
-        applicationProperties.cms.baseUrl = String.format("http://localhost:%s", mockWebServer.port)
         CmsServiceImpl(applicationProperties, webClient)
     }
 
     @Test
     fun mustReturnCorrectMail() {
-        suppose("Cms service returns mail list response") {
+        suppose("Cms service will receive mail list response") {
             val mail = generateMailResponse(coop, MailType.MAIL_CONFIRMATION_MAIL)
             testContext.mailList = MailListResponse(listOf(mail))
             mockWebServer.enqueue(
@@ -70,14 +66,14 @@ class CmsServiceTest : TestBase() {
             )
         }
 
-        verify("Subscriber consumes the response") {
+        verify("Service receives and handles correct mail") {
             val response = cmsService.getMail(coop, MailType.MAIL_CONFIRMATION_MAIL, defaultLanguage)
             StepVerifier.create(response)
                 .expectSubscription()
                 .expectNext(testContext.mailList)
                 .verifyComplete()
         }
-        verify("Mock server has received the correct request") {
+        verify("Service client sent correct request") {
             val recordedRequest = mockWebServer.takeRequest()
             assertThat(recordedRequest.method).isEqualTo("GET")
             assertThat(recordedRequest.path)
@@ -87,7 +83,7 @@ class CmsServiceTest : TestBase() {
 
     @Test
     fun mustThrowExceptionForEmptyMailList() {
-        suppose("Cms service returns empty list") {
+        suppose("Service will receive empty mail list") {
             mockWebServer.enqueue(
                 MockResponse().setBody(objectMapper.writeValueAsString(MailListResponse(listOf())))
                     .addHeader("Content-Type", "application/json")
@@ -102,7 +98,7 @@ class CmsServiceTest : TestBase() {
 
     @Test
     fun mustThrowExceptionForServerError() {
-        suppose("Cms service returns internal server error") {
+        suppose("Service will receive response code 500") {
             mockWebServer.enqueue(MockResponse().setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value()))
         }
 

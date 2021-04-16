@@ -14,6 +14,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.util.UriComponentsBuilder
 import reactor.core.publisher.Mono
+import kotlin.jvm.Throws
 
 @Service
 class CmsServiceImpl(
@@ -23,6 +24,7 @@ class CmsServiceImpl(
 
     companion object : KLogging()
 
+    @Throws(ResourceNotFoundException::class, InternalException::class)
     override fun getMail(coop: String, mailType: MailType, lang: Lang): Mono<MailListResponse> {
         val url = UriComponentsBuilder
             .fromUriString(applicationProperties.cms.baseUrl + "/mail/$coop")
