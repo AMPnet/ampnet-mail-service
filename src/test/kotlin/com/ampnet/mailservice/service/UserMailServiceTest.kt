@@ -123,7 +123,7 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(mailText).contains(testContext.organizationName)
 
             val link = applicationProperties.mail.baseUrl + "/" + testContext.coop + "/" +
-                applicationProperties.mail.manageOrganizationPath
+                applicationProperties.mail.organizationPath
             assertThat(mailText).contains(link)
         }
     }
@@ -189,7 +189,7 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(mailText).contains("approved")
             assertThat(mailText).contains("Why wait?")
             val projectOffersLink = applicationProperties.mail.baseUrl + "/" +
-                testContext.user.coop + "/" + applicationProperties.mail.overviewPath
+                testContext.user.coop + "/" + applicationProperties.mail.offersPath
             assertThat(mailText).contains(projectOffersLink)
         }
     }
@@ -231,7 +231,7 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(mailText).contains("approved")
             assertThat(mailText).doesNotContain("Why wait?")
             val projectOffersLink = applicationProperties.mail.baseUrl + "/" +
-                testContext.user.coop + "/" + applicationProperties.mail.overviewPath
+                testContext.user.coop + "/" + applicationProperties.mail.offersPath
             assertThat(mailText).doesNotContain(projectOffersLink)
         }
     }
@@ -257,7 +257,7 @@ class UserMailServiceTest : MailServiceTestBase() {
 
             val mailText = mail.mimeMessage.content.toString()
             val projectOffersLink = applicationProperties.mail.baseUrl + "/" +
-                testContext.user.coop + "/" + applicationProperties.mail.overviewPath
+                testContext.user.coop + "/" + applicationProperties.mail.offersPath
             assertThat(mailText).doesNotContain(projectOffersLink)
             assertThat(mailText).contains("rejected")
         }
@@ -391,8 +391,7 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(userMail.mimeMessage.subject).isEqualTo(walletActivatedSubject)
             val confirmationUserLink = applicationProperties.mail.baseUrl + "/" + testContext.user.coop + "/" +
-                applicationProperties.mail.manageOrganizationPath + "/" + testContext.project.organizationUuid +
-                "/" + applicationProperties.mail.manageProjectPath + "/" + testContext.project.uuid
+                applicationProperties.mail.projectPath + "/" + testContext.project.uuid
             val mailText = userMail.mimeMessage.content.toString()
             assertThat(mailText).contains(confirmationUserLink)
             assertThat(mailText).doesNotContain(activationData)
@@ -425,7 +424,7 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(userMail.mimeMessage.subject).isEqualTo(walletActivatedSubject)
             val confirmationUserLink = applicationProperties.mail.baseUrl + "/" + testContext.user.coop + "/" +
-                applicationProperties.mail.manageOrganizationPath + "/" + testContext.organization.uuid
+                applicationProperties.mail.organizationPath + "/" + testContext.organization.uuid
             val mailText = userMail.mimeMessage.content.toString()
             assertThat(mailText).contains(confirmationUserLink)
             assertThat(mailText).doesNotContain(activationData)
@@ -485,8 +484,7 @@ class UserMailServiceTest : MailServiceTestBase() {
             assertThat(userMail.envelopeReceiver).isEqualTo(testContext.receiverMail)
             assertThat(userMail.mimeMessage.subject).isEqualTo(projectFullyFundedSubject)
             val projectFullyFundedLink = applicationProperties.mail.baseUrl + "/" + testContext.user.coop + "/" +
-                applicationProperties.mail.manageOrganizationPath + "/" + testContext.project.organizationUuid + "/" +
-                applicationProperties.mail.manageProjectPath + "/" + testContext.project.uuid
+                applicationProperties.mail.projectPath + "/" + testContext.project.uuid
             val mailText = userMail.mimeMessage.content.toString()
             assertThat(mailText).contains(projectFullyFundedLink)
         }

@@ -15,7 +15,7 @@ class LinkResolverServiceTest : TestBase() {
         verify("Service will remove only correct double slashes") {
             val applicationProperties = ApplicationProperties()
             applicationProperties.mail.baseUrl = "https://demo.ampnet.io/"
-            applicationProperties.mail.manageOrganizationPath = "/org//invites///"
+            applicationProperties.mail.organizationPath = "/org//invites///"
 
             val service = LinkResolverServiceImpl(applicationProperties)
             val generatedPath = service.getOrganizationInvitesLink("ampnet-test")

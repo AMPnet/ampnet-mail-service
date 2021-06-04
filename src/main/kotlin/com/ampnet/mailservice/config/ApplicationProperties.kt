@@ -15,13 +15,13 @@ class MailProperties {
     lateinit var baseUrl: String
     var confirmationPath: String = "auth/mail-confirmation"
     var resetPasswordPath: String = "auth/reset-password"
-    var manageOrganizationPath: String = "dash/manage_groups"
+    var organizationPath: String = "dash/groups"
     var newWalletPath: String = "dash/activation"
     var manageWithdrawalsPath: String = "dash/manage_withdrawals"
     var walletActivatedPath: String = "dash/wallet"
-    var manageProjectPath: String = "manage_project"
-    var overviewPath: String = "overview"
-    var enabled: Boolean = false
+    var projectPath: String = "dash/project"
+    var offersPath: String = "offers"
+    var enabled: Boolean = true
 }
 
 @Suppress("MagicNumber")

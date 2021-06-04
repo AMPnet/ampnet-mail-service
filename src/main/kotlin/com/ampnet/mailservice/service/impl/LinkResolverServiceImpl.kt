@@ -14,13 +14,13 @@ class LinkResolverServiceImpl(applicationProperties: ApplicationProperties) : Li
     private val resetPasswordPath = applicationProperties.mail.resetPasswordPath
     private val newWalletPath = applicationProperties.mail.newWalletPath
     private val walletActivatedPath = applicationProperties.mail.walletActivatedPath
-    private val manageOrganizationPath = applicationProperties.mail.manageOrganizationPath
-    private val manageProjectPath = applicationProperties.mail.manageProjectPath
+    private val organizationPath = applicationProperties.mail.organizationPath
+    private val projectPath = applicationProperties.mail.projectPath
     private val manageWithdrawalsPath = applicationProperties.mail.manageWithdrawalsPath
-    private val overviewPath = applicationProperties.mail.overviewPath
+    private val offersPath = applicationProperties.mail.offersPath
 
     override fun getOrganizationInvitesLink(coop: String) =
-        "$baseUrl/$coop/$manageOrganizationPath".removeDoubleSlashes()
+        "$baseUrl/$coop/$organizationPath".removeDoubleSlashes()
 
     override fun getManageWithdrawalsLink(coop: String) =
         "$baseUrl/$coop/$manageWithdrawalsPath".removeDoubleSlashes()
@@ -48,17 +48,17 @@ class LinkResolverServiceImpl(applicationProperties: ApplicationProperties) : Li
     ): String {
         val typePath = when (walletType) {
             WalletType.USER -> walletActivatedPath
-            WalletType.PROJECT -> "$manageOrganizationPath/$organizationUUid/$manageProjectPath/$projectUuid"
-            WalletType.ORGANIZATION -> "$manageOrganizationPath/$organizationUUid"
+            WalletType.PROJECT -> "$projectPath/$projectUuid"
+            WalletType.ORGANIZATION -> "$organizationPath/$organizationUUid"
         }
         return "$baseUrl/$coop/$typePath".removeDoubleSlashes()
     }
 
     override fun getProjectFullyFundedLink(coop: String, organizationUUid: String, projectUuid: String) =
-        "$baseUrl/$coop/$manageOrganizationPath/$organizationUUid/$manageProjectPath/$projectUuid".removeDoubleSlashes()
+        "$baseUrl/$coop/$projectPath/$projectUuid".removeDoubleSlashes()
 
     override fun getProjectOffersLink(coop: String): String =
-        "$baseUrl/$coop/$overviewPath".removeDoubleSlashes()
+        "$baseUrl/$coop/$offersPath".removeDoubleSlashes()
 
     private fun String.removeDoubleSlashes() = this.replace("(?<!(http:)|(https:))//+".toRegex(), "/")
 }
