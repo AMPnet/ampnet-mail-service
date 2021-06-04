@@ -48,14 +48,14 @@ class LinkResolverServiceImpl(applicationProperties: ApplicationProperties) : Li
     ): String {
         val typePath = when (walletType) {
             WalletType.USER -> walletActivatedPath
-            WalletType.PROJECT -> "$manageOrganizationPath/$organizationUUid/$manageProjectPath/$projectUuid"
+            WalletType.PROJECT -> "$manageProjectPath/$projectUuid"
             WalletType.ORGANIZATION -> "$manageOrganizationPath/$organizationUUid"
         }
         return "$baseUrl/$coop/$typePath".removeDoubleSlashes()
     }
 
     override fun getProjectFullyFundedLink(coop: String, organizationUUid: String, projectUuid: String) =
-        "$baseUrl/$coop/$manageOrganizationPath/$organizationUUid/$manageProjectPath/$projectUuid".removeDoubleSlashes()
+        "$baseUrl/$coop/$manageProjectPath/$projectUuid".removeDoubleSlashes()
 
     override fun getProjectOffersLink(coop: String): String =
         "$baseUrl/$coop/$overviewPath".removeDoubleSlashes()
